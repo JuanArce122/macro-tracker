@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Meal {
+  id         Int      @id @default(autoincrement())
+  date       DateTime
+  category   String
+  name       String
+  imageUrl   String?
+  weightG    Float
+  calories   Float
+  protein    Float
+  carbs      Float
+  fat        Float
+  confidence Float
+  items      String?
+  createdAt  DateTime @default(now())
+}
+
+model Goal {
+  id       Int   @id @default(autoincrement())
+  calories Float
+  protein  Float
+  carbs    Float
+  fat      Float
+}
