@@ -55,18 +55,23 @@ export async function POST(req: NextRequest) {
     let imageUrl: string | null = null;
 
     if (imageBase64) {
-      const buffer = Buffer.from(imageBase64, "base64");
-      const resized = await sharp(buffer)
-        .resize({ width: 600, withoutEnlargement: true })
-        .jpeg({ quality: 75 })
-        .toBuffer();
+      try {
+        const buffer = Buffer.from(imageBase64, "base64");
+        const resized = await sharp(buffer)
+          .resize({ width: 600, withoutEnlargement: true })
+          .jpeg({ quality: 75 })
+          .toBuffer();
 
-      const filename = `meal-${Date.now()}.jpg`;
-      const blob = await put(filename, resized, {
-        access: "public",
-        contentType: "image/jpeg",
-      });
-      imageUrl = blob.url;
+        const filename = `meal-${Date.now()}.jpg`;
+        const blob = await put(filename, resized, {
+          access: "public",
+          contentType: "image/jpeg",
+        });
+        imageUrl = blob.url;
+      } catch (blobError) {
+        // Si el upload falla, guardamos la comida sin imagen
+        console.error("[meals POST] Blob upload failed (comida guardada sin imagen):", blobError);
+      }
     }
 
     const meal = await prisma.meal.create({
