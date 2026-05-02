@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchFoods, calcMacros, type Food } from "@/lib/foods";
+import { calcMacros, type Food } from "@/lib/foods";
+import { useFoodSearch } from "@/app/hooks/useFoodSearch";
 import type { AnalysisResult } from "./StepCamera";
 
 const RECENT_KEY = "recent_foods";
@@ -36,7 +37,15 @@ export default function StepSearch({ onResult, onBack }: Props) {
     setCustomFoods(loadFromStorage(CUSTOM_KEY, []));
   }, []);
 
-  const results = searchFoods(query, customFoods);
+  const { results: dbResults, loading: searching } = useFoodSearch(query);
+  // Combinar resultados de DB con los alimentos custom del usuario (localStorage)
+  const customMatches = customFoods.filter((f) => {
+    if (!query.trim()) return false;
+    return query.toLowerCase().split(/\s+/).every((w) => f.nombre.toLowerCase().includes(w));
+  });
+  const resultIds = new Set(dbResults.map((f) => f.id));
+  const results = [...customMatches.filter((f) => !resultIds.has(f.id)), ...dbResults];
+
   const isUnitBased = !!(selected?.gramsPerUnit);
   const effectiveWeight = isUnitBased ? units * selected!.gramsPerUnit! : Number(weightG);
   const showRecents = !query.trim() && !selected && recentFoods.length > 0;
@@ -125,8 +134,14 @@ export default function StepSearch({ onResult, onBack }: Props) {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
           autoFocus
-          className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
+        {searching && (
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+        )}
         {query && (
           <button onClick={() => { setQuery(""); setSelected(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

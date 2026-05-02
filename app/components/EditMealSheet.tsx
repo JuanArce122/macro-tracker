@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { MealItem } from "./add/StepCamera";
-import { searchFoods, calcMacros } from "@/lib/foods";
+import { calcMacros } from "@/lib/foods";
 import type { Food } from "@/lib/foods";
+import { useFoodSearch } from "@/app/hooks/useFoodSearch";
 
 type Meal = {
   id: number;
@@ -65,6 +66,32 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
   if (confidence >= 0.85) return <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Alta</span>;
   if (confidence >= 0.6)  return <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Media</span>;
   return <span className="text-xs font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Baja</span>;
+}
+
+function FoodDropdown({ query, onSelect }: { query: string; onSelect: (food: Food) => void }) {
+  const { results, loading } = useFoodSearch(query);
+  if (loading) return (
+    <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2">
+      <svg className="w-4 h-4 text-emerald-400 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+      </svg>
+      <span className="text-sm text-gray-400">Buscando…</span>
+    </div>
+  );
+  if (results.length === 0) return null;
+  return (
+    <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+      {results.map((food) => (
+        <button key={food.id} type="button"
+          onMouseDown={(e) => { e.preventDefault(); onSelect(food); }}
+          className="w-full flex items-center justify-between px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0">
+          <span className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate flex-1">{food.nombre}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0">{food.cal} kcal/100g</span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 type Props = {
@@ -423,25 +450,12 @@ export default function EditMealSheet({ meal, onClose }: Props) {
                               placeholder="Busca un alimento…"
                               autoComplete="off"
                             />
-                            {nameSearch?.id === item.id && nameSearch.query.trim().length > 1 && (() => {
-                              const results: Food[] = searchFoods(nameSearch.query);
-                              if (results.length === 0) return null;
-                              return (
-                                <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
-                                  {results.map((food) => (
-                                    <button
-                                      key={food.id}
-                                      type="button"
-                                      onMouseDown={(e) => { e.preventDefault(); applyFoodFromDB(item.id, food, item.pesoG); }}
-                                      className="w-full flex items-center justify-between px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0"
-                                    >
-                                      <span className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate flex-1">{food.nombre}</span>
-                                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0">{food.cal} kcal/100g</span>
-                                    </button>
-                                  ))}
-                                </div>
-                              );
-                            })()}
+                            {nameSearch?.id === item.id && nameSearch.query.trim().length > 1 && (
+                              <FoodDropdown
+                                query={nameSearch.query}
+                                onSelect={(food) => applyFoodFromDB(item.id, food, item.pesoG)}
+                              />
+                            )}
                           </div>
                           <div>
                             <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Unidades</label>

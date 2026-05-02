@@ -54,3 +54,20 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model Food {
+  id           Int     @id @default(autoincrement())
+  nombre       String
+  categoria    String
+  cal          Float
+  p            Float
+  c            Float
+  f            Float
+  gramsPerUnit Float?
+  unitLabel    String?
+  source       String  @default("usda")
+  userId       Int?
+
+  @@index([nombre])
+  @@index([userId])
+}
