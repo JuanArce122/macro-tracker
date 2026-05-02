@@ -192,9 +192,6 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
               <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                 <span>{emoji}</span>
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 capitalize">{label}</span>
-                <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
-                  {group.reduce((s, m) => s + m.calories, 0).toFixed(0)} kcal
-                </span>
               </div>
               {group.map((meal) => (
                 <MealItem
