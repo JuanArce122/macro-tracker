@@ -24,6 +24,7 @@ export type AnalysisResult = {
 type Props = {
   onResult: (result: AnalysisResult) => void;
   onBack: () => void;
+  onSwitchToSearch?: () => void;
 };
 
 // Normaliza orientación (EXIF) y redimensiona vía canvas
@@ -54,7 +55,7 @@ function normalizeImage(file: File): Promise<{ dataUrl: string; base64: string }
   });
 }
 
-export default function StepCamera({ onResult, onBack }: Props) {
+export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -192,15 +193,35 @@ export default function StepCamera({ onResult, onBack }: Props) {
       )}
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-3 mb-4 flex flex-col gap-2">
-          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-4 mb-4 flex flex-col gap-3">
+          <div className="flex items-start gap-2">
+            <span className="text-lg flex-shrink-0">⚠️</span>
+            <p className="text-red-600 dark:text-red-400 text-sm leading-snug">{error}</p>
+          </div>
           {imageBase64 && (
-            <button
-              onClick={handleManualFallback}
-              className="text-sm font-semibold text-red-600 dark:text-red-400 self-start underline active:opacity-70"
-            >
-              Ingresar macros manualmente →
-            </button>
+            <div className="flex flex-col gap-2 border-t border-red-100 dark:border-red-900/40 pt-3">
+              <p className="text-xs text-red-500 dark:text-red-400 font-medium">¿Qué quieres hacer?</p>
+              {onSwitchToSearch && (
+                <button
+                  onClick={onSwitchToSearch}
+                  className="flex items-center gap-2 bg-emerald-500 text-white text-sm font-semibold rounded-xl px-3 py-2.5 active:bg-emerald-600 transition-colors"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Usar búsqueda manual
+                </button>
+              )}
+              <button
+                onClick={handleManualFallback}
+                className="flex items-center gap-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl px-3 py-2.5 active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Ingresar macros manualmente
+              </button>
+            </div>
           )}
         </div>
       )}

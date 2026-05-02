@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import BottomNav from "@/app/components/BottomNav";
 import type { Food } from "@/lib/foods";
 
@@ -69,10 +70,13 @@ function calcTDEE(p: Profile): TDEEResult {
 type NewFoodForm = { nombre: string; cal: string; p: string; c: string; f: string };
 
 export default function SettingsPage() {
+  const { data: session } = useSession();
   const [goals, setGoals] = useState<Goals>({ calories: 2000, protein: 150, carbs: 200, fat: 65 });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const [showTDEE, setShowTDEE] = useState(false);
   const [profile, setProfile] = useState<Profile>({
@@ -127,6 +131,11 @@ export default function SettingsPage() {
     const next = customFoods.filter((f) => f.id !== id);
     setCustomFoods(next);
     localStorage.setItem(CUSTOM_KEY, JSON.stringify(next));
+  }
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    await signOut({ callbackUrl: "/auth" });
   }
 
   return (
@@ -325,6 +334,38 @@ export default function SettingsPage() {
                 </button>
               )}
             </div>
+            {/* ── MI CUENTA ─────────────────────────────────────────── */}
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1 mt-2">Mi cuenta</p>
+
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+              {/* Email */}
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50 dark:border-gray-700">
+                <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4.5 h-4.5 w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Cuenta activa</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+                    {session?.user?.email ?? "—"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Cerrar sesión */}
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="w-full flex items-center gap-3 px-4 py-4 active:bg-red-50 dark:active:bg-red-900/10 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-[18px] h-[18px] text-red-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-red-500">Cerrar sesión</span>
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -342,6 +383,57 @@ export default function SettingsPage() {
           ) : saved ? <>✓ Metas guardadas</> : "Guardar metas"}
         </button>
       </div>
+
+      {/* Modal: confirmar cerrar sesión */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-6"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLogoutModal(false); }}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+          {/* Sheet */}
+          <div className="relative w-full max-w-[430px] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden">
+            <div className="flex flex-col items-center text-center px-6 pt-8 pb-2 gap-3">
+              <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">¿Cerrar sesión?</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                Se cerrará tu sesión en este dispositivo. Tus datos quedarán guardados.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 px-5 pt-4 pb-8">
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full bg-red-500 hover:bg-red-600 active:bg-red-700 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold rounded-2xl py-4 flex items-center justify-center gap-2 transition-colors"
+              >
+                {loggingOut ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Cerrando sesión…
+                  </>
+                ) : (
+                  "Sí, cerrar sesión"
+                )}
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                disabled={loggingOut}
+                className="w-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-2xl py-4 active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </div>

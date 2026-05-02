@@ -1,23 +1,29 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("q");
 
     if (search) {
-      // Búsqueda por nombre de alimento
       const meals = await prisma.meal.findMany({
-        where: { name: { contains: search } },
+        where: { userId, name: { contains: search } },
         orderBy: { date: "desc" },
         take: 50,
       });
       return Response.json(meals);
     }
 
-    // Resumen por día: agrupamos en JS (SQLite no tiene GROUP BY con aggregates fácil en Prisma)
     const meals = await prisma.meal.findMany({
+      where: { userId },
       orderBy: { date: "desc" },
       select: {
         id: true,
@@ -30,7 +36,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Agrupar por fecha local (usa dateLocal si existe, fallback a UTC)
     const byDay = new Map<string, { date: string; calories: number; protein: number; carbs: number; fat: number }>();
 
     for (const meal of meals) {
@@ -42,18 +47,11 @@ export async function GET(req: NextRequest) {
         existing.carbs += meal.carbs;
         existing.fat += meal.fat;
       } else {
-        byDay.set(day, {
-          date: day,
-          calories: meal.calories,
-          protein: meal.protein,
-          carbs: meal.carbs,
-          fat: meal.fat,
-        });
+        byDay.set(day, { date: day, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat });
       }
     }
 
     const days = Array.from(byDay.values()).sort((a, b) => b.date.localeCompare(a.date));
-
     return Response.json(days);
   } catch (error) {
     console.error("[history GET]", error);

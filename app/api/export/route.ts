@@ -1,19 +1,29 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const { searchParams } = new URL(req.url);
     const from = searchParams.get("from");
     const to = searchParams.get("to");
 
     const meals = await prisma.meal.findMany({
-      where: from && to ? {
-        OR: [
-          { dateLocal: { gte: from, lte: to } },
-          { dateLocal: null, date: { gte: new Date(`${from}T00:00:00.000Z`), lte: new Date(`${to}T23:59:59.999Z`) } },
-        ],
-      } : undefined,
+      where: {
+        userId,
+        ...(from && to ? {
+          OR: [
+            { dateLocal: { gte: from, lte: to } },
+            { dateLocal: null, date: { gte: new Date(`${from}T00:00:00.000Z`), lte: new Date(`${to}T23:59:59.999Z`) } },
+          ],
+        } : {}),
+      },
       orderBy: [{ dateLocal: "asc" }, { date: "asc" }],
     });
 

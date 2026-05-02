@@ -1,16 +1,27 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { NextRequest } from "next/server";
-import { unlink } from "fs/promises";
-import { join } from "path";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const { id } = await params;
     const body = await req.json();
     const { name, category, weightG, calories, protein, carbs, fat, items } = body;
+
+    // Verificar que la comida pertenece al usuario
+    const existing = await prisma.meal.findFirst({ where: { id: Number(id), userId } });
+    if (!existing) {
+      return Response.json({ error: "Comida no encontrada" }, { status: 404 });
+    }
 
     const meal = await prisma.meal.update({
       where: { id: Number(id) },
@@ -38,19 +49,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const { id } = await params;
 
-    const meal = await prisma.meal.findUnique({ where: { id: Number(id) } });
-
+    // Verificar que la comida pertenece al usuario
+    const meal = await prisma.meal.findFirst({ where: { id: Number(id), userId } });
     if (!meal) {
       return Response.json({ error: "Comida no encontrada" }, { status: 404 });
     }
 
-    if (meal.imageUrl) {
-      const filepath = join(process.cwd(), "public", meal.imageUrl);
-      await unlink(filepath).catch(() => null);
-    }
-
+    // Si la imagen es de Vercel Blob, se puede eliminar con del() de @vercel/blob
+    // Por ahora se deja la URL huérfana si falla — no bloquea el flujo
     await prisma.meal.delete({ where: { id: Number(id) } });
 
     return Response.json({ ok: true });

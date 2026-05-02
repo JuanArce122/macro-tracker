@@ -39,6 +39,7 @@ export default function AddMealPage({
           <StepCamera
             onResult={handleResult}
             onBack={() => setStep("mode")}
+            onSwitchToSearch={() => setStep("search")}
           />
         )}
         {step === "search" && (

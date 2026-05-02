@@ -1,10 +1,17 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { NextRequest } from "next/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const { searchParams } = new URL(req.url);
     const date = searchParams.get("date");
 
@@ -14,9 +21,9 @@ export async function GET(req: NextRequest) {
 
     const meals = await prisma.meal.findMany({
       where: {
+        userId,
         OR: [
           { dateLocal: date },
-          // fallback para comidas antiguas sin dateLocal
           { dateLocal: null, date: { gte: new Date(`${date}T00:00:00.000Z`), lte: new Date(`${date}T23:59:59.999Z`) } },
         ],
       },
@@ -32,6 +39,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const userId = Number(session.user.id);
+
     const body = await req.json();
     const { date, dateLocal, category, name, imageBase64, mimeType, weightG, calories, protein, carbs, fat, confidence, items } = body;
 
@@ -58,6 +71,7 @@ export async function POST(req: NextRequest) {
 
     const meal = await prisma.meal.create({
       data: {
+        userId,
         date: new Date(date),
         dateLocal: dateLocal ?? null,
         category,

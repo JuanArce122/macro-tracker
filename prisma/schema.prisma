@@ -7,8 +7,19 @@ datasource db {
   provider = "sqlite"
 }
 
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  meals        Meal[]
+  goals        Goal[]
+}
+
 model Meal {
   id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date       DateTime
   dateLocal  String?
   category   String
@@ -23,13 +34,23 @@ model Meal {
   items      String?
   createdAt  DateTime @default(now())
 
-  @@index([dateLocal])
+  @@index([userId, dateLocal])
 }
 
 model Goal {
   id       Int   @id @default(autoincrement())
+  userId   Int
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   calories Float
   protein  Float
   carbs    Float
   fat      Float
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
