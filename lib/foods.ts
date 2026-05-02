@@ -161,19 +161,18 @@ export const FOODS: Food[] = [
   { id: 192, nombre: "Proteína vegetal (promedio)",   categoria: "suplemento", cal: 375, p: 75.0, c: 10.0, f: 5.0  },
 ];
 
-export function searchFoods(query: string): Food[] {
+export function searchFoods(query: string, extra: Food[] = []): Food[] {
   if (!query.trim()) return [];
   const words = query.toLowerCase().trim().split(/\s+/);
-  return FOODS.filter((f) => {
+  const all = [...extra, ...FOODS];
+  return all.filter((f) => {
     const nombre = f.nombre.toLowerCase();
     return words.every((w) => {
-      // Coincidencia exacta
       if (nombre.includes(w)) return true;
-      // Tolerancia a género/número: comparar sin la última letra (crudo→crud, cruda→crud)
       if (w.length > 3 && nombre.includes(w.slice(0, -1))) return true;
       return false;
     });
-  }).slice(0, 8);
+  }).slice(0, 10);
 }
 
 export function calcMacros(food: Food, weightG: number) {

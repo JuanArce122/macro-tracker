@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         date: true,
+        dateLocal: true,
         calories: true,
         protein: true,
         carbs: true,
@@ -29,11 +30,11 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Agrupar por fecha (YYYY-MM-DD)
+    // Agrupar por fecha local (usa dateLocal si existe, fallback a UTC)
     const byDay = new Map<string, { date: string; calories: number; protein: number; carbs: number; fat: number }>();
 
     for (const meal of meals) {
-      const day = meal.date.toISOString().split("T")[0];
+      const day = meal.dateLocal ?? meal.date.toISOString().split("T")[0];
       const existing = byDay.get(day);
       if (existing) {
         existing.calories += meal.calories;

@@ -187,6 +187,43 @@ export default function HistoryPage() {
         {/* Lista de días */}
         {!isSearching && (
           <div className="px-4 pt-4 flex flex-col gap-2">
+            {/* Promedios últimos 7 días */}
+            {!loading && days.length > 0 && (() => {
+              const recent = days.slice(0, 7);
+              const n = recent.length;
+              const avg = {
+                calories: recent.reduce((s, d) => s + d.calories, 0) / n,
+                protein:  recent.reduce((s, d) => s + d.protein,  0) / n,
+                carbs:    recent.reduce((s, d) => s + d.carbs,    0) / n,
+                fat:      recent.reduce((s, d) => s + d.fat,      0) / n,
+              };
+              return (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-1">
+                  <p className="text-xs font-semibold text-gray-400 mb-3">
+                    Promedio · últimos {n} {n === 1 ? "día" : "días"} registrados
+                  </p>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <p className="text-lg font-bold text-emerald-600">{avg.calories.toFixed(0)}</p>
+                      <p className="text-xs text-gray-400">kcal</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-blue-500">{avg.protein.toFixed(1)}g</p>
+                      <p className="text-xs text-gray-400">prot.</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-amber-500">{avg.carbs.toFixed(1)}g</p>
+                      <p className="text-xs text-gray-400">carbs</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-violet-500">{avg.fat.toFixed(1)}g</p>
+                      <p className="text-xs text-gray-400">grasa</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {loading && (
               <p className="text-gray-400 text-sm text-center py-12">Cargando…</p>
             )}
