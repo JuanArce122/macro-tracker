@@ -44,4 +44,6 @@ export default auth((req) => {
 export const config = {
   // Aplica a todas las rutas excepto las de Next.js internals
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Auth.js requiere Node.js runtime, no Edge Runtime
+  runtime: "nodejs",
 };
