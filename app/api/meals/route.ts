@@ -12,11 +12,14 @@ export async function GET(req: NextRequest) {
       return Response.json({ error: "Se requiere el parámetro date (YYYY-MM-DD)" }, { status: 400 });
     }
 
-    const start = new Date(`${date}T00:00:00.000Z`);
-    const end = new Date(`${date}T23:59:59.999Z`);
-
     const meals = await prisma.meal.findMany({
-      where: { date: { gte: start, lte: end } },
+      where: {
+        OR: [
+          { dateLocal: date },
+          // fallback para comidas antiguas sin dateLocal
+          { dateLocal: null, date: { gte: new Date(`${date}T00:00:00.000Z`), lte: new Date(`${date}T23:59:59.999Z`) } },
+        ],
+      },
       orderBy: { createdAt: "asc" },
     });
 
@@ -30,7 +33,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { date, category, name, imageBase64, mimeType, weightG, calories, protein, carbs, fat, confidence, items } = body;
+    const { date, dateLocal, category, name, imageBase64, mimeType, weightG, calories, protein, carbs, fat, confidence, items } = body;
 
     if (!date || !category || !name || weightG == null || calories == null || protein == null || carbs == null || fat == null || confidence == null) {
       return Response.json({ error: "Faltan campos requeridos" }, { status: 400 });
@@ -56,6 +59,7 @@ export async function POST(req: NextRequest) {
     const meal = await prisma.meal.create({
       data: {
         date: new Date(date),
+        dateLocal: dateLocal ?? null,
         category,
         name,
         imageUrl,

@@ -81,6 +81,7 @@ function todayString() {
 export default function StepConfirm({ result, date: _date, onBack }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>(defaultCategory());
   const [selectedDate, setSelectedDate] = useState(todayString());
@@ -157,6 +158,7 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
     try {
       const body: Record<string, unknown> = {
         date: `${selectedDate}T${new Date().toISOString().split("T")[1]}`,
+        dateLocal: selectedDate,
         category,
         name: nombrePlato,
         weightG: totals.pesoG,
@@ -185,8 +187,11 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
         return;
       }
 
-      router.push(`/day/${selectedDate}`);
-      router.refresh();
+      setSaved(true);
+      setTimeout(() => {
+        router.push(`/day/${selectedDate}`);
+        router.refresh();
+      }, 700);
     } catch {
       setError("No se pudo conectar con el servidor.");
     } finally {
@@ -423,10 +428,19 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
         </button>
         <button
           onClick={handleSave}
-          disabled={saving || items.length === 0 || !nombrePlato}
-          className="flex-[2] bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold rounded-2xl py-3.5 transition-colors flex items-center justify-center gap-2"
+          disabled={saving || saved || items.length === 0 || !nombrePlato}
+          className={`flex-[2] text-white font-semibold rounded-2xl py-3.5 transition-colors flex items-center justify-center gap-2 ${
+            saved ? "bg-emerald-600" : "bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400"
+          }`}
         >
-          {saving ? (
+          {saved ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Guardado
+            </>
+          ) : saving ? (
             <>
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

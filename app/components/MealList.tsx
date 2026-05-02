@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import EditMealSheet from "./EditMealSheet";
+import Toast from "./Toast";
 
 type Meal = {
   id: number;
@@ -18,6 +19,12 @@ type Meal = {
   confidence: number;
   items?: string | null;
 };
+
+type ToastState = {
+  message: string;
+  type: "success" | "error";
+  action?: { label: string; onClick: () => void };
+} | null;
 
 const CATEGORIES = [
   { key: "desayuno", label: "Desayuno", emoji: "🌅" },
@@ -109,22 +116,69 @@ function MealItem({
 export default function MealList({ meals, date: _date }: { meals: Meal[]; date: string }) {
   const router = useRouter();
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
+  const [toast, setToast] = useState<ToastState>(null);
 
-  async function handleDelete(id: number) {
-    if (!confirm("¿Eliminar esta comida?")) return;
-    await fetch(`/api/meals/${id}`, { method: "DELETE" });
-    router.refresh();
+  // IDs ocultadas optimistamente (pendientes de borrado)
+  const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
+  const deleteTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const deletedMeals = useRef<Map<number, Meal>>(new Map());
+
+  const dismissToast = useCallback(() => setToast(null), []);
+
+  function handleDelete(id: number) {
+    const meal = meals.find((m) => m.id === id);
+    if (!meal) return;
+
+    // Guardar referencia y ocultar de UI
+    deletedMeals.current.set(id, meal);
+    setHiddenIds((prev) => new Set([...prev, id]));
+
+    // Timer: ejecutar DELETE real después de 5s
+    const timer = setTimeout(async () => {
+      deleteTimers.current.delete(id);
+      deletedMeals.current.delete(id);
+      try {
+        const res = await fetch(`/api/meals/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error();
+        setHiddenIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+        router.refresh();
+      } catch {
+        // Restaurar si falla
+        setHiddenIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+        setToast({ message: "Error al eliminar. Intenta de nuevo.", type: "error" });
+      }
+    }, 5000);
+
+    deleteTimers.current.set(id, timer);
+
+    setToast({
+      message: "Comida eliminada",
+      type: "success",
+      action: {
+        label: "Deshacer",
+        onClick: () => {
+          const t = deleteTimers.current.get(id);
+          if (t) { clearTimeout(t); deleteTimers.current.delete(id); }
+          deletedMeals.current.delete(id);
+          setHiddenIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+        },
+      },
+    });
   }
 
-  const filled = CATEGORIES.filter(({ key }) => meals.some((m) => m.category === key));
+  const visibleMeals = meals.filter((m) => !hiddenIds.has(m.id));
+  const filled = CATEGORIES.filter(({ key }) => visibleMeals.some((m) => m.category === key));
 
   if (filled.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-        <span className="text-5xl mb-3">🍽️</span>
-        <p className="text-gray-500 font-medium">Sin comidas registradas</p>
-        <p className="text-gray-400 text-sm mt-1">Toca el botón verde para agregar</p>
-      </div>
+      <>
+        <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+          <span className="text-5xl mb-3">🍽️</span>
+          <p className="text-gray-500 font-medium">Sin comidas registradas</p>
+          <p className="text-gray-400 text-sm mt-1">Toca el botón verde para agregar</p>
+        </div>
+        {toast && <Toast {...toast} onDismiss={dismissToast} />}
+      </>
     );
   }
 
@@ -132,7 +186,7 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
     <>
       <div className="px-4 pb-4 flex flex-col gap-3">
         {filled.map(({ key, label, emoji }) => {
-          const group = meals.filter((m) => m.category === key);
+          const group = visibleMeals.filter((m) => m.category === key);
           return (
             <div key={key} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border-b border-gray-100">
@@ -159,6 +213,8 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
         meal={editingMeal}
         onClose={() => setEditingMeal(null)}
       />
+
+      {toast && <Toast {...toast} onDismiss={dismissToast} />}
     </>
   );
 }

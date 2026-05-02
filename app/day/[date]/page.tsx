@@ -6,10 +6,14 @@ import AddMealButton from "@/app/components/AddMealButton";
 import BottomNav from "@/app/components/BottomNav";
 
 async function getMeals(date: string) {
-  const start = new Date(`${date}T00:00:00.000Z`);
-  const end = new Date(`${date}T23:59:59.999Z`);
   return prisma.meal.findMany({
-    where: { date: { gte: start, lte: end } },
+    where: {
+      OR: [
+        { dateLocal: date },
+        // fallback para comidas antiguas sin dateLocal
+        { dateLocal: null, date: { gte: new Date(`${date}T00:00:00.000Z`), lte: new Date(`${date}T23:59:59.999Z`) } },
+      ],
+    },
     orderBy: { createdAt: "asc" },
   });
 }

@@ -10,6 +10,7 @@ datasource db {
 model Meal {
   id         Int      @id @default(autoincrement())
   date       DateTime
+  dateLocal  String?
   category   String
   name       String
   imageUrl   String?
@@ -21,6 +22,8 @@ model Meal {
   confidence Float
   items      String?
   createdAt  DateTime @default(now())
+
+  @@index([dateLocal])
 }
 
 model Goal {

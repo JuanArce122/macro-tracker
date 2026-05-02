@@ -21,3 +21,12 @@ body {
 * {
   box-sizing: border-box;
 }
+
+@keyframes toastSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.toast-slide-up {
+  animation: toastSlideUp 0.2s ease-out;
+}
