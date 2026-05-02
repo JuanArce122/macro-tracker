@@ -1,5 +1,6 @@
-import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = [
   "/auth",
@@ -17,7 +18,7 @@ const STATIC_PATHS = [
   "/uploads/",
 ];
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Permitir archivos estáticos sin verificación
@@ -30,20 +31,21 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  // Verificar si hay sesión válida usando getToken (Edge Runtime compatible)
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+
   // Sin sesión → redirigir al login
-  if (!req.auth) {
+  if (!token) {
     const loginUrl = new URL("/auth", req.url);
     // Guardar la ruta original para redirigir de vuelta después del login
-    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+    loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   // Aplica a todas las rutas excepto las de Next.js internals
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-  // Auth.js requiere Node.js runtime, no Edge Runtime
-  runtime: "nodejs",
 };
