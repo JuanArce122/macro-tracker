@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { MealItem } from "./add/StepCamera";
+import { searchFoods, calcMacros } from "@/lib/foods";
+import type { Food } from "@/lib/foods";
 
 type Meal = {
   id: number;
@@ -79,6 +81,42 @@ export default function EditMealSheet({ meal, onClose }: Props) {
   const [name, setName] = useState("");
   const [items, setItems] = useState<EditableItem[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [nameSearch, setNameSearch] = useState<{ id: string; query: string } | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setNameSearch(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function applyFoodFromDB(itemId: string, food: Food, currentWeight: number) {
+    const weight = currentWeight > 0 ? currentWeight : 100;
+    const macros = calcMacros(food, weight);
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id !== itemId ? item : {
+          ...item,
+          nombre: food.nombre,
+          pesoG: weight,
+          calorias: macros.calorias,
+          proteina: macros.proteina,
+          carbs: macros.carbs,
+          grasa: macros.grasa,
+          _baseWeight: weight,
+          _baseCalorias: macros.calorias,
+          _baseProteina: macros.proteina,
+          _baseCarbs: macros.carbs,
+          _baseGrasa: macros.grasa,
+        }
+      )
+    );
+    setNameSearch(null);
+  }
 
   // Modo sin ítems (comidas viejas sin segregación)
   const [weightG, setWeightG] = useState("");
@@ -371,14 +409,39 @@ export default function EditMealSheet({ meal, onClose }: Props) {
 
                       {isExpanded && (
                         <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3 flex flex-col gap-3 bg-white dark:bg-gray-900">
-                          <div>
+                          <div className="relative" ref={nameSearch?.id === item.id ? dropdownRef : null}>
                             <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Nombre</label>
                             <input
                               type="text"
-                              value={item.nombre}
-                              onChange={(e) => updateItem(item.id, "nombre", e.target.value)}
+                              value={nameSearch?.id === item.id ? nameSearch.query : item.nombre}
+                              onChange={(e) => {
+                                setNameSearch({ id: item.id, query: e.target.value });
+                                if (!e.target.value.trim()) updateItem(item.id, "nombre", e.target.value);
+                              }}
+                              onFocus={() => setNameSearch({ id: item.id, query: item.nombre })}
                               className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                              placeholder="Busca un alimento…"
+                              autoComplete="off"
                             />
+                            {nameSearch?.id === item.id && nameSearch.query.trim().length > 1 && (() => {
+                              const results: Food[] = searchFoods(nameSearch.query);
+                              if (results.length === 0) return null;
+                              return (
+                                <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+                                  {results.map((food) => (
+                                    <button
+                                      key={food.id}
+                                      type="button"
+                                      onMouseDown={(e) => { e.preventDefault(); applyFoodFromDB(item.id, food, item.pesoG); }}
+                                      className="w-full flex items-center justify-between px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                                    >
+                                      <span className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate flex-1">{food.nombre}</span>
+                                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0">{food.cal} kcal/100g</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </div>
                           <div>
                             <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Unidades</label>
