@@ -49,9 +49,9 @@ function MealItem({
   onDelete: (id: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 py-3 px-4 border-b border-gray-50 last:border-0">
+    <div className="flex items-center gap-3 py-3 px-4 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
       {meal.imageUrl ? (
-        <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+        <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
           <Image
             src={meal.imageUrl}
             alt={meal.name}
@@ -61,7 +61,7 @@ function MealItem({
           />
         </div>
       ) : (
-        <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
           <span className="text-2xl">🍽️</span>
         </div>
       )}
@@ -69,13 +69,13 @@ function MealItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
           <ConfidenceDot confidence={meal.confidence} />
-          <p className="font-medium text-sm text-gray-800 truncate">{meal.name}</p>
+          <p className="font-medium text-sm text-gray-800 dark:text-gray-100 truncate">{meal.name}</p>
         </div>
         {meal.items && (() => {
           try {
             const parsed: { nombre: string; unidades: number }[] = JSON.parse(meal.items);
             return (
-              <p className="text-xs text-gray-400 truncate">
+              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
                 {parsed.map((item) => item.unidades > 1 ? `${item.unidades}x ${item.nombre}` : item.nombre).join(" · ")}
               </p>
             );
@@ -92,7 +92,7 @@ function MealItem({
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={() => onEdit(meal)}
-          className="p-2 text-gray-300 hover:text-blue-400 active:text-blue-500 transition-colors"
+          className="p-2 text-gray-300 dark:text-gray-600 hover:text-blue-400 active:text-blue-500 transition-colors"
           aria-label="Editar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ function MealItem({
         </button>
         <button
           onClick={() => onDelete(meal.id)}
-          className="p-2 text-gray-300 hover:text-red-400 active:text-red-500 transition-colors"
+          className="p-2 text-gray-300 dark:text-gray-600 hover:text-red-400 active:text-red-500 transition-colors"
           aria-label="Eliminar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -174,8 +174,8 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
       <>
         <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
           <span className="text-5xl mb-3">🍽️</span>
-          <p className="text-gray-500 font-medium">Sin comidas registradas</p>
-          <p className="text-gray-400 text-sm mt-1">Toca el botón verde para agregar</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Sin comidas registradas</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Toca el botón verde para agregar</p>
         </div>
         {toast && <Toast {...toast} onDismiss={dismissToast} />}
       </>
@@ -188,11 +188,11 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
         {filled.map(({ key, label, emoji }) => {
           const group = visibleMeals.filter((m) => m.category === key);
           return (
-            <div key={key} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+            <div key={key} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                 <span>{emoji}</span>
-                <span className="text-sm font-semibold text-gray-700 capitalize">{label}</span>
-                <span className="ml-auto text-xs text-gray-400">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 capitalize">{label}</span>
+                <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
                   {group.reduce((s, m) => s + m.calories, 0).toFixed(0)} kcal
                 </span>
               </div>

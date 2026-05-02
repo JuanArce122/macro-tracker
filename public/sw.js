@@ -1,4 +1,4 @@
-const CACHE_NAME = "macro-tracker-v1";
+const CACHE_NAME = "macro-tracker-v2";
 const STATIC_ASSETS = ["/", "/history", "/settings"];
 
 self.addEventListener("install", (event) => {
@@ -21,8 +21,28 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // No cachear APIs ni uploads
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/uploads/")) {
+  // No cachear uploads ni export
+  if (url.pathname.startsWith("/uploads/") || url.pathname.startsWith("/api/export")) {
+    return;
+  }
+
+  // Stale-while-revalidate para API de comidas y metas (historial offline)
+  if (url.pathname.startsWith("/api/meals") || url.pathname.startsWith("/api/history") || url.pathname.startsWith("/api/goals")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(request);
+        const fetchPromise = fetch(request).then((res) => {
+          if (res.ok) cache.put(request, res.clone());
+          return res;
+        }).catch(() => cached);
+        return cached ?? fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // No cachear otras APIs
+  if (url.pathname.startsWith("/api/")) {
     return;
   }
 

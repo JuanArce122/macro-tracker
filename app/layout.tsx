@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="es" className={`${geistSans.variable} h-full`}>
       <body className="h-full bg-gray-100 antialiased">
         <ServiceWorkerRegistration />
-        <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-gray-50">
+        <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-gray-50 dark:bg-gray-900">
           {children}
         </div>
       </body>

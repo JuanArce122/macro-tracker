@@ -79,22 +79,22 @@ export default function StepSearch({ onResult, onBack }: Props) {
     return (
       <button
         onClick={() => handleSelect(food)}
-        className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50 text-left"
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-gray-700/50 text-left"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-gray-800 truncate">{food.nombre}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{food.nombre}</p>
             {isCustom && (
               <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">Mío</span>
             )}
           </div>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
             {food.gramsPerUnit
               ? `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por ${food.gramsPerUnit}g (1 ${food.unitLabel})`
               : `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por 100g`}
           </p>
         </div>
-        <svg className="w-4 h-4 text-gray-300 flex-shrink-0 ml-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -105,18 +105,18 @@ export default function StepSearch({ onResult, onBack }: Props) {
 
   return (
     <div className="flex flex-col flex-1 p-5">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 text-sm mb-6 -ml-1">
+      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm mb-6 -ml-1">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Atrás
       </button>
 
-      <h1 className="text-xl font-bold text-gray-800 mb-5">Buscar alimento</h1>
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-5">Buscar alimento</h1>
 
       {/* Buscador */}
       <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
@@ -125,7 +125,7 @@ export default function StepSearch({ onResult, onBack }: Props) {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
           autoFocus
-          className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
         {query && (
           <button onClick={() => { setQuery(""); setSelected(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -138,8 +138,8 @@ export default function StepSearch({ onResult, onBack }: Props) {
 
       {/* Recientes */}
       {showRecents && (
-        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm mb-4">
-          <p className="text-xs font-semibold text-gray-400 px-4 py-2.5 border-b border-gray-50">Recientes</p>
+        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-4">
+          <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 px-4 py-2.5 border-b border-gray-50 dark:border-gray-700">Recientes</p>
           {recentFoods.map((food) => (
             <FoodRow key={food.id} food={food} isCustom={customIds.has(food.id)} />
           ))}
@@ -148,9 +148,9 @@ export default function StepSearch({ onResult, onBack }: Props) {
 
       {/* Resultados */}
       {!selected && query.trim() && (
-        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm mb-4">
+        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-4">
           {results.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-6">Sin resultados para &quot;{query}&quot;</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-6">Sin resultados para &quot;{query}&quot;</p>
           ) : (
             results.map((food) => (
               <FoodRow key={food.id} food={food} isCustom={customIds.has(food.id)} />
@@ -162,9 +162,9 @@ export default function StepSearch({ onResult, onBack }: Props) {
       {/* Cantidad / Peso */}
       {selected && (
         <div className="flex flex-col gap-4">
-          <div className="bg-blue-50 rounded-2xl p-4">
-            <p className="text-sm font-semibold text-blue-700 mb-1">{selected.nombre}</p>
-            <p className="text-xs text-blue-500">
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-2xl p-4">
+            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">{selected.nombre}</p>
+            <p className="text-xs text-blue-500 dark:text-blue-400">
               {selected.gramsPerUnit
                 ? `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G — por ${selected.gramsPerUnit}g (1 ${selected.unitLabel})`
                 : `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G por 100g`}
@@ -173,24 +173,24 @@ export default function StepSearch({ onResult, onBack }: Props) {
 
           {isUnitBased ? (
             <div>
-              <label className="text-sm font-medium text-gray-600 block mb-1.5">
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">
                 ¿Cuántos {selected.unitLabel}s?
               </label>
               <div className="flex items-center gap-4">
                 <button onClick={() => setUnits((u) => Math.max(1, u - 1))}
-                  className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 text-xl font-medium active:bg-gray-200 transition-colors">−</button>
-                <span className="text-2xl font-bold text-gray-800 w-8 text-center">{units}</span>
+                  className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xl font-medium active:bg-gray-200 dark:active:bg-gray-600 transition-colors">−</button>
+                <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 w-8 text-center">{units}</span>
                 <button onClick={() => setUnits((u) => u + 1)}
-                  className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 text-xl font-medium active:bg-gray-200 transition-colors">+</button>
-                <span className="text-sm text-gray-400 ml-1">= {effectiveWeight}g</span>
+                  className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xl font-medium active:bg-gray-200 dark:active:bg-gray-600 transition-colors">+</button>
+                <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">= {effectiveWeight}g</span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="text-sm font-medium text-gray-600 block mb-1.5">Peso en gramos *</label>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">Peso en gramos *</label>
               <input type="number" inputMode="decimal" placeholder="ej: 267" value={weightG}
                 onChange={(e) => setWeightG(e.target.value)} autoFocus
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
             </div>
           )}
 
@@ -200,13 +200,13 @@ export default function StepSearch({ onResult, onBack }: Props) {
               ? `Para ${units} ${units === 1 ? selected.unitLabel : `${selected.unitLabel}s`} (${effectiveWeight}g):`
               : `Para ${weightG}g:`;
             return (
-              <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-400 mb-3">{label}</p>
+              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
+                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-3">{label}</p>
                 <div className="grid grid-cols-4 gap-2 text-center">
-                  <div><p className="text-lg font-bold text-emerald-600">{m.calorias}</p><p className="text-xs text-gray-400">kcal</p></div>
-                  <div><p className="text-lg font-bold text-blue-500">{m.proteina}g</p><p className="text-xs text-gray-400">proteína</p></div>
-                  <div><p className="text-lg font-bold text-amber-500">{m.carbs}g</p><p className="text-xs text-gray-400">carbs</p></div>
-                  <div><p className="text-lg font-bold text-violet-500">{m.grasa}g</p><p className="text-xs text-gray-400">grasa</p></div>
+                  <div><p className="text-lg font-bold text-emerald-600">{m.calorias}</p><p className="text-xs text-gray-400 dark:text-gray-500">kcal</p></div>
+                  <div><p className="text-lg font-bold text-blue-500">{m.proteina}g</p><p className="text-xs text-gray-400 dark:text-gray-500">proteína</p></div>
+                  <div><p className="text-lg font-bold text-amber-500">{m.carbs}g</p><p className="text-xs text-gray-400 dark:text-gray-500">carbs</p></div>
+                  <div><p className="text-lg font-bold text-violet-500">{m.grasa}g</p><p className="text-xs text-gray-400 dark:text-gray-500">grasa</p></div>
                 </div>
               </div>
             );
@@ -215,7 +215,7 @@ export default function StepSearch({ onResult, onBack }: Props) {
       )}
 
       <button onClick={handleConfirm} disabled={!canConfirm}
-        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold rounded-2xl py-4 transition-colors mt-auto">
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-2xl py-4 transition-colors mt-auto">
         Continuar
       </button>
     </div>

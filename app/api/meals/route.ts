@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
     if (imageBase64) {
       const buffer = Buffer.from(imageBase64, "base64");
       const resized = await sharp(buffer)
-        .resize({ width: 800, withoutEnlargement: true })
-        .jpeg({ quality: 85 })
+        .resize({ width: 600, withoutEnlargement: true })
+        .jpeg({ quality: 75 })
         .toBuffer();
 
       const filename = `meal-${Date.now()}.jpg`;

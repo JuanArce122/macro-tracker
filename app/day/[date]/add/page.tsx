@@ -27,8 +27,8 @@ export default function AddMealPage({
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-[430px] w-full flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto max-w-[430px] w-full flex flex-col min-h-screen bg-white dark:bg-gray-900">
         {step === "mode" && (
           <StepMode
             onSelect={(mode) => setStep(mode)}

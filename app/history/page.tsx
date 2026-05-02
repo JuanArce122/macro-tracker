@@ -35,30 +35,30 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
   return (
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
       <div
-        className="w-full max-w-[430px] mx-auto bg-white rounded-t-3xl p-5 shadow-2xl"
+        className="w-full max-w-[430px] mx-auto bg-white dark:bg-gray-900 rounded-t-3xl p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+        <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
 
         <div className="flex gap-4 mb-4">
           {meal.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={meal.imageUrl} alt={meal.name} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
               <span className="text-3xl">🍽️</span>
             </div>
           )}
           <div className="flex-1">
-            <p className="font-bold text-gray-800 text-base">{meal.name}</p>
-            <p className="text-sm text-gray-400 capitalize mt-0.5">{meal.category} · {meal.weightG}g</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="font-bold text-gray-800 dark:text-gray-100 text-base">{meal.name}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 capitalize mt-0.5">{meal.category} · {meal.weightG}g</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
               {format(parseISO(meal.date), "d 'de' MMMM yyyy", { locale: es })}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 bg-gray-50 rounded-2xl p-4 mb-4">
+        <div className="grid grid-cols-4 gap-2 bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-4">
           {[
             { label: "kcal", val: meal.calories, color: "text-emerald-600" },
             { label: "prot.", val: meal.protein, color: "text-blue-500" },
@@ -67,14 +67,14 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
           ].map(({ label, val, color }) => (
             <div key={label} className="text-center">
               <p className={`text-lg font-bold ${color}`}>{val.toFixed(1)}</p>
-              <p className="text-xs text-gray-400">{label}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{label}</p>
             </div>
           ))}
         </div>
 
         <button
           onClick={() => { router.push(`/day/${day}`); onClose(); }}
-          className="w-full border border-gray-200 text-gray-600 font-medium rounded-2xl py-3 text-sm"
+          className="w-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium rounded-2xl py-3 text-sm"
         >
           Ver día completo →
         </button>
@@ -116,12 +116,24 @@ export default function HistoryPage() {
   const isSearching = query.trim().length > 0;
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50">
+    <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 pt-5 pb-3">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Historial</h1>
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 pt-5 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Historial</h1>
+          <a
+            href="/api/export"
+            download
+            className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-xl active:opacity-70"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            CSV
+          </a>
+        </div>
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -129,10 +141,10 @@ export default function HistoryPage() {
             placeholder="Buscar alimento..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-gray-100 rounded-xl pl-9 pr-9 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+            className="w-full bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
           />
           {query && (
-            <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -150,31 +162,31 @@ export default function HistoryPage() {
             ) : searchResults.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-8">Sin resultados para "{query}"</p>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <p className="text-xs text-gray-400 px-4 py-2.5 border-b border-gray-50">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <p className="text-xs text-gray-400 dark:text-gray-500 px-4 py-2.5 border-b border-gray-50 dark:border-gray-700">
                   {searchResults.length} resultado{searchResults.length !== 1 ? "s" : ""}
                 </p>
                 {searchResults.map((meal) => (
                   <button
                     key={meal.id}
                     onClick={() => setSelectedMeal(meal)}
-                    className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50 text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-gray-700/50 text-left"
                   >
                     {meal.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={meal.imageUrl} alt={meal.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-11 h-11 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                         <span className="text-xl">🍽️</span>
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{meal.name}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{meal.name}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
                         {format(parseISO(meal.date), "d MMM yyyy", { locale: es })} · {meal.calories.toFixed(0)} kcal
                       </p>
                     </div>
-                    <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -198,26 +210,26 @@ export default function HistoryPage() {
                 fat:      recent.reduce((s, d) => s + d.fat,      0) / n,
               };
               return (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-1">
-                  <p className="text-xs font-semibold text-gray-400 mb-3">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-1">
+                  <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3">
                     Promedio · últimos {n} {n === 1 ? "día" : "días"} registrados
                   </p>
                   <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
                       <p className="text-lg font-bold text-emerald-600">{avg.calories.toFixed(0)}</p>
-                      <p className="text-xs text-gray-400">kcal</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">kcal</p>
                     </div>
                     <div>
                       <p className="text-lg font-bold text-blue-500">{avg.protein.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400">prot.</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">prot.</p>
                     </div>
                     <div>
                       <p className="text-lg font-bold text-amber-500">{avg.carbs.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400">carbs</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">carbs</p>
                     </div>
                     <div>
                       <p className="text-lg font-bold text-violet-500">{avg.fat.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400">grasa</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">grasa</p>
                     </div>
                   </div>
                 </div>
@@ -240,20 +252,20 @@ export default function HistoryPage() {
                 <button
                   key={day.date}
                   onClick={() => router.push(`/day/${day.date}`)}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-left active:bg-gray-50 transition-colors"
+                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-left active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <p className="font-semibold text-gray-800 capitalize">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 capitalize">
                         {format(parsed, "EEEE", { locale: es })}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
                         {format(parsed, "d 'de' MMMM yyyy", { locale: es })}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-emerald-600">{day.calories.toFixed(0)}</p>
-                      <p className="text-xs text-gray-400">kcal</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">kcal</p>
                     </div>
                   </div>
                   <div className="flex gap-4">

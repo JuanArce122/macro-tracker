@@ -140,14 +140,14 @@ export default function StepCamera({ onResult, onBack }: Props) {
 
   return (
     <div className="flex flex-col flex-1 p-5">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 text-sm mb-6 -ml-1">
+      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm mb-6 -ml-1">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Atrás
       </button>
 
-      <h1 className="text-xl font-bold text-gray-800 mb-6">Foto con IA</h1>
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Foto con IA</h1>
 
       {/* Inputs ocultos */}
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
@@ -176,28 +176,28 @@ export default function StepCamera({ onResult, onBack }: Props) {
         <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={() => cameraRef.current?.click()}
-            className="flex flex-col items-center justify-center gap-3 h-36 bg-white border border-gray-100 rounded-2xl shadow-sm active:bg-gray-50 transition-colors"
+            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
           >
             <span className="text-4xl">📷</span>
-            <span className="text-sm font-semibold text-gray-700">Cámara</span>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Cámara</span>
           </button>
           <button
             onClick={() => galleryRef.current?.click()}
-            className="flex flex-col items-center justify-center gap-3 h-36 bg-white border border-gray-100 rounded-2xl shadow-sm active:bg-gray-50 transition-colors"
+            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
           >
             <span className="text-4xl">🖼️</span>
-            <span className="text-sm font-semibold text-gray-700">Librería</span>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Librería</span>
           </button>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-4 flex flex-col gap-2">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-3 mb-4 flex flex-col gap-2">
+          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           {imageBase64 && (
             <button
               onClick={handleManualFallback}
-              className="text-sm font-semibold text-red-600 self-start underline active:opacity-70"
+              className="text-sm font-semibold text-red-600 dark:text-red-400 self-start underline active:opacity-70"
             >
               Ingresar macros manualmente →
             </button>
@@ -208,7 +208,7 @@ export default function StepCamera({ onResult, onBack }: Props) {
       <button
         onClick={handleAnalyze}
         disabled={!imageBase64 || loading}
-        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold rounded-2xl py-4 flex items-center justify-center gap-2 transition-colors mt-auto"
+        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-2xl py-4 flex items-center justify-center gap-2 transition-colors mt-auto"
       >
         {loading ? (
           <>

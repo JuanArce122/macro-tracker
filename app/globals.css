@@ -18,6 +18,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --foreground: #f9fafb;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
