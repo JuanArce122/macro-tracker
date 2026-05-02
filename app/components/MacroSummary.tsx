@@ -6,12 +6,12 @@ type MacroCardProps = {
   color: string;
   bgColor: string;
   trackColor: string;
+  fillColor: string;
 };
 
-function MacroCard({ label, value, goal, unit, color, bgColor, trackColor }: MacroCardProps) {
+function MacroCard({ label, value, goal, unit, color, bgColor, trackColor, fillColor }: MacroCardProps) {
   const pct = Math.min((value / goal) * 100, 100);
   const remaining = Math.max(goal - value, 0);
-  const fillColor = color.split(" ").map((c) => c.replace("text-", "bg-")).join(" ");
 
   return (
     <div className={`rounded-2xl p-3 ${bgColor} flex flex-col gap-2`}>
@@ -71,6 +71,7 @@ export default function MacroSummary({ totals, goals }: Props) {
           color="text-blue-600 dark:text-blue-400"
           bgColor="bg-blue-50 dark:bg-blue-900/30"
           trackColor="bg-blue-100 dark:bg-blue-900/50"
+          fillColor="bg-blue-500 dark:bg-blue-400"
         />
         <MacroCard
           label="Carbs"
@@ -80,6 +81,7 @@ export default function MacroSummary({ totals, goals }: Props) {
           color="text-amber-600 dark:text-amber-400"
           bgColor="bg-amber-50 dark:bg-amber-900/30"
           trackColor="bg-amber-100 dark:bg-amber-900/50"
+          fillColor="bg-amber-500 dark:bg-amber-400"
         />
         <MacroCard
           label="Grasa"
@@ -89,6 +91,7 @@ export default function MacroSummary({ totals, goals }: Props) {
           color="text-violet-600 dark:text-violet-400"
           bgColor="bg-violet-50 dark:bg-violet-900/30"
           trackColor="bg-violet-100 dark:bg-violet-900/50"
+          fillColor="bg-violet-500 dark:bg-violet-400"
         />
       </div>
     </div>
