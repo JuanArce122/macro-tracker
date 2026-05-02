@@ -89,6 +89,13 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
   const [items, setItems] = useState<EditableItem[]>(makeEditable(result.items));
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Modo manual: usado cuando items.length === 0 (IA falló o no detectó nada)
+  const [flatWeight, setFlatWeight] = useState("");
+  const [flatCalories, setFlatCalories] = useState("");
+  const [flatProtein, setFlatProtein] = useState("");
+  const [flatCarbs, setFlatCarbs] = useState("");
+  const [flatFat, setFlatFat] = useState("");
+
   const totals = calcTotals(items);
 
   function updateItem(id: string, field: keyof MealItem, value: string | number) {
@@ -150,24 +157,47 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
     setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
+  function addItem() {
+    const newItem: EditableItem = {
+      id: `manual-${Date.now()}`,
+      nombre: "Ingrediente",
+      unidades: 1,
+      pesoG: 0,
+      calorias: 0,
+      proteina: 0,
+      carbs: 0,
+      grasa: 0,
+      confianza: 1.0,
+      _baseWeight: 0,
+      _baseCalorias: 0,
+      _baseProteina: 0,
+      _baseCarbs: 0,
+      _baseGrasa: 0,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setExpandedId(newItem.id);
+  }
+
   async function handleSave() {
-    if (items.length === 0) return;
+    if (!nombrePlato) return;
+    if (items.length === 0 && !Number(flatCalories)) return;
     setSaving(true);
     setError(null);
 
     try {
+      const useFlatMode = items.length === 0;
       const body: Record<string, unknown> = {
         date: `${selectedDate}T${new Date().toISOString().split("T")[1]}`,
         dateLocal: selectedDate,
         category,
         name: nombrePlato,
-        weightG: totals.pesoG,
-        calories: Math.round(totals.calorias),
-        protein: Math.round(totals.proteina * 10) / 10,
-        carbs: Math.round(totals.carbs * 10) / 10,
-        fat: Math.round(totals.grasa * 10) / 10,
-        confidence: Math.min(...items.map((i) => i.confianza)),
-        items: items.map(({ id: _id, ...item }) => item),
+        weightG:    useFlatMode ? (Number(flatWeight) || 0)   : totals.pesoG,
+        calories:   useFlatMode ? (Number(flatCalories) || 0) : Math.round(totals.calorias),
+        protein:    useFlatMode ? (Number(flatProtein) || 0)  : Math.round(totals.proteina * 10) / 10,
+        carbs:      useFlatMode ? (Number(flatCarbs) || 0)    : Math.round(totals.carbs * 10) / 10,
+        fat:        useFlatMode ? (Number(flatFat) || 0)      : Math.round(totals.grasa * 10) / 10,
+        confidence: useFlatMode ? 0.5 : Math.min(...items.map((i) => i.confianza)),
+        items:      useFlatMode ? null : items.map(({ id: _id, ...item }) => item),
       };
 
       if (result.imageBase64) {
@@ -261,14 +291,51 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
           />
         </div>
 
-        {/* Ítems detectados */}
+        {/* Ítems / modo manual */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-600">
-              Ingredientes detectados ({items.length})
+              {items.length > 0 ? `Ingredientes (${items.length})` : "Macros del plato"}
             </label>
+            <button
+              onClick={addItem}
+              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 active:opacity-70"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Ingrediente
+            </button>
           </div>
 
+          {items.length === 0 ? (
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                La IA no detectó ingredientes. Ingresa los macros manualmente o toca &quot;+ Ingrediente&quot;.
+              </p>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Peso total (g)</label>
+                <input type="number" inputMode="decimal" placeholder="ej: 350" value={flatWeight}
+                  onChange={(e) => setFlatWeight(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Calorías (kcal)", val: flatCalories, set: setFlatCalories, color: "focus:ring-emerald-300" },
+                  { label: "Proteína (g)",    val: flatProtein,  set: setFlatProtein,  color: "focus:ring-blue-300"    },
+                  { label: "Carbs (g)",       val: flatCarbs,    set: setFlatCarbs,    color: "focus:ring-amber-300"   },
+                  { label: "Grasa (g)",       val: flatFat,      set: setFlatFat,      color: "focus:ring-violet-300"  },
+                ].map(({ label, val, set, color }) => (
+                  <div key={label}>
+                    <label className="text-xs text-gray-400 block mb-1">{label}</label>
+                    <input type="number" inputMode="decimal" placeholder="0" value={val}
+                      onChange={(e) => set(e.target.value)}
+                      className={`w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 ${color}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
           <div className="flex flex-col gap-2">
             {items.map((item) => {
               const isExpanded = expandedId === item.id;
@@ -380,12 +447,8 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
               );
             })}
 
-            {items.length === 0 && (
-              <p className="text-gray-400 text-sm text-center py-4">
-                Sin ingredientes — elimínaste todos
-              </p>
-            )}
           </div>
+          )}
         </div>
 
         {/* Totales */}
@@ -428,7 +491,7 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
         </button>
         <button
           onClick={handleSave}
-          disabled={saving || saved || items.length === 0 || !nombrePlato}
+          disabled={saving || saved || !nombrePlato || (items.length === 0 && !Number(flatCalories))}
           className={`flex-[2] text-white font-semibold rounded-2xl py-3.5 transition-colors flex items-center justify-center gap-2 ${
             saved ? "bg-emerald-600" : "bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400"
           }`}

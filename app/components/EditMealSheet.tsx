@@ -172,6 +172,48 @@ export default function EditMealSheet({ meal, onClose }: Props) {
     setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
+  function addItem() {
+    const newItem: EditableItem = {
+      id: `manual-${Date.now()}`,
+      nombre: "Ingrediente",
+      unidades: 1,
+      pesoG: 0,
+      calorias: 0,
+      proteina: 0,
+      carbs: 0,
+      grasa: 0,
+      confianza: 1.0,
+      _baseWeight: 0,
+      _baseCalorias: 0,
+      _baseProteina: 0,
+      _baseCarbs: 0,
+      _baseGrasa: 0,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setExpandedId(newItem.id);
+  }
+
+  function switchToItemsMode() {
+    const initial: EditableItem = {
+      id: `manual-${Date.now()}`,
+      nombre: name,
+      unidades: 1,
+      pesoG: Number(weightG) || 0,
+      calorias: Number(calories) || 0,
+      proteina: Number(protein) || 0,
+      carbs: Number(carbs) || 0,
+      grasa: Number(fat) || 0,
+      confianza: 1.0,
+      _baseWeight: Number(weightG) || 0,
+      _baseCalorias: Number(calories) || 0,
+      _baseProteina: Number(protein) || 0,
+      _baseCarbs: Number(carbs) || 0,
+      _baseGrasa: Number(fat) || 0,
+    };
+    setItems([initial]);
+    setExpandedId(null);
+  }
+
   async function handleSave() {
     if (!meal) return;
     setSaving(true);
@@ -282,9 +324,15 @@ export default function EditMealSheet({ meal, onClose }: Props) {
           {/* Ítems (si tiene segregación) */}
           {hasItems ? (
             <div>
-              <label className="text-sm font-medium text-gray-600 block mb-2">
-                Ingredientes ({items.length})
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-600">Ingredientes ({items.length})</label>
+                <button onClick={addItem} className="flex items-center gap-1 text-xs font-semibold text-emerald-600 active:opacity-70">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Ingrediente
+                </button>
+              </div>
               <div className="flex flex-col gap-2">
                 {items.map((item) => {
                   const isExpanded = expandedId === item.id;
@@ -386,6 +434,15 @@ export default function EditMealSheet({ meal, onClose }: Props) {
           ) : (
             /* Modo plano (comidas sin segregación) */
             <>
+              <button
+                onClick={switchToItemsMode}
+                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 active:opacity-70 -mt-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Desglosar en ingredientes
+              </button>
               <div>
                 <label className="text-sm font-medium text-gray-600 block mb-1.5">Peso (g)</label>
                 <input type="number" inputMode="decimal" value={weightG} onChange={(e) => setWeightG(e.target.value)}

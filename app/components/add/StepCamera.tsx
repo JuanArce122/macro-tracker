@@ -26,30 +26,61 @@ type Props = {
   onBack: () => void;
 };
 
+// Normaliza orientación (EXIF) y redimensiona vía canvas
+function normalizeImage(file: File): Promise<{ dataUrl: string; base64: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (ev) => {
+      const src = ev.target?.result as string;
+      const img = new window.Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const MAX = 1024;
+        const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.round(img.naturalWidth * scale);
+        const h = Math.round(img.naturalHeight * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        resolve({ dataUrl, base64: dataUrl.split(",")[1] });
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function StepCamera({ onResult, onBack }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string>("");
-  const [mimeType, setMimeType] = useState<string>("image/jpeg");
+  const [mimeType] = useState<string>("image/jpeg");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      setError("La imagen es demasiado grande (máx. 15 MB). Elige otra.");
+      return;
+    }
+
     setError(null);
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
+    try {
+      const { dataUrl, base64 } = await normalizeImage(file);
       setPreviewUrl(dataUrl);
-      // Separar el prefijo para quedarnos solo con el base64 puro
-      const base64 = dataUrl.split(",")[1];
       setImageBase64(base64);
-      setMimeType(file.type || "image/jpeg");
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setError("No se pudo leer la imagen. Intenta con otra.");
+    }
   }
 
   async function handleAnalyze() {
@@ -73,7 +104,10 @@ export default function StepCamera({ onResult, onBack }: Props) {
 
       onResult({
         nombrePlato: data.nombre_plato,
-        items: data.items.map((item: { nombre: string; unidades: number; peso_g: number; calorias: number; proteina_g: number; carbs_g: number; grasa_g: number; confianza: number }) => ({
+        items: data.items.map((item: {
+          nombre: string; unidades: number; peso_g: number;
+          calorias: number; proteina_g: number; carbs_g: number; grasa_g: number; confianza: number;
+        }) => ({
           nombre: item.nombre,
           unidades: item.unidades ?? 1,
           pesoG: item.peso_g,
@@ -94,6 +128,16 @@ export default function StepCamera({ onResult, onBack }: Props) {
     }
   }
 
+  function handleManualFallback() {
+    onResult({
+      nombrePlato: "",
+      items: [],
+      imageBase64,
+      mimeType,
+      imagePreviewUrl: previewUrl ?? "",
+    });
+  }
+
   return (
     <div className="flex flex-col flex-1 p-5">
       <button onClick={onBack} className="flex items-center gap-1 text-gray-400 text-sm mb-6 -ml-1">
@@ -106,34 +150,18 @@ export default function StepCamera({ onResult, onBack }: Props) {
       <h1 className="text-xl font-bold text-gray-800 mb-6">Foto con IA</h1>
 
       {/* Inputs ocultos */}
-      <input
-        ref={cameraRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      <input
-        ref={galleryRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+      <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
       {previewUrl ? (
         <div className="relative mb-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="w-full max-h-64 object-cover rounded-2xl"
-          />
+          <img src={previewUrl} alt="Preview" className="w-full max-h-64 object-cover rounded-2xl" />
           <button
             onClick={() => {
               setPreviewUrl(null);
               setImageBase64("");
+              setError(null);
               if (cameraRef.current) cameraRef.current.value = "";
               if (galleryRef.current) galleryRef.current.value = "";
             }}
@@ -164,8 +192,16 @@ export default function StepCamera({ onResult, onBack }: Props) {
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-4">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-4 flex flex-col gap-2">
           <p className="text-red-600 text-sm">{error}</p>
+          {imageBase64 && (
+            <button
+              onClick={handleManualFallback}
+              className="text-sm font-semibold text-red-600 self-start underline active:opacity-70"
+            >
+              Ingresar macros manualmente →
+            </button>
+          )}
         </div>
       )}
 
