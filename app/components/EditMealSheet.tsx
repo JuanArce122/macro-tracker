@@ -131,6 +131,7 @@ export default function EditMealSheet({ meal, onClose }: Props) {
   function applyFoodFromDB(itemId: string, food: Food, currentWeight: number) {
     const weight = currentWeight > 0 ? currentWeight : 100;
     const macros = calcMacros(food, weight);
+    fetch(`/api/foods/${food.id}/use`, { method: "POST" }).catch(() => {});
     setItems((prev) =>
       prev.map((item) =>
         item.id !== itemId ? item : {

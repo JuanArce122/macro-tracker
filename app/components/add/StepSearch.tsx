@@ -5,18 +5,12 @@ import { calcMacros, type Food } from "@/lib/foods";
 import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
 import type { AnalysisResult } from "./StepCamera";
 
-const RECENT_KEY = "recent_foods";
-const CUSTOM_KEY = "custom_foods";
-
-function loadFromStorage<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try { return JSON.parse(localStorage.getItem(key) ?? "null") ?? fallback; } catch { return fallback; }
-}
-
-function saveRecent(food: FoodWithSource) {
-  const prev: FoodWithSource[] = loadFromStorage(RECENT_KEY, []);
-  const next = [food, ...prev.filter((f) => f.id !== food.id)].slice(0, 5);
-  localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+async function registerUse(foodId: number) {
+  try {
+    await fetch(`/api/foods/${foodId}/use`, { method: "POST" });
+  } catch {
+    // Silencioso si falla
+  }
 }
 
 type Props = {
@@ -33,8 +27,19 @@ export default function StepSearch({ onResult, onBack }: Props) {
   const [customFoods, setCustomFoods] = useState<FoodWithSource[]>([]);
 
   useEffect(() => {
-    setRecentFoods(loadFromStorage(RECENT_KEY, []));
-    setCustomFoods(loadFromStorage(CUSTOM_KEY, []));
+    fetch("/api/foods/user")
+      .then((r) => r.ok ? r.json() : { myFoods: [], recentFoods: [] })
+      .then((data) => {
+        setCustomFoods((data.myFoods ?? []).map((f: { id: number; nombre: string; cal: number; p: number; c: number; f: number }) => ({ ...f, categoria: "user" as const, source: "user" })));
+        setRecentFoods((data.recentFoods ?? []).map((f: { id: number; nombre: string; cal: number; p: number; c: number; f: number; gramsPerUnit?: number | null; unitLabel?: string | null; source: string }) => ({
+          id: f.id, nombre: f.nombre, categoria: "proteina" as const,
+          cal: f.cal, p: f.p, c: f.c, f: f.f,
+          gramsPerUnit: f.gramsPerUnit ?? undefined,
+          unitLabel: f.unitLabel ?? undefined,
+          source: f.source,
+        })));
+      })
+      .catch(() => {});
   }, []);
 
   const { results: dbResults, loading: searching } = useFoodSearch(query);
@@ -55,6 +60,8 @@ export default function StepSearch({ onResult, onBack }: Props) {
     setQuery(food.nombre);
     setWeightG("");
     setUnits(1);
+    // Registrar uso para actualizar recientes y frecuentes
+    registerUse(food.id);
   }
 
   function handleConfirm() {
@@ -62,7 +69,7 @@ export default function StepSearch({ onResult, onBack }: Props) {
     if (isUnitBased && units <= 0) return;
     if (!isUnitBased && (!weightG || Number(weightG) <= 0)) return;
 
-    saveRecent(selected);
+    registerUse(selected.id);
     const macros = calcMacros(selected, effectiveWeight);
     onResult({
       nombrePlato: selected.nombre,

@@ -64,7 +64,34 @@ function normalizeOFFProduct(p: OFFProduct): {
   };
 }
 
-// ─── Endpoint ────────────────────────────────────────────────────────────────
+// ─── POST: crear alimento del usuario ────────────────────────────────────────
+
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = Number(session.user.id);
+
+  const body = await req.json();
+  const { nombre, cal, p, c, f } = body;
+  if (!nombre?.trim() || !cal) return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
+
+  const food = await prisma.food.create({
+    data: {
+      nombre: nombre.trim(),
+      categoria: "user",
+      cal: Number(cal),
+      p: Number(p) || 0,
+      c: Number(c) || 0,
+      f: Number(f) || 0,
+      source: "user",
+      userId,
+    },
+  });
+
+  return NextResponse.json({ food }, { status: 201 });
+}
+
+// ─── GET endpoint ────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   const session = await auth();

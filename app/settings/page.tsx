@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import BottomNav from "@/app/components/BottomNav";
-import type { Food } from "@/lib/foods";
 
 type Goals = { calories: number; protein: number; carbs: number; fat: number };
 
@@ -47,12 +46,7 @@ const RING_COLOR: Record<string, string> = {
   amber: "focus:ring-amber-300 border-amber-200", violet: "focus:ring-violet-300 border-violet-200",
 };
 
-const CUSTOM_KEY = "custom_foods";
-
-function loadCustomFoods(): Food[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) ?? "[]"); } catch { return []; }
-}
+type DBFood = { id: number; nombre: string; cal: number; p: number; c: number; f: number };
 
 function calcTDEE(p: Profile): TDEEResult {
   const w = Number(p.weightKg), h = Number(p.heightCm), a = Number(p.age);
@@ -85,16 +79,19 @@ export default function SettingsPage() {
   });
   const tdeeResult = calcTDEE(profile);
 
-  const [customFoods, setCustomFoods] = useState<Food[]>([]);
+  const [customFoods, setCustomFoods] = useState<DBFood[]>([]);
   const [showAddFood, setShowAddFood] = useState(false);
   const [newFood, setNewFood] = useState<NewFoodForm>({ nombre: "", cal: "", p: "", c: "", f: "" });
+  const [savingFood, setSavingFood] = useState(false);
 
   useEffect(() => {
-    fetch("/api/goals")
-      .then((r) => r.json())
-      .then((d) => setGoals({ calories: d.calories, protein: d.protein, carbs: d.carbs, fat: d.fat }))
-      .finally(() => setLoading(false));
-    setCustomFoods(loadCustomFoods());
+    Promise.all([
+      fetch("/api/goals").then((r) => r.json()),
+      fetch("/api/foods/user").then((r) => r.json()),
+    ]).then(([goals, userData]) => {
+      setGoals({ calories: goals.calories, protein: goals.protein, carbs: goals.carbs, fat: goals.fat });
+      setCustomFoods(userData.myFoods ?? []);
+    }).finally(() => setLoading(false));
   }, []);
 
   async function handleSave() {
@@ -110,27 +107,30 @@ export default function SettingsPage() {
     setShowTDEE(false);
   }
 
-  function handleAddFood() {
+  async function handleAddFood() {
     const { nombre, cal, p, c, f } = newFood;
     if (!nombre.trim() || !Number(cal)) return;
-    const nextId = 10000 + customFoods.length + Date.now() % 1000;
-    const food: Food = {
-      id: nextId,
-      nombre: nombre.trim(),
-      categoria: "proteina",
-      cal: Number(cal), p: Number(p) || 0, c: Number(c) || 0, f: Number(f) || 0,
-    };
-    const next = [...customFoods, food];
-    setCustomFoods(next);
-    localStorage.setItem(CUSTOM_KEY, JSON.stringify(next));
-    setNewFood({ nombre: "", cal: "", p: "", c: "", f: "" });
-    setShowAddFood(false);
+    setSavingFood(true);
+    try {
+      const res = await fetch("/api/foods", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombre.trim(), cal: Number(cal), p: Number(p) || 0, c: Number(c) || 0, f: Number(f) || 0 }),
+      });
+      if (res.ok) {
+        const { food } = await res.json();
+        setCustomFoods((prev) => [...prev, food]);
+        setNewFood({ nombre: "", cal: "", p: "", c: "", f: "" });
+        setShowAddFood(false);
+      }
+    } finally {
+      setSavingFood(false);
+    }
   }
 
-  function deleteCustomFood(id: number) {
-    const next = customFoods.filter((f) => f.id !== id);
-    setCustomFoods(next);
-    localStorage.setItem(CUSTOM_KEY, JSON.stringify(next));
+  async function deleteCustomFood(id: number) {
+    await fetch(`/api/foods/${id}`, { method: "DELETE" });
+    setCustomFoods((prev) => prev.filter((f) => f.id !== id));
   }
 
   async function handleLogout() {
@@ -318,9 +318,11 @@ export default function SettingsPage() {
                       className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium rounded-xl py-2.5 text-sm active:bg-gray-50 dark:active:bg-gray-700">
                       Cancelar
                     </button>
-                    <button onClick={handleAddFood} disabled={!newFood.nombre.trim() || !Number(newFood.cal)}
-                      className="flex-[2] bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-xl py-2.5 text-sm active:bg-emerald-600">
-                      Guardar
+                    <button onClick={handleAddFood} disabled={!newFood.nombre.trim() || !Number(newFood.cal) || savingFood}
+                      className="flex-[2] bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-xl py-2.5 text-sm active:bg-emerald-600 flex items-center justify-center gap-1.5">
+                      {savingFood ? (
+                        <><svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Guardando…</>
+                      ) : "Guardar"}
                     </button>
                   </div>
                 </div>

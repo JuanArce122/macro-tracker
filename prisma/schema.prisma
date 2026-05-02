@@ -56,7 +56,7 @@ model PasswordResetToken {
 }
 
 model Food {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   nombre       String
   categoria    String
   cal          Float
@@ -65,9 +65,12 @@ model Food {
   f            Float
   gramsPerUnit Float?
   unitLabel    String?
-  source       String  @default("usda")
+  source       String    @default("usda")
   userId       Int?
+  usageCount   Int       @default(0)
+  lastUsedAt   DateTime?
 
   @@index([nombre])
   @@index([userId])
+  @@index([lastUsedAt])
 }
