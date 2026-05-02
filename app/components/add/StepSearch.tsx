@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { calcMacros, type Food } from "@/lib/foods";
-import { useFoodSearch } from "@/app/hooks/useFoodSearch";
+import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
 import type { AnalysisResult } from "./StepCamera";
 
 const RECENT_KEY = "recent_foods";
@@ -13,8 +13,8 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   try { return JSON.parse(localStorage.getItem(key) ?? "null") ?? fallback; } catch { return fallback; }
 }
 
-function saveRecent(food: Food) {
-  const prev: Food[] = loadFromStorage(RECENT_KEY, []);
+function saveRecent(food: FoodWithSource) {
+  const prev: FoodWithSource[] = loadFromStorage(RECENT_KEY, []);
   const next = [food, ...prev.filter((f) => f.id !== food.id)].slice(0, 5);
   localStorage.setItem(RECENT_KEY, JSON.stringify(next));
 }
@@ -26,11 +26,11 @@ type Props = {
 
 export default function StepSearch({ onResult, onBack }: Props) {
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Food | null>(null);
+  const [selected, setSelected] = useState<FoodWithSource | null>(null);
   const [weightG, setWeightG] = useState<string>("");
   const [units, setUnits] = useState<number>(1);
-  const [recentFoods, setRecentFoods] = useState<Food[]>([]);
-  const [customFoods, setCustomFoods] = useState<Food[]>([]);
+  const [recentFoods, setRecentFoods] = useState<FoodWithSource[]>([]);
+  const [customFoods, setCustomFoods] = useState<FoodWithSource[]>([]);
 
   useEffect(() => {
     setRecentFoods(loadFromStorage(RECENT_KEY, []));
@@ -50,7 +50,7 @@ export default function StepSearch({ onResult, onBack }: Props) {
   const effectiveWeight = isUnitBased ? units * selected!.gramsPerUnit! : Number(weightG);
   const showRecents = !query.trim() && !selected && recentFoods.length > 0;
 
-  function handleSelect(food: Food) {
+  function handleSelect(food: FoodWithSource) {
     setSelected(food);
     setQuery(food.nombre);
     setWeightG("");
@@ -84,17 +84,20 @@ export default function StepSearch({ onResult, onBack }: Props) {
 
   const canConfirm = selected && (isUnitBased ? units > 0 : (weightG && Number(weightG) > 0));
 
-  function FoodRow({ food, isCustom }: { food: Food; isCustom?: boolean }) {
+  function FoodRow({ food, isCustom }: { food: FoodWithSource; isCustom?: boolean }) {
     return (
       <button
         onClick={() => handleSelect(food)}
         className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-gray-700/50 text-left"
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{food.nombre}</p>
             {isCustom && (
               <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">Mío</span>
+            )}
+            {food.source === "openfoodfacts" && (
+              <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">OFF</span>
             )}
           </div>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">

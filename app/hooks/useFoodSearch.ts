@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { searchFoods } from "@/lib/foods";
 import type { Food } from "@/lib/foods";
 
-type DBFood = {
+export type DBFood = {
   id: number;
   nombre: string;
   categoria: string;
@@ -18,11 +18,11 @@ type DBFood = {
   userId?: number | null;
 };
 
-function dbFoodToFood(f: DBFood): Food {
+export function dbFoodToFood(f: DBFood): Food {
   return {
     id: f.id,
     nombre: f.nombre,
-    categoria: f.categoria as Food["categoria"],
+    categoria: (f.categoria === "otros" ? "proteina" : f.categoria) as Food["categoria"],
     cal: f.cal,
     p: f.p,
     c: f.c,
@@ -32,8 +32,10 @@ function dbFoodToFood(f: DBFood): Food {
   };
 }
 
+export type FoodWithSource = Food & { source: string };
+
 export function useFoodSearch(query: string, debounceMs = 300) {
-  const [results, setResults] = useState<Food[]>([]);
+  const [results, setResults] = useState<FoodWithSource[]>([]);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,14 +53,15 @@ export function useFoodSearch(query: string, debounceMs = 300) {
         const res = await fetch(`/api/foods?q=${encodeURIComponent(query)}&limit=10`);
         if (res.ok) {
           const data = await res.json();
-          setResults((data.foods as DBFood[]).map(dbFoodToFood));
+          setResults((data.foods as DBFood[]).map((f) => ({
+            ...dbFoodToFood(f),
+            source: f.source ?? "usda",
+          })));
         } else {
-          // Fallback local si la API falla
-          setResults(searchFoods(query));
+          setResults(searchFoods(query).map((f) => ({ ...f, source: "usda" })));
         }
       } catch {
-        // Sin conexión → búsqueda local
-        setResults(searchFoods(query));
+        setResults(searchFoods(query).map((f) => ({ ...f, source: "usda" })));
       } finally {
         setLoading(false);
       }

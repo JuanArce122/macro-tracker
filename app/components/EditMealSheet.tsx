@@ -85,9 +85,16 @@ function FoodDropdown({ query, onSelect }: { query: string; onSelect: (food: Foo
       {results.map((food) => (
         <button key={food.id} type="button"
           onMouseDown={(e) => { e.preventDefault(); onSelect(food); }}
-          className="w-full flex items-center justify-between px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0">
-          <span className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate flex-1">{food.nombre}</span>
-          <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0">{food.cal} kcal/100g</span>
+          className="w-full flex items-start gap-2 px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{food.nombre}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-xs text-gray-400 dark:text-gray-500">{food.cal} kcal/100g</span>
+              {food.source === "openfoodfacts" && (
+                <span className="text-[10px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full">OFF</span>
+              )}
+            </div>
+          </div>
         </button>
       ))}
     </div>
