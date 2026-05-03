@@ -76,17 +76,6 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Créditos */}
-        <p className="text-xs text-center text-gray-400 dark:text-gray-500 leading-relaxed px-4">
-          Hecho con ❤️ usando{" "}
-          <span className="font-medium text-gray-500 dark:text-gray-400">Next.js</span>
-          {" · "}
-          <span className="font-medium text-gray-500 dark:text-gray-400">Prisma</span>
-          {" · "}
-          <span className="font-medium text-gray-500 dark:text-gray-400">Gemini AI</span>
-          {" · "}
-          <span className="font-medium text-gray-500 dark:text-gray-400">Tailwind CSS</span>
-        </p>
       </div>
     </div>
   );
