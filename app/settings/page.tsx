@@ -65,10 +65,36 @@ const THEME_LABELS: Record<string, string> = {
   dark: "Oscuro",
 };
 
+const NOTIF_STORAGE_KEY = "notification_schedule";
+
+function getActiveNotifCount(): number {
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (!raw) return 0;
+    const s = JSON.parse(raw);
+    return Object.values(s).filter((v: unknown) => (v as { enabled: boolean }).enabled).length;
+  } catch {
+    return 0;
+  }
+}
+
+async function restoreNotifSchedule() {
+  if (!("serviceWorker" in navigator) || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (!raw) return;
+    const schedule = JSON.parse(raw);
+    const reg = await navigator.serviceWorker.getRegistration();
+    reg?.active?.postMessage({ type: "SCHEDULE_NOTIFICATIONS", schedule });
+  } catch { /* silencioso */ }
+}
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [goals, setGoals] = useState<Goals>(null);
   const [myFoodsCount, setMyFoodsCount] = useState(0);
+  const [activeNotifs, setActiveNotifs] = useState(0);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -86,6 +112,9 @@ export default function SettingsPage() {
       .then((r) => r.json())
       .then((d) => setMyFoodsCount(d.myFoods?.length ?? 0))
       .catch(() => null);
+
+    setActiveNotifs(getActiveNotifCount());
+    restoreNotifSchedule();
   }, []);
 
   const goalsSubtitle = goals
@@ -95,6 +124,10 @@ export default function SettingsPage() {
   const foodsSubtitle = myFoodsCount > 0
     ? `${myFoodsCount} alimento${myFoodsCount !== 1 ? "s" : ""} guardado${myFoodsCount !== 1 ? "s" : ""}`
     : "Agrega tus alimentos habituales";
+
+  const notifSubtitle = activeNotifs > 0
+    ? `${activeNotifs} recordatorio${activeNotifs !== 1 ? "s" : ""} activo${activeNotifs !== 1 ? "s" : ""}`
+    : "Recordatorios de comidas";
 
   return (
     <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
@@ -130,8 +163,8 @@ export default function SettingsPage() {
           <SettingsRow
             icon="🔔"
             title="Notificaciones"
-            subtitle="Recordatorios de comidas"
-            soon
+            subtitle={notifSubtitle}
+            href="/settings/notifications"
           />
           <SettingsRow
             icon="🎨"
