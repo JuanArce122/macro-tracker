@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
+import { useTheme } from "@/app/hooks/useTheme";
 
 type Profile = {
   name: string | null;
@@ -58,10 +59,17 @@ function RowGroup({ children }: { children: React.ReactNode }) {
   );
 }
 
+const THEME_LABELS: Record<string, string> = {
+  system: "Sistema",
+  light: "Claro",
+  dark: "Oscuro",
+};
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [goals, setGoals] = useState<Goals>(null);
-  const [customFoodsCount, setCustomFoodsCount] = useState(0);
+  const [myFoodsCount, setMyFoodsCount] = useState(0);
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetch("/api/profile")
@@ -74,20 +82,18 @@ export default function SettingsPage() {
       .then(setGoals)
       .catch(() => null);
 
-    try {
-      const foods = JSON.parse(localStorage.getItem("custom_foods") ?? "[]");
-      setCustomFoodsCount(Array.isArray(foods) ? foods.length : 0);
-    } catch {
-      setCustomFoodsCount(0);
-    }
+    fetch("/api/foods/user")
+      .then((r) => r.json())
+      .then((d) => setMyFoodsCount(d.myFoods?.length ?? 0))
+      .catch(() => null);
   }, []);
 
   const goalsSubtitle = goals
     ? `${goals.calories.toFixed(0)} kcal · ${goals.protein.toFixed(0)}g P · ${goals.carbs.toFixed(0)}g C · ${goals.fat.toFixed(0)}g G`
     : "Configura tus metas diarias";
 
-  const foodsSubtitle = customFoodsCount > 0
-    ? `${customFoodsCount} alimento${customFoodsCount !== 1 ? "s" : ""} guardado${customFoodsCount !== 1 ? "s" : ""}`
+  const foodsSubtitle = myFoodsCount > 0
+    ? `${myFoodsCount} alimento${myFoodsCount !== 1 ? "s" : ""} guardado${myFoodsCount !== 1 ? "s" : ""}`
     : "Agrega tus alimentos habituales";
 
   return (
@@ -130,8 +136,8 @@ export default function SettingsPage() {
           <SettingsRow
             icon="🎨"
             title="Apariencia"
-            subtitle="Tema visual"
-            soon
+            subtitle={THEME_LABELS[theme] ?? "Sistema"}
+            href="/settings/appearance"
           />
         </RowGroup>
 
@@ -143,7 +149,6 @@ export default function SettingsPage() {
             title="Mis datos"
             subtitle="Exportar CSV · Borrar historial"
             href="/settings/data"
-            soon
           />
         </RowGroup>
 
@@ -153,8 +158,8 @@ export default function SettingsPage() {
           <SettingsRow
             icon="ℹ️"
             title="Sobre Macro Tracker"
-            subtitle="Versión, créditos"
-            soon
+            subtitle="v1.0.0 · Créditos"
+            href="/settings/about"
           />
         </RowGroup>
       </div>

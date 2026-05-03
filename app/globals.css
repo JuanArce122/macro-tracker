@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+/* Clase .dark para modo oscuro controlado por el usuario (o Sistema) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f9fafb;
   --foreground: #111827;
+}
+
+/* Modo oscuro via clase .dark en <html> */
+html.dark {
+  --background: #111827;
+  --foreground: #f9fafb;
 }
 
 @theme inline {
@@ -16,13 +25,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, sans-serif;
   -webkit-tap-highlight-color: transparent;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #111827;
-    --foreground: #f9fafb;
-  }
 }
 
 * {

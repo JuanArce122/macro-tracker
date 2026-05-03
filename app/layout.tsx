@@ -36,6 +36,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} h-full`}>
+      <head>
+        {/* Aplicar clase .dark antes de que React hidrate para evitar flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="h-full bg-gray-100 antialiased">
         <SessionProvider>
           <ServiceWorkerRegistration />
