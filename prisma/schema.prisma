@@ -8,12 +8,23 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  meals        Meal[]
-  goals        Goal[]
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  passwordHash  String
+  createdAt     DateTime @default(now())
+
+  // Perfil
+  name          String?
+  avatarEmoji   String?
+  age           Int?
+  sex           String?  // "male" | "female"
+  weightKg      Float?
+  heightCm      Float?
+  activityLevel String?  // "sedentary" | "light" | "moderate" | "active" | "very_active"
+  fitnessGoal   String?  // "lose" | "maintain" | "gain"
+
+  meals         Meal[]
+  goals         Goal[]
 }
 
 model Meal {

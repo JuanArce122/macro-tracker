@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import { format, addDays, subDays, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
-export default function DayHeader({ date }: { date: string }) {
+type Profile = { name: string | null; avatarEmoji: string | null } | null;
+
+function greeting(name: string | null): string {
+  const h = new Date().getHours();
+  const saludo = h < 12 ? "Buenos días" : h < 19 ? "Buenas tardes" : "Buenas noches";
+  return name ? `${saludo}, ${name.split(" ")[0]}` : saludo;
+}
+
+export default function DayHeader({ date, profile }: { date: string; profile?: Profile }) {
   const router = useRouter();
   const parsed = parseISO(date);
 
@@ -29,11 +37,23 @@ export default function DayHeader({ date }: { date: string }) {
       </button>
 
       <div className="text-center">
-        <p className={`font-semibold text-base capitalize ${isTodayDate ? "text-emerald-600" : "text-gray-800 dark:text-gray-100"}`}>
-          {label}
-        </p>
-        {!isTodayDate && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">{format(parsed, "yyyy")}</p>
+        {isTodayDate && profile !== undefined ? (
+          <>
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+              <span>{profile?.avatarEmoji ?? "🙂"}</span>
+              <span>{greeting(profile?.name ?? null)}</span>
+            </p>
+            <p className="font-semibold text-base capitalize text-emerald-600">{label}</p>
+          </>
+        ) : (
+          <>
+            <p className={`font-semibold text-base capitalize ${isTodayDate ? "text-emerald-600" : "text-gray-800 dark:text-gray-100"}`}>
+              {label}
+            </p>
+            {!isTodayDate && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">{format(parsed, "yyyy")}</p>
+            )}
+          </>
         )}
       </div>
 
