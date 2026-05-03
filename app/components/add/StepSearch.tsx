@@ -16,10 +16,11 @@ async function registerUse(foodId: number) {
 type Props = {
   onResult: (result: AnalysisResult) => void;
   onBack: () => void;
+  initialQuery?: string;
 };
 
-export default function StepSearch({ onResult, onBack }: Props) {
-  const [query, setQuery] = useState("");
+export default function StepSearch({ onResult, onBack, initialQuery = "" }: Props) {
+  const [query, setQuery] = useState(initialQuery);
   const [selected, setSelected] = useState<FoodWithSource | null>(null);
   const [weightG, setWeightG] = useState<string>("");
   const [units, setUnits] = useState<number>(1);

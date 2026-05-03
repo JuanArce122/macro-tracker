@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import DayHeader from "@/app/components/DayHeader";
 import MacroSummary from "@/app/components/MacroSummary";
 import MealList from "@/app/components/MealList";
-import AddMealButton from "@/app/components/AddMealButton";
+import QuickAddFAB from "@/app/components/QuickAddFAB";
 import BottomNav from "@/app/components/BottomNav";
 
 async function getMeals(userId: number, date: string) {
@@ -60,9 +60,9 @@ export default async function DayPage({
       <DayHeader date={date} profile={profile} />
       <div className="flex-1 overflow-y-auto">
         <MacroSummary totals={totals} goals={goals} />
-        <AddMealButton date={date} />
         <MealList meals={meals} date={date} />
       </div>
+      <QuickAddFAB date={date} />
       <BottomNav />
     </div>
   );

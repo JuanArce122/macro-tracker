@@ -74,6 +74,7 @@ type Props = {
   result: AnalysisResult;
   date: string;
   onBack: () => void;
+  onSaved?: () => void;
 };
 
 function todayString() {
@@ -114,7 +115,7 @@ function FoodDropdown({ query, onSelect }: { query: string; onSelect: (food: Foo
   );
 }
 
-export default function StepConfirm({ result, date: _date, onBack }: Props) {
+export default function StepConfirm({ result, date: _date, onBack, onSaved }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -293,6 +294,7 @@ export default function StepConfirm({ result, date: _date, onBack }: Props) {
       }
 
       setSaved(true);
+      onSaved?.();
       setTimeout(() => {
         router.push(`/day/${selectedDate}`);
         router.refresh();

@@ -175,7 +175,7 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
         <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
           <span className="text-5xl mb-3">🍽️</span>
           <p className="text-gray-500 dark:text-gray-400 font-medium">Sin comidas registradas</p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Toca el botón verde para agregar</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Toca el <span className="text-emerald-500 font-semibold">+</span> para agregar</p>
         </div>
         {toast && <Toast {...toast} onDismiss={dismissToast} />}
       </>

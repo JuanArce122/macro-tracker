@@ -23,7 +23,7 @@ export default function BottomNav() {
   const isSettings = pathname.startsWith("/settings");
 
   return (
-    <nav className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-around h-16 z-10">
+    <nav className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-around z-10" style={{ height: "calc(4rem + env(safe-area-inset-bottom))", paddingBottom: "env(safe-area-inset-bottom)" }}>
       <Link href={`/day/${today()}`}
         className={`flex flex-col items-center gap-0.5 text-xs px-6 py-2 ${isDay ? "text-emerald-600" : "text-gray-400 dark:text-gray-500"}`}>
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
