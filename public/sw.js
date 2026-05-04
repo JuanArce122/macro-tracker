@@ -1,4 +1,4 @@
-const CACHE_NAME = "macro-tracker-v3";
+const CACHE_NAME = "macro-tracker-v4";
 const STATIC_ASSETS = ["/", "/history", "/settings"];
 
 // ─── Instalación ──────────────────────────────────────────────────────────────
