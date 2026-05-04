@@ -16,11 +16,11 @@ async function registerUse(foodId: number) {
 type Props = {
   onResult: (result: AnalysisResult) => void;
   onBack: () => void;
-  onCamera?: () => void;
+  onPhotoSelected?: (file: File) => void;
   initialQuery?: string;
 };
 
-export default function StepSearch({ onResult, onBack, onCamera, initialQuery = "" }: Props) {
+export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQuery = "" }: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [selected, setSelected] = useState<FoodWithSource | null>(null);
   const [weightG, setWeightG] = useState<string>("");
@@ -137,7 +137,7 @@ export default function StepSearch({ onResult, onBack, onCamera, initialQuery = 
         <div className="w-16" />
       </div>
 
-      {/* Buscador + botón cámara */}
+      {/* Buscador + botones foto */}
       <div className="flex items-center gap-2 mb-3">
         <div className="relative flex-1">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -166,18 +166,50 @@ export default function StepSearch({ onResult, onBack, onCamera, initialQuery = 
           )}
         </div>
 
-        {/* Botón cámara */}
-        {onCamera && (
-          <button
-            onClick={onCamera}
-            title="Foto con IA"
-            className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+        {/* Botón cámara — label directo sobre input */}
+        {onPhotoSelected && (
+          <label
+            title="Abrir cámara"
+            className="w-11 h-11 flex-shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center cursor-pointer active:bg-emerald-200 dark:active:bg-emerald-800/60 transition-colors"
           >
-            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onPhotoSelected(file);
+                e.target.value = "";
+              }}
+            />
+            <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-          </button>
+          </label>
+        )}
+
+        {/* Botón galería — label directo sobre input */}
+        {onPhotoSelected && (
+          <label
+            title="Subir desde galería"
+            className="w-11 h-11 flex-shrink-0 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center cursor-pointer active:bg-violet-200 dark:active:bg-violet-800/60 transition-colors"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onPhotoSelected(file);
+                e.target.value = "";
+              }}
+            />
+            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </label>
         )}
       </div>
 

@@ -19,6 +19,12 @@ export default function AddMealPage({
 
   const [step, setStep] = useState<Step>("search");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  function handlePhotoSelected(file: File) {
+    setPendingFile(file);
+    setStep("camera");
+  }
 
   function handleResult(r: AnalysisResult) {
     setResult(r);
@@ -32,14 +38,15 @@ export default function AddMealPage({
           <StepSearch
             onResult={handleResult}
             onBack={() => router.push(`/day/${date}`)}
-            onCamera={() => setStep("camera")}
+            onPhotoSelected={handlePhotoSelected}
           />
         )}
         {step === "camera" && (
           <StepCamera
             onResult={handleResult}
-            onBack={() => setStep("search")}
-            onSwitchToSearch={() => setStep("search")}
+            onBack={() => { setPendingFile(null); setStep("search"); }}
+            onSwitchToSearch={() => { setPendingFile(null); setStep("search"); }}
+            initialFile={pendingFile ?? undefined}
           />
         )}
         {step === "confirm" && result && (

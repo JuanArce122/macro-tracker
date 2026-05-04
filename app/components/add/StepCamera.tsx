@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export type MealItem = {
   nombre: string;
@@ -25,6 +25,7 @@ type Props = {
   onResult: (result: AnalysisResult) => void;
   onBack: () => void;
   onSwitchToSearch?: () => void;
+  initialFile?: File;
 };
 
 // Normaliza orientación (EXIF) y redimensiona vía canvas
@@ -55,7 +56,7 @@ function normalizeImage(file: File): Promise<{ dataUrl: string; base64: string }
   });
 }
 
-export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props) {
+export default function StepCamera({ onResult, onBack, onSwitchToSearch, initialFile }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -63,6 +64,25 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
   const [mimeType] = useState<string>("image/jpeg");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+
+  // Si llega una foto pre-seleccionada, procesarla directamente
+  useEffect(() => {
+    if (!initialFile) return;
+    if (initialFile.size > 15 * 1024 * 1024) {
+      setError("La imagen es demasiado grande (máx. 15 MB). Elige otra.");
+      return;
+    }
+    setProcessing(true);
+    setError(null);
+    normalizeImage(initialFile)
+      .then(({ dataUrl, base64 }) => {
+        setPreviewUrl(dataUrl);
+        setImageBase64(base64);
+      })
+      .catch(() => setError("No se pudo leer la imagen. Intenta con otra."))
+      .finally(() => setProcessing(false));
+  }, [initialFile]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -139,6 +159,14 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
     });
   }
 
+  function clearPhoto() {
+    setPreviewUrl(null);
+    setImageBase64("");
+    setError(null);
+    if (cameraRef.current) cameraRef.current.value = "";
+    if (galleryRef.current) galleryRef.current.value = "";
+  }
+
   return (
     <div className="flex flex-col flex-1 p-5">
       <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm mb-6 -ml-1">
@@ -150,22 +178,27 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
 
       <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Foto con IA</h1>
 
-      {/* Inputs ocultos */}
+      {/* Inputs ocultos — solo usados si no hay initialFile */}
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
       <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
-      {previewUrl ? (
+      {/* Estado: procesando foto inicial */}
+      {processing && (
+        <div className="flex items-center justify-center h-36 mb-4">
+          <svg className="w-7 h-7 text-emerald-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+        </div>
+      )}
+
+      {/* Preview de la foto */}
+      {!processing && previewUrl && (
         <div className="relative mb-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={previewUrl} alt="Preview" className="w-full max-h-64 object-cover rounded-2xl" />
           <button
-            onClick={() => {
-              setPreviewUrl(null);
-              setImageBase64("");
-              setError(null);
-              if (cameraRef.current) cameraRef.current.value = "";
-              if (galleryRef.current) galleryRef.current.value = "";
-            }}
+            onClick={clearPhoto}
             className="absolute top-2 right-2 bg-black/40 text-white rounded-full p-1.5"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -173,7 +206,10 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
             </svg>
           </button>
         </div>
-      ) : (
+      )}
+
+      {/* Selector cámara/galería — solo si no hay foto y no hay initialFile */}
+      {!processing && !previewUrl && !initialFile && (
         <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={() => cameraRef.current?.click()}
@@ -192,6 +228,7 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
         </div>
       )}
 
+      {/* Errores */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-4 mb-4 flex flex-col gap-3">
           <div className="flex items-start gap-2">
@@ -228,7 +265,7 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch }: Props
 
       <button
         onClick={handleAnalyze}
-        disabled={!imageBase64 || loading}
+        disabled={!imageBase64 || loading || processing}
         className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-2xl py-4 flex items-center justify-center gap-2 transition-colors mt-auto"
       >
         {loading ? (

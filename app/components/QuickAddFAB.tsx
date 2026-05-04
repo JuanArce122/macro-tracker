@@ -10,6 +10,7 @@ type Step = "closed" | "camera" | "search" | "confirm";
 export default function QuickAddFAB({ date }: { date: string }) {
   const [step, setStep] = useState<Step>("closed");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   function openSearch() {
     setStep("search");
@@ -18,6 +19,12 @@ export default function QuickAddFAB({ date }: { date: string }) {
   function closeAll() {
     setStep("closed");
     setResult(null);
+    setPendingFile(null);
+  }
+
+  function handlePhotoSelected(file: File) {
+    setPendingFile(file);
+    setStep("camera");
   }
 
   function handleResult(r: AnalysisResult) {
@@ -71,14 +78,15 @@ export default function QuickAddFAB({ date }: { date: string }) {
             <StepSearch
               onResult={handleResult}
               onBack={closeAll}
-              onCamera={() => setStep("camera")}
+              onPhotoSelected={handlePhotoSelected}
             />
           )}
           {step === "camera" && (
             <StepCamera
               onResult={handleResult}
-              onBack={() => setStep("search")}
-              onSwitchToSearch={() => setStep("search")}
+              onBack={() => { setPendingFile(null); setStep("search"); }}
+              onSwitchToSearch={() => { setPendingFile(null); setStep("search"); }}
+              initialFile={pendingFile ?? undefined}
             />
           )}
           {step === "confirm" && result && (
