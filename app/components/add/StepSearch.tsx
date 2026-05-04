@@ -16,10 +16,11 @@ async function registerUse(foodId: number) {
 type Props = {
   onResult: (result: AnalysisResult) => void;
   onBack: () => void;
+  onCamera?: () => void;
   initialQuery?: string;
 };
 
-export default function StepSearch({ onResult, onBack, initialQuery = "" }: Props) {
+export default function StepSearch({ onResult, onBack, onCamera, initialQuery = "" }: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [selected, setSelected] = useState<FoodWithSource | null>(null);
   const [weightG, setWeightG] = useState<string>("");
@@ -44,7 +45,6 @@ export default function StepSearch({ onResult, onBack, initialQuery = "" }: Prop
   }, []);
 
   const { results: dbResults, loading: searching } = useFoodSearch(query);
-  // Combinar resultados de DB con los alimentos custom del usuario (localStorage)
   const customMatches = customFoods.filter((f) => {
     if (!query.trim()) return false;
     return query.toLowerCase().split(/\s+/).every((w) => f.nombre.toLowerCase().includes(w));
@@ -61,7 +61,6 @@ export default function StepSearch({ onResult, onBack, initialQuery = "" }: Prop
     setQuery(food.nombre);
     setWeightG("");
     setUnits(1);
-    // Registrar uso para actualizar recientes y frecuentes
     registerUse(food.id);
   }
 
@@ -125,38 +124,58 @@ export default function StepSearch({ onResult, onBack, initialQuery = "" }: Prop
 
   return (
     <div className="flex flex-col flex-1 p-5">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm mb-6 -ml-1">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Atrás
-      </button>
-
-      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-5">Buscar alimento</h1>
-
-      {/* Buscador */}
-      <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          type="text"
-          placeholder="ej: pechuga de pollo cruda"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
-          autoFocus
-          className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-        />
-        {searching && (
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm -ml-1">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-        )}
-        {query && (
-          <button onClick={() => { setQuery(""); setSelected(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          Cancelar
+        </button>
+        <h1 className="text-base font-bold text-gray-800 dark:text-gray-100">Agregar comida</h1>
+        {/* Placeholder para centrar el título */}
+        <div className="w-16" />
+      </div>
+
+      {/* Buscador + botón cámara */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="ej: pechuga de pollo cruda"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
+            autoFocus
+            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+          {searching && (
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+          )}
+          {query && !searching && (
+            <button onClick={() => { setQuery(""); setSelected(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Botón cámara */}
+        {onCamera && (
+          <button
+            onClick={onCamera}
+            title="Foto con IA"
+            className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+          >
+            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
         )}
@@ -182,6 +201,20 @@ export default function StepSearch({ onResult, onBack, initialQuery = "" }: Prop
               <FoodRow key={food.id} food={food} isCustom={customIds.has(food.id)} />
             ))
           )}
+        </div>
+      )}
+
+      {/* Estado vacío: sin query, sin recientes, sin selección */}
+      {!query.trim() && !selected && recentFoods.length === 0 && (
+        <div className="flex flex-col items-center justify-center flex-1 gap-3 pb-10">
+          <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <svg className="w-7 h-7 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <p className="text-sm text-gray-400 dark:text-gray-500 text-center">
+            Escribe para buscar un alimento
+          </p>
         </div>
       )}
 
