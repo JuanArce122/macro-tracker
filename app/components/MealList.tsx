@@ -214,10 +214,13 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
         })}
       </div>
 
-      <EditMealSheet
-        meal={editingMeal}
-        onClose={() => setEditingMeal(null)}
-      />
+      {editingMeal && (
+        <EditMealSheet
+          key={editingMeal.id}
+          meal={editingMeal}
+          onClose={() => setEditingMeal(null)}
+        />
+      )}
 
       {toast && <Toast {...toast} onDismiss={dismissToast} />}
     </>

@@ -76,21 +76,43 @@ const inputClass = "w-full bg-bg-secondary border border-border rounded-xl text-
 const inputClassSmall = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums";
 
 type Props = {
-  meal: Meal | null;
+  meal: Meal;
   onClose: () => void;
 };
+
+function parseItemsFromMeal(meal: Meal): EditableItem[] {
+  if (!meal.items) return [];
+  try {
+    const parsed: MealItem[] = JSON.parse(meal.items);
+    return makeEditable(parsed);
+  } catch {
+    return [];
+  }
+}
 
 export default function EditMealSheet({ meal, onClose }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [category, setCategory] = useState<Category>("snack");
-  const [name, setName] = useState("");
-  const [items, setItems] = useState<EditableItem[]>([]);
+  // Estados inicializados directamente desde el prop. El parent monta
+  // este componente con key={meal.id}, así que cada meal arranca con
+  // estado fresco. No se necesita sync prop→state via useEffect.
+  const [category, setCategory] = useState<Category>(meal.category as Category);
+  const [name, setName] = useState(meal.name);
+  const [items, setItems] = useState<EditableItem[]>(() => parseItemsFromMeal(meal));
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [nameSearch, setNameSearch] = useState<{ id: string; query: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Modo sin ítems (comidas viejas sin segregación)
+  const [weightG, setWeightG] = useState(String(meal.weightG));
+  const [calories, setCalories] = useState(String(meal.calories));
+  const [protein, setProtein] = useState(String(meal.protein));
+  const [carbs, setCarbs] = useState(String(meal.carbs));
+  const [fat, setFat] = useState(String(meal.fat));
+
+  const hasItems = items.length > 0;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -126,40 +148,6 @@ export default function EditMealSheet({ meal, onClose }: Props) {
     );
     setNameSearch(null);
   }
-
-  // Modo sin ítems (comidas viejas sin segregación)
-  const [weightG, setWeightG] = useState("");
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
-
-  const hasItems = items.length > 0;
-
-  useEffect(() => {
-    if (!meal) return;
-    setCategory(meal.category as Category);
-    setName(meal.name);
-    setError(null);
-    setExpandedId(null);
-
-    if (meal.items) {
-      try {
-        const parsed: MealItem[] = JSON.parse(meal.items);
-        setItems(makeEditable(parsed));
-      } catch {
-        setItems([]);
-      }
-    } else {
-      setItems([]);
-    }
-
-    setWeightG(String(meal.weightG));
-    setCalories(String(meal.calories));
-    setProtein(String(meal.protein));
-    setCarbs(String(meal.carbs));
-    setFat(String(meal.fat));
-  }, [meal]);
 
   function updateItem(id: string, field: keyof MealItem, value: string | number) {
     setItems((prev) =>
@@ -262,7 +250,6 @@ export default function EditMealSheet({ meal, onClose }: Props) {
   }
 
   async function handleSave() {
-    if (!meal) return;
     setSaving(true);
     setError(null);
 
@@ -314,8 +301,6 @@ export default function EditMealSheet({ meal, onClose }: Props) {
       setSaving(false);
     }
   }
-
-  if (!meal) return null;
 
   const totals = hasItems ? calcTotals(items) : null;
 

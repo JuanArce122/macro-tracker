@@ -14,12 +14,13 @@ const MACRO_FIELDS: { key: keyof Goals; label: string; unit: string; textColor: 
   { key: "fat",      label: "Grasa",         unit: "g",    textColor: "text-macro-fat" },
 ];
 
+type SaveStatus = "idle" | "saving" | "saved";
+
 export default function GoalsPage() {
   const router = useRouter();
   const [goals, setGoals] = useState<Goals>({ calories: 2000, protein: 150, carbs: 200, fat: 65 });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [status, setStatus] = useState<SaveStatus>("idle");
 
   useEffect(() => {
     fetch("/api/goals")
@@ -28,24 +29,43 @@ export default function GoalsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Auto-save con debounce de 700ms
+  // Auto-save con debounce de 700ms. Todos los setStatus ocurren dentro
+  // de callbacks async (setTimeout, .then/.catch), nunca sync en el
+  // body del efecto.
   useEffect(() => {
     if (loading) return;
-    setSaved(false);
-    const t = setTimeout(async () => {
-      setSaving(true);
-      await fetch("/api/goals", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(goals),
-      });
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+
+    let cancelled = false;
+    let clearTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const debounceTimer = setTimeout(async () => {
+      setStatus("saving");
+      try {
+        await fetch("/api/goals", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(goals),
+        });
+        if (cancelled) return;
+        setStatus("saved");
+        clearTimer = setTimeout(() => {
+          if (!cancelled) setStatus("idle");
+        }, 2000);
+      } catch {
+        if (!cancelled) setStatus("idle");
+      }
     }, 700);
-    return () => clearTimeout(t);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(debounceTimer);
+      if (clearTimer) clearTimeout(clearTimer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goals]);
+
+  const saving = status === "saving";
+  const saved = status === "saved";
 
   const pPct = Math.round((goals.protein * 4 / (goals.calories || 1)) * 100);
   const cPct = Math.round((goals.carbs   * 4 / (goals.calories || 1)) * 100);

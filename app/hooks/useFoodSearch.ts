@@ -34,16 +34,21 @@ export function dbFoodToFood(f: DBFood): Food {
 
 export type FoodWithSource = Food & { source: string };
 
+const EMPTY_RESULTS: FoodWithSource[] = [];
+
 export function useFoodSearch(query: string, debounceMs = 300) {
-  const [results, setResults] = useState<FoodWithSource[]>([]);
+  // Estado interno: SOLO se popula cuando hay un query buscable. El reset
+  // a [] cuando el query es muy corto se hace de forma derivada al
+  // devolver el valor al consumidor (no se llama setResults([])).
+  const [results, setResults] = useState<FoodWithSource[]>(EMPTY_RESULTS);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const trimmed = query.trim();
+  const isQueryable = trimmed.length >= 2;
+
   useEffect(() => {
-    if (!query.trim() || query.trim().length < 2) {
-      setResults([]);
-      return;
-    }
+    if (!isQueryable) return;
 
     if (timerRef.current) clearTimeout(timerRef.current);
 
@@ -68,7 +73,10 @@ export function useFoodSearch(query: string, debounceMs = 300) {
     }, debounceMs);
 
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [query, debounceMs]);
+  }, [query, isQueryable, debounceMs]);
 
-  return { results, loading };
+  return {
+    results: isQueryable ? results : EMPTY_RESULTS,
+    loading: isQueryable && loading,
+  };
 }

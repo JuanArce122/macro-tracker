@@ -67,25 +67,39 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
   const [mimeType] = useState<string>("image/jpeg");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
 
-  // Si llega una foto pre-seleccionada, procesarla directamente
+  // Validación derivada del prop: si el archivo inicial es demasiado
+  // grande, mostramos el error directamente sin pasar por state.
+  const initialFileTooLarge = !!initialFile && initialFile.size > 15 * 1024 * 1024;
+
+  // Error a mostrar: el de tamaño tiene prioridad (derivado del prop);
+  // los demás vienen del state (normalización async, fetch a Gemini, etc.).
+  const displayError = initialFileTooLarge
+    ? "La imagen es demasiado grande (máx. 15 MB). Elige otra."
+    : error;
+
+  // Procesando: tenemos foto inicial, aún sin preview ni error. Sin state.
+  const processing = !!initialFile && !previewUrl && !displayError;
+
+  // Procesado async de la foto pre-seleccionada. Sin setState sync en el
+  // body del efecto: solo en los callbacks de .then/.catch.
   useEffect(() => {
-    if (!initialFile) return;
-    if (initialFile.size > 15 * 1024 * 1024) {
-      setError("La imagen es demasiado grande (máx. 15 MB). Elige otra.");
-      return;
-    }
-    setProcessing(true);
-    setError(null);
+    if (!initialFile || initialFileTooLarge) return;
+
+    let cancelled = false;
     normalizeImage(initialFile)
       .then(({ dataUrl, base64 }) => {
+        if (cancelled) return;
         setPreviewUrl(dataUrl);
         setImageBase64(base64);
       })
-      .catch(() => setError("No se pudo leer la imagen. Intenta con otra."))
-      .finally(() => setProcessing(false));
-  }, [initialFile]);
+      .catch(() => {
+        if (cancelled) return;
+        setError("No se pudo leer la imagen. Intenta con otra.");
+      });
+
+    return () => { cancelled = true; };
+  }, [initialFile, initialFileTooLarge]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -229,13 +243,13 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
       )}
 
       {/* Errores */}
-      {error && (
+      {displayError && (
         <div className="bg-bg-secondary border border-border rounded-xl p-4 mb-4 flex flex-col gap-3">
           <div className="flex items-start gap-2.5">
             <span className="text-accent-warm flex-shrink-0 mt-0.5">
               <Icon icon={AlertTriangle} size={18} />
             </span>
-            <p className="text-text-primary text-sm leading-snug">{error}</p>
+            <p className="text-text-primary text-sm leading-snug">{displayError}</p>
           </div>
           {imageBase64 && (
             <div className="flex flex-col gap-2 border-t border-border pt-3">
