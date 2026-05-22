@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { Target, Salad, Bell, Palette, BarChart3, Info } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
 import { useTheme } from "@/app/hooks/useTheme";
@@ -145,13 +146,13 @@ export default function SettingsPage() {
         <SectionLabel label="Nutrición" />
         <RowGroup>
           <SettingsRow
-            icon="🎯"
+            icon={Target}
             title="Metas diarias"
             subtitle={goalsSubtitle}
             href="/settings/goals"
           />
           <SettingsRow
-            icon="🥗"
+            icon={Salad}
             title="Mis alimentos"
             subtitle={foodsSubtitle}
             href="/settings/foods"
@@ -162,13 +163,13 @@ export default function SettingsPage() {
         <SectionLabel label="Preferencias" />
         <RowGroup>
           <SettingsRow
-            icon="🔔"
+            icon={Bell}
             title="Notificaciones"
             subtitle={notifSubtitle}
             href="/settings/notifications"
           />
           <SettingsRow
-            icon="🎨"
+            icon={Palette}
             title="Apariencia"
             subtitle={THEME_LABELS[theme] ?? "Sistema"}
             href="/settings/appearance"
@@ -179,7 +180,7 @@ export default function SettingsPage() {
         <SectionLabel label="Privacidad" />
         <RowGroup>
           <SettingsRow
-            icon="📊"
+            icon={BarChart3}
             title="Mis datos"
             subtitle="Exportar CSV · Borrar historial"
             href="/settings/data"
@@ -190,7 +191,7 @@ export default function SettingsPage() {
         <SectionLabel label="Info" />
         <RowGroup>
           <SettingsRow
-            icon="ℹ️"
+            icon={Info}
             title="Sobre Macro Tracker"
             subtitle="v1.0.0 · Créditos"
             href="/settings/about"

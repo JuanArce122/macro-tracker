@@ -1,5 +1,8 @@
 "use client";
 
+import { Camera, Search } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
+
 type Props = {
   onSelect: (mode: "camera" | "search") => void;
   onBack: () => void;
@@ -23,8 +26,8 @@ export default function StepMode({ onSelect, onBack }: Props) {
           onClick={() => onSelect("camera")}
           className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-left"
         >
-          <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-3xl">📷</span>
+          <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center flex-shrink-0 text-emerald-600 dark:text-emerald-400">
+            <Icon icon={Camera} size={28} />
           </div>
           <div>
             <p className="font-semibold text-gray-800 dark:text-gray-100">Foto con IA</p>
@@ -39,8 +42,8 @@ export default function StepMode({ onSelect, onBack }: Props) {
           onClick={() => onSelect("search")}
           className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-left"
         >
-          <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-3xl">🔍</span>
+          <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400">
+            <Icon icon={Search} size={28} />
           </div>
           <div>
             <p className="font-semibold text-gray-800 dark:text-gray-100">Buscar alimento</p>

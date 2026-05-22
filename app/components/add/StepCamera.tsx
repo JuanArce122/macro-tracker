@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { Camera, Image as ImageIcon, AlertTriangle, Sparkles } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 export type MealItem = {
   nombre: string;
@@ -213,17 +215,17 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
         <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={() => cameraRef.current?.click()}
-            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-gray-700 dark:text-gray-200"
           >
-            <span className="text-4xl">📷</span>
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Cámara</span>
+            <Icon icon={Camera} size={32} />
+            <span className="text-sm font-semibold">Cámara</span>
           </button>
           <button
             onClick={() => galleryRef.current?.click()}
-            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+            className="flex flex-col items-center justify-center gap-3 h-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-gray-700 dark:text-gray-200"
           >
-            <span className="text-4xl">🖼️</span>
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Librería</span>
+            <Icon icon={ImageIcon} size={32} />
+            <span className="text-sm font-semibold">Librería</span>
           </button>
         </div>
       )}
@@ -232,7 +234,9 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-4 mb-4 flex flex-col gap-3">
           <div className="flex items-start gap-2">
-            <span className="text-lg flex-shrink-0">⚠️</span>
+            <span className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">
+              <Icon icon={AlertTriangle} size={18} />
+            </span>
             <p className="text-red-600 dark:text-red-400 text-sm leading-snug">{error}</p>
           </div>
           {imageBase64 && (
@@ -277,7 +281,10 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
             Analizando con IA…
           </>
         ) : (
-          <>✨ Analizar con IA</>
+          <>
+            <Icon icon={Sparkles} size={20} />
+            Analizar con IA
+          </>
         )}
       </button>
     </div>

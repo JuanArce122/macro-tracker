@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { Monitor, Sun, Moon } from "lucide-react";
 import { useTheme, type Theme } from "@/app/hooks/useTheme";
+import Icon from "@/app/components/ui/Icon";
 
-const OPTIONS: { value: Theme; label: string; emoji: string; desc: string }[] = [
-  { value: "system", label: "Sistema",  emoji: "⚙️", desc: "Sigue la preferencia del dispositivo" },
-  { value: "light",  label: "Claro",    emoji: "☀️", desc: "Interfaz siempre en modo claro" },
-  { value: "dark",   label: "Oscuro",   emoji: "🌙", desc: "Interfaz siempre en modo oscuro" },
+const OPTIONS: { value: Theme; label: string; icon: LucideIcon; desc: string }[] = [
+  { value: "system", label: "Sistema",  icon: Monitor, desc: "Sigue la preferencia del dispositivo" },
+  { value: "light",  label: "Claro",    icon: Sun,     desc: "Interfaz siempre en modo claro" },
+  { value: "dark",   label: "Oscuro",   icon: Moon,    desc: "Interfaz siempre en modo oscuro" },
 ];
 
 export default function AppearancePage() {
@@ -31,13 +34,15 @@ export default function AppearancePage() {
         </p>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
-          {OPTIONS.map(({ value, label, emoji, desc }) => (
+          {OPTIONS.map(({ value, label, icon, desc }) => (
             <button
               key={value}
               onClick={() => setTheme(value)}
               className="w-full flex items-center gap-4 px-4 py-4 text-left active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors"
             >
-              <span className="text-2xl w-9 text-center flex-shrink-0">{emoji}</span>
+              <span className="w-9 flex items-center justify-center text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <Icon icon={icon} size={22} />
+              </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{label}</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{desc}</p>

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2, AlertTriangle } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type Modal = "history" | "account" | null;
 
@@ -273,7 +275,9 @@ export default function DataPage() {
               onClick={() => setModal("history")}
               className="w-full flex items-center gap-3.5 px-4 py-4 text-left active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
             >
-              <span className="text-xl w-8 text-center flex-shrink-0">🗑️</span>
+              <span className="w-8 flex items-center justify-center text-red-500 flex-shrink-0">
+                <Icon icon={Trash2} size={20} />
+              </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-red-500">Borrar historial</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Elimina todas tus comidas registradas</p>
@@ -288,7 +292,9 @@ export default function DataPage() {
               onClick={() => setModal("account")}
               className="w-full flex items-center gap-3.5 px-4 py-4 text-left active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
             >
-              <span className="text-xl w-8 text-center flex-shrink-0">⚠️</span>
+              <span className="w-8 flex items-center justify-center text-red-500 flex-shrink-0">
+                <Icon icon={AlertTriangle} size={20} />
+              </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-red-500">Eliminar mi cuenta</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Borra tu cuenta y todos tus datos permanentemente</p>

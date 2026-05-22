@@ -4,7 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { UtensilsCrossed, CalendarDays } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
+import Icon from "@/app/components/ui/Icon";
 
 type DaySummary = {
   date: string;
@@ -45,8 +47,8 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
             // eslint-disable-next-line @next/next/no-img-element
             <img src={meal.imageUrl} alt={meal.name} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-3xl">🍽️</span>
+            <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
+              <Icon icon={UtensilsCrossed} size={32} />
             </div>
           )}
           <div className="flex-1">
@@ -176,8 +178,8 @@ export default function HistoryPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={meal.imageUrl} alt={meal.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xl">🍽️</span>
+                      <div className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
+                        <Icon icon={UtensilsCrossed} size={20} />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -241,7 +243,9 @@ export default function HistoryPage() {
             )}
             {!loading && days.length === 0 && (
               <div className="flex flex-col items-center py-16 text-center">
-                <span className="text-5xl mb-3">📅</span>
+                <span className="text-gray-300 dark:text-gray-600 mb-3">
+                  <Icon icon={CalendarDays} size={48} />
+                </span>
                 <p className="text-gray-500 font-medium">Sin registros todavía</p>
                 <p className="text-gray-400 text-sm mt-1">Agrega comidas para verlas aquí</p>
               </div>

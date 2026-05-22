@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { Sunrise, Sun, Moon, Apple, UtensilsCrossed } from "lucide-react";
 import EditMealSheet from "./EditMealSheet";
 import Toast from "./Toast";
+import Icon from "@/app/components/ui/Icon";
 
 type Meal = {
   id: number;
@@ -26,11 +29,11 @@ type ToastState = {
   action?: { label: string; onClick: () => void };
 } | null;
 
-const CATEGORIES = [
-  { key: "desayuno", label: "Desayuno", emoji: "🌅" },
-  { key: "almuerzo", label: "Almuerzo", emoji: "☀️" },
-  { key: "cena", label: "Cena", emoji: "🌙" },
-  { key: "snack", label: "Snack", emoji: "🍎" },
+const CATEGORIES: { key: string; label: string; icon: LucideIcon }[] = [
+  { key: "desayuno", label: "Desayuno", icon: Sunrise },
+  { key: "almuerzo", label: "Almuerzo", icon: Sun },
+  { key: "cena",     label: "Cena",     icon: Moon },
+  { key: "snack",    label: "Snack",    icon: Apple },
 ];
 
 function ConfidenceDot({ confidence }: { confidence: number }) {
@@ -61,8 +64,8 @@ function MealItem({
           />
         </div>
       ) : (
-        <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl">🍽️</span>
+        <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
+          <Icon icon={UtensilsCrossed} size={24} />
         </div>
       )}
 
@@ -173,7 +176,9 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
     return (
       <>
         <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-          <span className="text-5xl mb-3">🍽️</span>
+          <span className="text-gray-300 dark:text-gray-600 mb-3">
+            <Icon icon={UtensilsCrossed} size={48} />
+          </span>
           <p className="text-gray-500 dark:text-gray-400 font-medium">Sin comidas registradas</p>
           <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Toca el <span className="text-emerald-500 font-semibold">+</span> para agregar</p>
         </div>
@@ -185,12 +190,14 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
   return (
     <>
       <div className="px-4 pb-4 flex flex-col gap-3">
-        {filled.map(({ key, label, emoji }) => {
+        {filled.map(({ key, label, icon }) => {
           const group = visibleMeals.filter((m) => m.category === key);
           return (
             <div key={key} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-                <span>{emoji}</span>
+                <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">
+                  <Icon icon={icon} size={18} />
+                </span>
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 capitalize">{label}</span>
               </div>
               {group.map((meal) => (

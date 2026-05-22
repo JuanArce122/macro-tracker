@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { EggFried, Salad, UtensilsCrossed, BarChart3, Bell, AlertTriangle, Info } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type ReminderKey = "breakfast" | "lunch" | "dinner" | "summary";
 
@@ -19,11 +22,11 @@ const DEFAULTS: Schedule = {
   summary:   { enabled: false, time: "21:00" },
 };
 
-const LABELS: Record<ReminderKey, { icon: string; title: string; desc: string }> = {
-  breakfast: { icon: "🍳", title: "Desayuno",      desc: "Recuerda registrar tu desayuno" },
-  lunch:     { icon: "🥗", title: "Almuerzo",      desc: "Recuerda registrar tu almuerzo" },
-  dinner:    { icon: "🍽️", title: "Cena",          desc: "Recuerda registrar tu cena" },
-  summary:   { icon: "📊", title: "Resumen diario", desc: "Revisa cómo quedaron tus macros" },
+const LABELS: Record<ReminderKey, { icon: LucideIcon; title: string; desc: string }> = {
+  breakfast: { icon: EggFried,        title: "Desayuno",      desc: "Recuerda registrar tu desayuno" },
+  lunch:     { icon: Salad,           title: "Almuerzo",      desc: "Recuerda registrar tu almuerzo" },
+  dinner:    { icon: UtensilsCrossed, title: "Cena",          desc: "Recuerda registrar tu cena" },
+  summary:   { icon: BarChart3,       title: "Resumen diario", desc: "Revisa cómo quedaron tus macros" },
 };
 
 const STORAGE_KEY = "notification_schedule";
@@ -122,7 +125,9 @@ export default function NotificationsPage() {
         {!granted && !denied && (
           <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
-              <span className="text-2xl flex-shrink-0">🔔</span>
+              <span className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5">
+                <Icon icon={Bell} size={24} />
+              </span>
               <div>
                 <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Activa las notificaciones</p>
                 <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 leading-relaxed">
@@ -150,7 +155,9 @@ export default function NotificationsPage() {
 
         {denied && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50 rounded-2xl p-4 flex items-start gap-3">
-            <span className="text-xl flex-shrink-0">⚠️</span>
+            <span className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
+              <Icon icon={AlertTriangle} size={20} />
+            </span>
             <div>
               <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Notificaciones bloqueadas</p>
               <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
@@ -171,7 +178,9 @@ export default function NotificationsPage() {
         {/* Aviso iOS */}
         {isIOS && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-4 flex items-start gap-3">
-            <span className="text-xl flex-shrink-0">ℹ️</span>
+            <span className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5">
+              <Icon icon={Info} size={20} />
+            </span>
             <div>
               <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">Nota para iPhone / iPad</p>
               <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5 leading-relaxed">
@@ -192,7 +201,9 @@ export default function NotificationsPage() {
               return (
                 <div key={key} className="px-4 py-3.5">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl w-8 text-center flex-shrink-0">{meta.icon}</span>
+                    <span className="w-8 flex items-center justify-center text-gray-500 dark:text-gray-400 flex-shrink-0">
+                      <Icon icon={meta.icon} size={20} />
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{meta.title}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{meta.desc}</p>

@@ -2,18 +2,21 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { Sunrise, Sun, Moon, Apple } from "lucide-react";
 import type { AnalysisResult, MealItem } from "./StepCamera";
 import { calcMacros } from "@/lib/foods";
 import type { Food } from "@/lib/foods";
 import { useFoodSearch } from "@/app/hooks/useFoodSearch";
+import Icon from "@/app/components/ui/Icon";
 
 type Category = "desayuno" | "almuerzo" | "cena" | "snack";
 
-const CATEGORIES: { key: Category; label: string; emoji: string }[] = [
-  { key: "desayuno", label: "Desayuno", emoji: "🌅" },
-  { key: "almuerzo", label: "Almuerzo", emoji: "☀️" },
-  { key: "cena",     label: "Cena",     emoji: "🌙" },
-  { key: "snack",    label: "Snack",    emoji: "🍎" },
+const CATEGORIES: { key: Category; label: string; icon: LucideIcon }[] = [
+  { key: "desayuno", label: "Desayuno", icon: Sunrise },
+  { key: "almuerzo", label: "Almuerzo", icon: Sun },
+  { key: "cena",     label: "Cena",     icon: Moon },
+  { key: "snack",    label: "Snack",    icon: Apple },
 ];
 
 function defaultCategory(): Category {
@@ -331,7 +334,7 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
         <div>
           <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-2">Categoría</label>
           <div className="grid grid-cols-4 gap-2">
-            {CATEGORIES.map(({ key, label, emoji }) => (
+            {CATEGORIES.map(({ key, label, icon }) => (
               <button
                 key={key}
                 onClick={() => setCategory(key)}
@@ -339,7 +342,7 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
                   category === key ? "bg-emerald-500 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                 }`}
               >
-                <span>{emoji}</span>
+                <Icon icon={icon} size={18} />
                 <span>{label}</span>
               </button>
             ))}

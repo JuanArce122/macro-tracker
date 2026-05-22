@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { TrendingDown, Scale, TrendingUp } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type Profile = {
   name: string | null;
@@ -28,10 +31,10 @@ const ACTIVITY_OPTIONS = [
   { value: "very_active",label: "Muy activo", desc: "Entrenamiento 2x/día" },
 ];
 
-const GOAL_OPTIONS = [
-  { value: "lose",     label: "Perder grasa",    emoji: "📉" },
-  { value: "maintain", label: "Mantener peso",   emoji: "⚖️" },
-  { value: "gain",     label: "Ganar músculo",   emoji: "📈" },
+const GOAL_OPTIONS: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "lose",     label: "Perder grasa",    icon: TrendingDown },
+  { value: "maintain", label: "Mantener peso",   icon: Scale },
+  { value: "gain",     label: "Ganar músculo",   icon: TrendingUp },
 ];
 
 export default function ProfilePage() {
@@ -250,7 +253,7 @@ export default function ProfilePage() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 flex flex-col gap-3">
           <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Objetivo principal</p>
           <div className="grid grid-cols-3 gap-2">
-            {GOAL_OPTIONS.map(({ value, label, emoji }) => (
+            {GOAL_OPTIONS.map(({ value, label, icon }) => (
               <button
                 key={value}
                 onClick={() => setFitnessGoal(value)}
@@ -260,7 +263,7 @@ export default function ProfilePage() {
                     : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                 }`}
               >
-                <span className="text-2xl">{emoji}</span>
+                <Icon icon={icon} size={24} />
                 <span className="text-center leading-tight">{label}</span>
               </button>
             ))}

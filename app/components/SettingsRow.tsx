@@ -1,7 +1,9 @@
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   subtitle?: string;
   href?: string;
@@ -12,7 +14,9 @@ type Props = {
 export default function SettingsRow({ icon, title, subtitle, href, soon = false, danger = false }: Props) {
   const inner = (
     <div className={`flex items-center gap-3.5 px-4 py-3.5 ${href && !soon ? "active:bg-gray-50 dark:active:bg-gray-700/50" : ""}`}>
-      <span className="text-xl w-8 text-center flex-shrink-0">{icon}</span>
+      <span className={`w-8 flex items-center justify-center flex-shrink-0 ${danger ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}>
+        <Icon icon={icon} size={20} />
+      </span>
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium ${danger ? "text-red-500" : "text-gray-800 dark:text-gray-100"}`}>
           {title}

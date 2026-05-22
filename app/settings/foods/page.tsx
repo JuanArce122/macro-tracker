@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Salad } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type Food = {
   id: number;
@@ -166,7 +168,9 @@ export default function FoodsPage() {
           <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-12">Cargando…</p>
         ) : foods.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <span className="text-5xl">🥗</span>
+            <span className="text-gray-300 dark:text-gray-600">
+              <Icon icon={Salad} size={48} />
+            </span>
             <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Aún no tienes alimentos guardados</p>
             <p className="text-gray-400 dark:text-gray-500 text-xs max-w-[220px]">
               Agrega tus alimentos habituales para registrarlos rápidamente.
