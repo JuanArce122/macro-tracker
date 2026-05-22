@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Search, X, Camera, Image as ImageIcon, Loader2 } from "lucide-react";
 import { calcMacros, type Food } from "@/lib/foods";
 import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
 import type { AnalysisResult } from "./StepCamera";
+import Button from "@/app/components/ui/Button";
+import Icon from "@/app/components/ui/Icon";
 
 async function registerUse(foodId: number) {
   try {
@@ -70,7 +73,7 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
     if (!isUnitBased && (!weightG || Number(weightG) <= 0)) return;
 
     registerUse(selected.id);
-    const macros = calcMacros(selected, effectiveWeight);
+    const macros = calcMacros(selected as Food, effectiveWeight);
     onResult({
       nombrePlato: selected.nombre,
       items: [{
@@ -95,27 +98,25 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
     return (
       <button
         onClick={() => handleSelect(food)}
-        className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-gray-700/50 text-left"
+        className="w-full flex items-center justify-between px-5 py-3 border-b border-border last:border-0 active:bg-bg-tertiary text-left transition-colors duration-200 ease-[var(--ease-editorial)]"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{food.nombre}</p>
+            <p className="text-sm font-medium text-text-primary truncate">{food.nombre}</p>
             {isCustom && (
-              <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">Mío</span>
+              <span className="text-[10px] uppercase tracking-[0.08em] bg-bg-tertiary text-text-secondary font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">Mío</span>
             )}
             {food.source === "openfoodfacts" && (
-              <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">OFF</span>
+              <span className="text-[10px] uppercase tracking-[0.08em] bg-bg-tertiary text-text-secondary font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">OFF</span>
             )}
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+          <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
             {food.gramsPerUnit
               ? `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por ${food.gramsPerUnit}g (1 ${food.unitLabel})`
               : `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por 100g`}
           </p>
         </div>
-        <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        <Icon icon={ChevronRight} size={16} className="text-text-tertiary flex-shrink-0 ml-2" />
       </button>
     );
   }
@@ -123,54 +124,55 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
   const customIds = new Set(customFoods.map((f) => f.id));
 
   return (
-    <div className="flex flex-col flex-1 p-5">
+    <div className="flex flex-col flex-1 p-5 bg-bg-primary">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm -ml-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1 text-text-tertiary active:text-text-primary text-sm -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]"
+        >
+          <Icon icon={ChevronLeft} size={16} />
           Cancelar
         </button>
-        <h1 className="text-base font-bold text-gray-800 dark:text-gray-100">Agregar comida</h1>
-        {/* Placeholder para centrar el título */}
+        <h1 className="font-serif text-xl tracking-[-0.02em] text-text-primary">Agregar comida</h1>
         <div className="w-16" />
       </div>
 
       {/* Buscador + botones foto */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none flex items-center">
+            <Icon icon={Search} size={16} />
+          </span>
           <input
             type="text"
             placeholder="ej: pechuga de pollo cruda"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
             autoFocus
-            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary pl-10 pr-10 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
           />
           {searching && (
-            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary">
+              <Icon icon={Loader2} size={16} className="animate-spin" />
+            </span>
           )}
           {query && !searching && (
-            <button onClick={() => { setQuery(""); setSelected(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button
+              onClick={() => { setQuery(""); setSelected(null); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary active:text-text-primary"
+              aria-label="Limpiar búsqueda"
+            >
+              <Icon icon={X} size={16} />
             </button>
           )}
         </div>
 
-        {/* Botón cámara — label directo sobre input */}
         {onPhotoSelected && (
           <label
             title="Abrir cámara"
-            className="w-11 h-11 flex-shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center cursor-pointer active:bg-emerald-200 dark:active:bg-emerald-800/60 transition-colors"
+            aria-label="Abrir cámara"
+            className="w-11 h-11 flex-shrink-0 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary cursor-pointer active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
             <input
               type="file"
@@ -183,18 +185,15 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
                 e.target.value = "";
               }}
             />
-            <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <Icon icon={Camera} size={18} />
           </label>
         )}
 
-        {/* Botón galería — label directo sobre input */}
         {onPhotoSelected && (
           <label
             title="Subir desde galería"
-            className="w-11 h-11 flex-shrink-0 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center cursor-pointer active:bg-violet-200 dark:active:bg-violet-800/60 transition-colors"
+            aria-label="Subir desde galería"
+            className="w-11 h-11 flex-shrink-0 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary cursor-pointer active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
             <input
               type="file"
@@ -206,17 +205,15 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
                 e.target.value = "";
               }}
             />
-            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <Icon icon={ImageIcon} size={18} />
           </label>
         )}
       </div>
 
       {/* Recientes */}
       {showRecents && (
-        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-4">
-          <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 px-4 py-2.5 border-b border-gray-50 dark:border-gray-700">Recientes</p>
+        <div className="bg-bg-secondary border border-border rounded-xl overflow-hidden mb-4">
+          <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary px-5 py-3 border-b border-border">Recientes</p>
           {recentFoods.map((food) => (
             <FoodRow key={food.id} food={food} isCustom={customIds.has(food.id)} />
           ))}
@@ -225,9 +222,9 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
 
       {/* Resultados */}
       {!selected && query.trim() && (
-        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-4">
+        <div className="bg-bg-secondary border border-border rounded-xl overflow-hidden mb-4">
           {results.length === 0 ? (
-            <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-6">Sin resultados para &quot;{query}&quot;</p>
+            <p className="text-text-tertiary text-sm text-center py-6">Sin resultados para &quot;{query}&quot;</p>
           ) : (
             results.map((food) => (
               <FoodRow key={food.id} food={food} isCustom={customIds.has(food.id)} />
@@ -239,12 +236,10 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
       {/* Estado vacío: sin query, sin recientes, sin selección */}
       {!query.trim() && !selected && recentFoods.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 gap-3 pb-10">
-          <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <svg className="w-7 h-7 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          <div className="w-14 h-14 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary">
+            <Icon icon={Search} size={24} />
           </div>
-          <p className="text-sm text-gray-400 dark:text-gray-500 text-center">
+          <p className="text-sm text-text-tertiary text-center">
             Escribe para buscar un alimento
           </p>
         </div>
@@ -253,9 +248,10 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
       {/* Cantidad / Peso */}
       {selected && (
         <div className="flex flex-col gap-4">
-          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-2xl p-4">
-            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">{selected.nombre}</p>
-            <p className="text-xs text-blue-500 dark:text-blue-400">
+          <div className="bg-bg-secondary border border-border rounded-xl p-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-2">Seleccionado</p>
+            <p className="text-base font-medium text-text-primary mb-1">{selected.nombre}</p>
+            <p className="text-xs text-text-tertiary tabular-nums">
               {selected.gramsPerUnit
                 ? `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G — por ${selected.gramsPerUnit}g (1 ${selected.unitLabel})`
                 : `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G por 100g`}
@@ -264,40 +260,62 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
 
           {isUnitBased ? (
             <div>
-              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">
+              <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-2">
                 ¿Cuántos {selected.unitLabel}s?
               </label>
               <div className="flex items-center gap-4">
-                <button onClick={() => setUnits((u) => Math.max(1, u - 1))}
-                  className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xl font-medium active:bg-gray-200 dark:active:bg-gray-600 transition-colors">−</button>
-                <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 w-8 text-center">{units}</span>
-                <button onClick={() => setUnits((u) => u + 1)}
-                  className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xl font-medium active:bg-gray-200 dark:active:bg-gray-600 transition-colors">+</button>
-                <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">= {effectiveWeight}g</span>
+                <button
+                  onClick={() => setUnits((u) => Math.max(1, u - 1))}
+                  className="w-11 h-11 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary text-xl font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
+                >−</button>
+                <span className="font-serif text-3xl tabular-nums tracking-[-0.02em] text-text-primary w-10 text-center">{units}</span>
+                <button
+                  onClick={() => setUnits((u) => u + 1)}
+                  className="w-11 h-11 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary text-xl font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
+                >+</button>
+                <span className="text-sm text-text-tertiary tabular-nums ml-1">= {effectiveWeight}g</span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">Peso en gramos *</label>
-              <input type="number" inputMode="decimal" placeholder="ej: 267" value={weightG}
-                onChange={(e) => setWeightG(e.target.value)} autoFocus
-                className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+              <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-2">Peso en gramos *</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="ej: 267"
+                value={weightG}
+                onChange={(e) => setWeightG(e.target.value)}
+                autoFocus
+                className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums"
+              />
             </div>
           )}
 
           {effectiveWeight > 0 && (() => {
-            const m = calcMacros(selected, effectiveWeight);
+            const m = calcMacros(selected as Food, effectiveWeight);
             const label = isUnitBased
-              ? `Para ${units} ${units === 1 ? selected.unitLabel : `${selected.unitLabel}s`} (${effectiveWeight}g):`
-              : `Para ${weightG}g:`;
+              ? `Para ${units} ${units === 1 ? selected.unitLabel : `${selected.unitLabel}s`} (${effectiveWeight}g)`
+              : `Para ${weightG}g`;
             return (
-              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-3">{label}</p>
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div><p className="text-lg font-bold text-emerald-600">{m.calorias}</p><p className="text-xs text-gray-400 dark:text-gray-500">kcal</p></div>
-                  <div><p className="text-lg font-bold text-blue-500">{m.proteina}g</p><p className="text-xs text-gray-400 dark:text-gray-500">proteína</p></div>
-                  <div><p className="text-lg font-bold text-amber-500">{m.carbs}g</p><p className="text-xs text-gray-400 dark:text-gray-500">carbs</p></div>
-                  <div><p className="text-lg font-bold text-violet-500">{m.grasa}g</p><p className="text-xs text-gray-400 dark:text-gray-500">grasa</p></div>
+              <div className="bg-bg-secondary border border-border rounded-xl p-5">
+                <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">{label}</p>
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <div>
+                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{m.calorias}</p>
+                    <p className="text-xs text-text-tertiary mt-1">kcal</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{m.proteina}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="text-xs text-text-tertiary mt-1">prot</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{m.carbs}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="text-xs text-text-tertiary mt-1">carbs</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{m.grasa}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="text-xs text-text-tertiary mt-1">grasa</p>
+                  </div>
                 </div>
               </div>
             );
@@ -305,10 +323,15 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
         </div>
       )}
 
-      <button onClick={handleConfirm} disabled={!canConfirm}
-        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-2xl py-4 transition-colors mt-auto">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleConfirm}
+        disabled={!canConfirm}
+        className="w-full mt-auto"
+      >
         Continuar
-      </button>
+      </Button>
     </div>
   );
 }

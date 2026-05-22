@@ -1,9 +1,19 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy: `new Resend(undefined)` lanza al instanciar. Inicializar a nivel
+// de módulo rompe el build de Vercel cuando RESEND_API_KEY no está
+// presente en el entorno (ej. previews sin secrets de prod). La
+// inicialización tardía mueve esa restricción al primer call real.
+let cached: Resend | null = null;
+function getResend(): Resend {
+  if (!cached) {
+    cached = new Resend(process.env.RESEND_API_KEY);
+  }
+  return cached;
+}
 
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
     to,
     subject: "Recupera tu contraseña — Macro Tracker",

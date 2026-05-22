@@ -1,29 +1,86 @@
 @import "tailwindcss";
 
-/* Clase .dark para modo oscuro controlado por el usuario (o Sistema) */
+/* Dark mode via clase .dark en <html> (toggle en Ajustes > Apariencia). Default: light. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  /* ── Backgrounds ─────────────────────────────── */
+  --bg-primary:   #F5F1EA;  /* crema cálido — fondo principal */
+  --bg-secondary: #FFFFFF;  /* tarjetas */
+  --bg-tertiary:  #EDE7DC;  /* áreas elevadas, tracks, fondo de avatar */
+
+  /* ── Text ────────────────────────────────────── */
+  --text-primary:   #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-tertiary:  #9A9A9A;
+
+  /* ── Borders ─────────────────────────────────── */
+  --border: #E5DFD3;
+
+  /* ── Accents ─────────────────────────────────── */
+  --accent-primary: #3D5A3D;  /* verde botánico */
+  --accent-warm:    #C66B4A;  /* terracota */
+
+  /* ── Macros ──────────────────────────────────── */
+  --macro-protein:  #3D5A3D;  /* verde botánico */
+  --macro-carbs:    #C66B4A;  /* terracota */
+  --macro-fat:      #8A7355;  /* mostaza tierra */
+  --macro-calories: #1A1A1A;  /* texto, no color saturado */
+
+  /* ── Surface / motion ────────────────────────── */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ease-editorial: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Modo oscuro via clase .dark en <html> */
 html.dark {
-  --background: #111827;
-  --foreground: #f9fafb;
+  --bg-primary:   #1A1A1A;
+  --bg-secondary: #242220;
+  --bg-tertiary:  #2E2A26;
+
+  --text-primary:   #F5F1EA;
+  --text-secondary: #A8A29A;
+  --text-tertiary:  #6B6B6B;
+
+  --border: #332F2A;
+
+  --accent-primary: #7BA075;  /* verde botánico claro */
+  --accent-warm:    #E08A6A;
+
+  --macro-protein:  #7BA075;
+  --macro-carbs:    #D88A6A;
+  --macro-fat:      #A89175;
+  --macro-calories: #F5F1EA;
+
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Exponer tokens a Tailwind v4: genera utilities bg-bg-primary, text-text-primary,
+   text-macro-protein, border-border, font-sans, font-serif, etc. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-bg-primary:   var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary:  var(--bg-tertiary);
+
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+
+  --color-border: var(--border);
+
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-warm:    var(--accent-warm);
+
+  --color-macro-protein:  var(--macro-protein);
+  --color-macro-carbs:    var(--macro-carbs);
+  --color-macro-fat:      var(--macro-fat);
+  --color-macro-calories: var(--macro-calories);
+
+  --font-sans:  var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -1,6 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { Leaf } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 import AuthForm from "./AuthForm";
 
 export const metadata = {
@@ -12,24 +14,27 @@ export default async function AuthPage() {
   if (session) redirect("/");
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
-      {/* Cabecera esmeralda */}
-      <div className="bg-emerald-500 pt-16 pb-20 flex flex-col items-center gap-3 px-6">
-        <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg">
-          <span className="text-3xl font-black text-white">M</span>
+    <div className="min-h-screen flex flex-col bg-bg-primary">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 py-10 gap-8">
+        {/* Logo + branding */}
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="w-16 h-16 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary">
+            <Icon icon={Leaf} size={28} />
+          </div>
+          <div>
+            <h1 className="font-serif text-4xl tracking-[-0.02em] text-text-primary">Macro Tracker</h1>
+            <p className="text-sm text-text-tertiary mt-2">Seguimiento nutricional con IA</p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Macro Tracker</h1>
-        <p className="text-emerald-100 text-sm">Seguimiento nutricional con IA</p>
-      </div>
 
-      {/* Card del formulario */}
-      <div className="flex-1 flex flex-col px-5 -mt-10">
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden w-full max-w-[430px] mx-auto">
-          <Suspense fallback={<div className="h-64 animate-pulse bg-gray-50 dark:bg-gray-800 rounded-3xl" />}>
+        {/* Card del formulario */}
+        <div className="w-full max-w-[400px] bg-bg-secondary rounded-xl border border-border overflow-hidden">
+          <Suspense fallback={<div className="h-72 animate-pulse bg-bg-tertiary" />}>
             <AuthForm />
           </Suspense>
         </div>
-        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6 pb-8">
+
+        <p className="text-xs text-text-tertiary text-center max-w-[280px]">
           Tus datos son privados y solo tú puedes verlos.
         </p>
       </div>

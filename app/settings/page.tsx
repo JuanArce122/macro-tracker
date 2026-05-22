@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { Target, Salad, Bell, Palette, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
+import Avatar from "@/app/components/ui/Avatar";
+import Icon from "@/app/components/ui/Icon";
 import { useTheme } from "@/app/hooks/useTheme";
+import { useActiveNotifCount } from "@/app/hooks/useNotificationSchedule";
 
 type Profile = {
   name: string | null;
-  avatarEmoji: string | null;
   fitnessGoal: string | null;
 };
 
@@ -22,23 +25,20 @@ const GOAL_LABELS: Record<string, string> = {
 };
 
 function ProfileCard({ profile }: { profile: Profile | null }) {
-  const avatar = profile?.avatarEmoji ?? "🙂";
   const name = profile?.name ?? "Mi perfil";
   const goal = profile?.fitnessGoal ? GOAL_LABELS[profile.fitnessGoal] : "Sin objetivo configurado";
 
   return (
     <Link href="/settings/profile">
-      <div className="mx-4 mt-4 mb-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 flex items-center gap-4 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-4xl">{avatar}</span>
-        </div>
+      <div className="mx-4 mt-4 mb-2 bg-bg-secondary rounded-xl border border-border p-5 flex items-center gap-4 active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]">
+        <Avatar name={profile?.name} size="xl" />
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-gray-800 dark:text-gray-100 text-base truncate">{name}</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{goal}</p>
+          <p className="font-serif text-xl tracking-[-0.02em] text-text-primary truncate leading-tight">{name}</p>
+          <p className="text-sm text-text-tertiary mt-1">{goal}</p>
         </div>
-        <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        <span className="text-text-tertiary flex-shrink-0">
+          <Icon icon={ChevronRight} size={18} />
+        </span>
       </div>
     </Link>
   );
@@ -46,7 +46,7 @@ function ProfileCard({ profile }: { profile: Profile | null }) {
 
 function SectionLabel({ label }: { label: string }) {
   return (
-    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-5 pt-5 pb-1">
+    <p className="text-xs uppercase tracking-[0.08em] font-medium text-text-tertiary px-5 pt-6 pb-2">
       {label}
     </p>
   );
@@ -54,7 +54,7 @@ function SectionLabel({ label }: { label: string }) {
 
 function RowGroup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
+    <div className="mx-4 bg-bg-secondary rounded-xl border border-border overflow-hidden divide-y divide-border">
       {children}
     </div>
   );
@@ -67,17 +67,6 @@ const THEME_LABELS: Record<string, string> = {
 };
 
 const NOTIF_STORAGE_KEY = "notification_schedule";
-
-function getActiveNotifCount(): number {
-  try {
-    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-    if (!raw) return 0;
-    const s = JSON.parse(raw);
-    return Object.values(s).filter((v: unknown) => (v as { enabled: boolean }).enabled).length;
-  } catch {
-    return 0;
-  }
-}
 
 async function restoreNotifSchedule() {
   if (!("serviceWorker" in navigator) || !("Notification" in window)) return;
@@ -95,7 +84,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [goals, setGoals] = useState<Goals>(null);
   const [myFoodsCount, setMyFoodsCount] = useState(0);
-  const [activeNotifs, setActiveNotifs] = useState(0);
+  const activeNotifs = useActiveNotifCount();
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -114,7 +103,6 @@ export default function SettingsPage() {
       .then((d) => setMyFoodsCount(d.myFoods?.length ?? 0))
       .catch(() => null);
 
-    setActiveNotifs(getActiveNotifCount());
     restoreNotifSchedule();
   }, []);
 
@@ -131,10 +119,10 @@ export default function SettingsPage() {
     : "Recordatorios de comidas";
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col flex-1 bg-bg-primary">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 pt-5 pb-4">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Ajustes</h1>
+      <div className="px-5 pt-7 pb-2">
+        <h1 className="font-serif text-[40px] leading-[1.1] tracking-[-0.02em] text-text-primary">Ajustes</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-24">
@@ -145,13 +133,13 @@ export default function SettingsPage() {
         <SectionLabel label="Nutrición" />
         <RowGroup>
           <SettingsRow
-            icon="🎯"
+            icon={Target}
             title="Metas diarias"
             subtitle={goalsSubtitle}
             href="/settings/goals"
           />
           <SettingsRow
-            icon="🥗"
+            icon={Salad}
             title="Mis alimentos"
             subtitle={foodsSubtitle}
             href="/settings/foods"
@@ -162,13 +150,13 @@ export default function SettingsPage() {
         <SectionLabel label="Preferencias" />
         <RowGroup>
           <SettingsRow
-            icon="🔔"
+            icon={Bell}
             title="Notificaciones"
             subtitle={notifSubtitle}
             href="/settings/notifications"
           />
           <SettingsRow
-            icon="🎨"
+            icon={Palette}
             title="Apariencia"
             subtitle={THEME_LABELS[theme] ?? "Sistema"}
             href="/settings/appearance"
@@ -179,7 +167,7 @@ export default function SettingsPage() {
         <SectionLabel label="Privacidad" />
         <RowGroup>
           <SettingsRow
-            icon="📊"
+            icon={BarChart3}
             title="Mis datos"
             subtitle="Exportar CSV · Borrar historial"
             href="/settings/data"
@@ -190,7 +178,7 @@ export default function SettingsPage() {
         <SectionLabel label="Info" />
         <RowGroup>
           <SettingsRow
-            icon="ℹ️"
+            icon={Info}
             title="Sobre Macro Tracker"
             subtitle="v1.0.0 · Créditos"
             href="/settings/about"
@@ -198,14 +186,12 @@ export default function SettingsPage() {
         </RowGroup>
 
         {/* CERRAR SESIÓN */}
-        <div className="mx-4 mt-2 mb-6">
+        <div className="mx-4 mt-4 mb-6">
           <button
             onClick={() => signOut({ callbackUrl: "/auth" })}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm text-red-500 font-semibold text-sm active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-bg-secondary border border-border text-red-600 font-medium text-sm active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            <Icon icon={LogOut} size={16} />
             Cerrar sesión
           </button>
         </div>

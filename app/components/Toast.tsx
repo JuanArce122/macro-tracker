@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { X } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 
 type ToastProps = {
   message: string;
@@ -16,25 +18,33 @@ export default function Toast({ message, type = "success", action, onDismiss }: 
     return () => clearTimeout(t);
   }, [action, onDismiss]);
 
+  const isError = type === "error";
+
   return (
     <div
-      className={`fixed bottom-24 left-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-white toast-slide-up ${
-        type === "error" ? "bg-red-600" : "bg-gray-800"
+      className={`fixed bottom-24 left-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl toast-slide-up shadow-[var(--shadow-subtle)] ${
+        isError ? "bg-red-600 text-white" : "bg-text-primary text-bg-primary"
       }`}
     >
       <p className="text-sm font-medium flex-1">{message}</p>
       {action && (
         <button
           onClick={() => { action.onClick(); onDismiss(); }}
-          className="text-sm font-bold underline flex-shrink-0 active:opacity-70"
+          className={`text-sm font-medium underline underline-offset-4 flex-shrink-0 active:opacity-70 transition-opacity duration-200 ease-[var(--ease-editorial)] ${
+            isError ? "decoration-white/60" : "decoration-bg-primary/60"
+          }`}
         >
           {action.label}
         </button>
       )}
-      <button onClick={onDismiss} className="text-white/50 flex-shrink-0 active:opacity-70">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+      <button
+        onClick={onDismiss}
+        className={`flex-shrink-0 active:opacity-70 transition-opacity duration-200 ease-[var(--ease-editorial)] ${
+          isError ? "text-white/60" : "text-bg-primary/60"
+        }`}
+        aria-label="Cerrar"
+      >
+        <Icon icon={X} size={14} />
       </button>
     </div>
   );

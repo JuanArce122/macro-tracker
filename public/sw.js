@@ -103,10 +103,6 @@ function scheduleNotification(key, timeStr) {
   const delay = msUntil(timeStr);
 
   const timer = setTimeout(async () => {
-    // Solo mostrar si tenemos permiso
-    const clients = await self.clients.matchAll({ type: "window" });
-    const anyFocused = clients.some((c) => c.focused);
-
     // Mostrar siempre (la app puede estar en background o cerrada)
     self.registration.showNotification(NOTIFICATION_TITLES[key], {
       body: NOTIFICATION_BODIES[key],

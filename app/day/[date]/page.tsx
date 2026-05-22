@@ -25,13 +25,6 @@ async function getGoals(userId: number) {
   return goal ?? { calories: 2000, protein: 150, carbs: 200, fat: 65 };
 }
 
-async function getProfile(userId: number) {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    select: { name: true, avatarEmoji: true },
-  });
-}
-
 export default async function DayPage({
   params,
 }: {
@@ -43,7 +36,7 @@ export default async function DayPage({
   const userId = Number(session.user.id);
   const { date } = await params;
 
-  const [meals, goals, profile] = await Promise.all([getMeals(userId, date), getGoals(userId), getProfile(userId)]);
+  const [meals, goals] = await Promise.all([getMeals(userId, date), getGoals(userId)]);
 
   const totals = meals.reduce(
     (acc, m) => ({
@@ -56,9 +49,9 @@ export default async function DayPage({
   );
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
-      <DayHeader date={date} profile={profile} />
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex flex-col flex-1 bg-bg-primary">
+      <DayHeader date={date} />
+      <div className="flex-1 overflow-y-auto pb-32">
         <MacroSummary totals={totals} goals={goals} />
         <MealList meals={meals} date={date} />
       </div>

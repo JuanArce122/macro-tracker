@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import SessionProvider from "./components/SessionProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +33,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#10b981",
+  themeColor: "#F5F1EA",
 };
 
 export default function RootLayout({
@@ -35,19 +42,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} h-full`}>
+    <html lang="es" className={`${inter.variable} ${fraunces.variable} h-full`}>
       <head>
-        {/* Aplicar clase .dark antes de que React hidrate para evitar flash */}
+        {/* Aplica .dark antes de hidratar para evitar flash.
+            Default = light: solo aplica si el usuario eligió "dark" explícitamente
+            o "system" + el SO está en oscuro. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();`,
           }}
         />
       </head>
-      <body className="h-full bg-gray-100 antialiased">
+      <body className="h-full bg-bg-tertiary antialiased">
         <SessionProvider>
           <ServiceWorkerRegistration />
-          <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+          <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-bg-primary">
             {children}
           </div>
         </SessionProvider>

@@ -1,5 +1,8 @@
 "use client";
 
+import { Camera, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
+
 type Props = {
   onSelect: (mode: "camera" | "search") => void;
   onBack: () => void;
@@ -7,48 +10,45 @@ type Props = {
 
 export default function StepMode({ onSelect, onBack }: Props) {
   return (
-    <div className="flex flex-col flex-1 p-5">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-400 dark:text-gray-500 text-sm mb-6 -ml-1">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
+    <div className="flex flex-col flex-1 p-5 bg-bg-primary">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-text-tertiary active:text-text-primary text-sm mb-6 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]"
+      >
+        <Icon icon={ChevronLeft} size={16} />
         Cancelar
       </button>
 
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Agregar comida</h1>
-      <p className="text-gray-400 dark:text-gray-500 text-sm mb-8">¿Cómo quieres registrarla?</p>
+      <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary mb-2">Agregar comida</h1>
+      <p className="text-sm text-text-tertiary mb-8">¿Cómo quieres registrarla?</p>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <button
           onClick={() => onSelect("camera")}
-          className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-left"
+          className="flex items-center gap-4 p-5 bg-bg-secondary rounded-xl border border-border active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)] text-left"
         >
-          <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-3xl">📷</span>
+          <div className="w-14 h-14 bg-bg-tertiary rounded-xl flex items-center justify-center flex-shrink-0 text-text-primary">
+            <Icon icon={Camera} size={28} />
           </div>
-          <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-100">Foto con IA</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Toma una foto y Gemini estima los macros automáticamente</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-text-primary">Foto con IA</p>
+            <p className="text-sm text-text-tertiary mt-0.5">Toma una foto y Gemini estima los macros automáticamente</p>
           </div>
-          <svg className="w-5 h-5 text-gray-300 dark:text-gray-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+          <Icon icon={ChevronRight} size={18} className="text-text-tertiary flex-shrink-0" />
         </button>
 
         <button
           onClick={() => onSelect("search")}
-          className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm active:bg-gray-50 dark:active:bg-gray-700 transition-colors text-left"
+          className="flex items-center gap-4 p-5 bg-bg-secondary rounded-xl border border-border active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)] text-left"
         >
-          <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-3xl">🔍</span>
+          <div className="w-14 h-14 bg-bg-tertiary rounded-xl flex items-center justify-center flex-shrink-0 text-text-primary">
+            <Icon icon={Search} size={28} />
           </div>
-          <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-100">Buscar alimento</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Escribe el nombre e ingresa el peso para calcular los macros exactos</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-text-primary">Buscar alimento</p>
+            <p className="text-sm text-text-tertiary mt-0.5">Escribe el nombre e ingresa el peso para calcular los macros exactos</p>
           </div>
-          <svg className="w-5 h-5 text-gray-300 dark:text-gray-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+          <Icon icon={ChevronRight} size={18} className="text-text-tertiary flex-shrink-0" />
         </button>
       </div>
     </div>
