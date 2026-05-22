@@ -7,6 +7,7 @@ import { ChevronLeft, TrendingDown, Scale, TrendingUp, Check, Loader2 } from "lu
 import Avatar from "@/app/components/ui/Avatar";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
+import { LAC_COUNTRIES } from "@/lib/regions";
 
 type Profile = {
   name: string | null;
@@ -16,6 +17,7 @@ type Profile = {
   heightCm: number | null;
   activityLevel: string | null;
   fitnessGoal: string | null;
+  countryCode: string | null;
 };
 
 const ACTIVITY_OPTIONS = [
@@ -48,6 +50,7 @@ export default function ProfilePage() {
   const [heightCm, setHeightCm] = useState("");
   const [activityLevel, setActivityLevel] = useState("");
   const [fitnessGoal, setFitnessGoal] = useState("");
+  const [countryCode, setCountryCode] = useState("");
 
   useEffect(() => {
     fetch("/api/profile")
@@ -60,6 +63,7 @@ export default function ProfilePage() {
         setHeightCm(p.heightCm ? String(p.heightCm) : "");
         setActivityLevel(p.activityLevel ?? "");
         setFitnessGoal(p.fitnessGoal ?? "");
+        setCountryCode(p.countryCode ?? "");
       })
       .catch(() => null)
       .finally(() => setLoading(false));
@@ -82,6 +86,7 @@ export default function ProfilePage() {
           heightCm: heightCm ? Number(heightCm) : null,
           activityLevel: activityLevel || null,
           fitnessGoal: fitnessGoal || null,
+          countryCode: countryCode || null,
         }),
       });
       if (!res.ok) throw new Error();
@@ -181,6 +186,32 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* País (HU-12) */}
+        <div className="bg-bg-secondary rounded-xl border border-border p-5 flex flex-col gap-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary">País</p>
+          <div className="relative">
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className={`${inputClass} appearance-none pr-10`}
+              aria-label="Selecciona tu país"
+            >
+              <option value="">Selecciona tu país…</option>
+              {LAC_COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag}  {c.name}
+                </option>
+              ))}
+            </select>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none">
+              ▾
+            </span>
+          </div>
+          <p className="text-xs text-text-tertiary leading-relaxed">
+            Priorizamos alimentos típicos de tu país en las búsquedas.
+          </p>
         </div>
 
         {/* Nivel de actividad */}

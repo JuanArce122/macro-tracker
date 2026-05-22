@@ -23,6 +23,9 @@ model User {
   activityLevel String?  // "sedentary" | "light" | "moderate" | "active" | "very_active"
   fitnessGoal   String?  // "lose" | "maintain" | "gain"
 
+  // Soporte regional (HU-12): ISO 3166-1 alpha-2 ("CO", "MX", "AR", etc.)
+  countryCode   String?
+
   meals         Meal[]
   goals         Goal[]
 }
@@ -81,7 +84,11 @@ model Food {
   usageCount   Int       @default(0)
   lastUsedAt   DateTime?
 
+  // Soporte regional (HU-12): null = global, "CO" = colombiano, "LAC" = LATAM genérico
+  regionCode   String?
+
   @@index([nombre])
   @@index([userId])
   @@index([lastUsedAt])
+  @@index([regionCode])
 }

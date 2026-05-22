@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { searchFoods } from "@/lib/foods"; // fallback offline
 import { FoodCreateSchema } from "@/lib/schemas";
 import { validateBody } from "@/lib/api/validate";
+import { rankFoods } from "@/lib/foods/ranking";
 
 // ─── Tipos Open Food Facts ────────────────────────────────────────────────────
 
@@ -110,20 +111,33 @@ export async function GET(req: NextRequest) {
   try {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
 
-    // 1. Buscar en DB local (USDA + usuario + cache de OFF)
+    // HU-12: priorización regional según countryCode del usuario
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { countryCode: true },
+    });
+    const userCountry = user?.countryCode ?? null;
+
+    // 1. Buscar en DB local (USDA + usuario + cache de OFF + regionales)
+    //    Pedimos más de `limit` para poder priorizar regionales en JS.
     const dbFoods = await prisma.food.findMany({
       where: {
         AND: words.map((word) => ({ nombre: { contains: word } })),
         OR: [{ userId: null }, { userId }],
       },
       orderBy: [{ source: "asc" }, { nombre: "asc" }],
-      take: limit,
+      take: limit * 3,
     });
 
+    // HU-12: ordenar por prioridad regional (ver lib/foods/ranking.ts)
+    const dbFoodsRanked = rankFoods(dbFoods, userCountry, limit);
+
     // 2. Si hay suficientes resultados locales, retornar sin llamar a OFF
-    if (dbFoods.length >= 5) {
-      return NextResponse.json({ foods: dbFoods });
+    if (dbFoodsRanked.length >= 5) {
+      return NextResponse.json({ foods: dbFoodsRanked });
     }
+    // Para el resto del flujo seguimos usando dbFoods (que ya tiene los datos)
+    // pero la respuesta final usa el ranking.
 
     // 3. Consultar Open Food Facts en paralelo
     const offProducts = await searchOpenFoodFacts(q, 10);
@@ -169,9 +183,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // 5. Combinar: DB local primero, luego OFF cacheados
+    // 5. Combinar: ranked locales primero, luego OFF cacheados
     const allFoods = [
-      ...dbFoods,
+      ...dbFoodsRanked,
       ...cachedFoods.filter((f) => !existingNames.has(f.nombre.toLowerCase())),
     ].slice(0, limit);
 

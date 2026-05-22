@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Search, X, Camera, Image as ImageIcon, Loader2 } from "lucide-react";
 import { calcMacros, type Food } from "@/lib/foods";
 import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
+import { REGION_FLAGS } from "@/lib/regions";
 import type { AnalysisResult } from "./StepCamera";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
@@ -108,6 +109,15 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
             )}
             {food.source === "openfoodfacts" && (
               <span className="text-[10px] uppercase tracking-[0.08em] bg-bg-tertiary text-text-secondary font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">OFF</span>
+            )}
+            {food.regionCode && REGION_FLAGS[food.regionCode] && (
+              <span
+                className="text-sm flex-shrink-0"
+                title={`Alimento típico de ${food.regionCode === "LAC" ? "Latinoamérica" : food.regionCode}`}
+                aria-label={`Regional ${food.regionCode}`}
+              >
+                {REGION_FLAGS[food.regionCode]}
+              </span>
             )}
           </div>
           <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">

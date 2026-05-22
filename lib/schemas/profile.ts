@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidCountryCode } from "@/lib/regions";
 
 export const SexSchema = z.enum(["male", "female"]);
 
@@ -15,6 +16,19 @@ export const FitnessGoalSchema = z.enum([
   "maintain",
   "gain",
 ]);
+
+/**
+ * Código de país validado contra la lista LAC (HU-12).
+ * Acepta null/undefined (campo opcional).
+ */
+export const CountryCodeSchema = z
+  .string()
+  .nullable()
+  .optional()
+  .refine(
+    (val) => val === null || val === undefined || isValidCountryCode(val),
+    { message: "País no soportado" }
+  );
 
 /**
  * Body aceptado por `PUT /api/profile`.
@@ -45,6 +59,7 @@ export const ProfileUpdateSchema = z.object({
     .optional(),
   activityLevel: ActivityLevelSchema.nullable().optional(),
   fitnessGoal: FitnessGoalSchema.nullable().optional(),
+  countryCode: CountryCodeSchema,
 });
 
 export type ProfileUpdateInput = z.infer<typeof ProfileUpdateSchema>;

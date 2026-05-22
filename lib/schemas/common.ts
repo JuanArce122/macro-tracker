@@ -17,9 +17,5 @@ export const PositiveNumberSchema = z
 /** ID de DB (entero positivo) */
 export const DbIdSchema = z.number().int().positive();
 
-/** ISO 3166-1 alpha-2 (CO, MX, AR, etc.) */
-export const CountryCodeSchema = z
-  .string()
-  .regex(/^[A-Z]{2}$/, "Código de país debe ser 2 letras mayúsculas")
-  .nullable()
-  .optional();
+// NOTA: el CountryCodeSchema validado contra LAC vive en `./profile.ts`
+// para evitar dependencia circular con `lib/regions.ts`.

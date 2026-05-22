@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
+    "seed:regional-co": "tsx scripts/seed-regional-co.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -49,6 +50,7 @@
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.22.3",
     "typescript": "^5",
     "vitest": "^4.1.7"
   }
