@@ -64,4 +64,21 @@ describe("ProfileUpdateSchema", () => {
   it("rejects invalid sex value", () => {
     expect(ProfileUpdateSchema.safeParse({ sex: "X" }).success).toBe(false);
   });
+
+  // ── HU-12: countryCode ────────────────────────────────────────────
+  it("accepts CO as countryCode", () => {
+    expect(ProfileUpdateSchema.safeParse({ countryCode: "CO" }).success).toBe(true);
+  });
+
+  it("accepts null countryCode (clearing)", () => {
+    expect(ProfileUpdateSchema.safeParse({ countryCode: null }).success).toBe(true);
+  });
+
+  it("rejects unknown country code", () => {
+    expect(ProfileUpdateSchema.safeParse({ countryCode: "XX" }).success).toBe(false);
+  });
+
+  it("rejects lowercase country code", () => {
+    expect(ProfileUpdateSchema.safeParse({ countryCode: "co" }).success).toBe(false);
+  });
 });

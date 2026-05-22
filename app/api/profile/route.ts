@@ -23,6 +23,7 @@ export async function GET() {
         heightCm: true,
         activityLevel: true,
         fitnessGoal: true,
+        countryCode: true,
         email: true,
       },
     });
@@ -58,6 +59,7 @@ export async function PUT(req: NextRequest) {
         heightCm: data.heightCm ?? null,
         activityLevel: data.activityLevel ?? null,
         fitnessGoal: data.fitnessGoal ?? null,
+        countryCode: data.countryCode ?? null,
       },
       select: {
         name: true,
@@ -68,6 +70,7 @@ export async function PUT(req: NextRequest) {
         heightCm: true,
         activityLevel: true,
         fitnessGoal: true,
+        countryCode: true,
       },
     });
 
