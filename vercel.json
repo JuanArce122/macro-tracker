@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/outliers",
+      "schedule": "0 9 * * 1"
+    }
+  ],
   "headers": [
     {
       "source": "/sw.js",
