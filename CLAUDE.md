@@ -45,7 +45,7 @@ PWA personal mobile-first (iPhone) para trackear macros con foto + IA. La app es
 │   │   ├── ui/          # primitivos del design system (Button, Card, Input, Icon, Avatar, Stat, …)
 │   │   └── *.tsx        # componentes de feature (BottomNav, MacroSummary, MealList, EditMealSheet, …)
 │   ├── components/add/  # StepMode, StepCamera, StepSearch, StepConfirm
-│   ├── hooks/           # useFoodSearch, useTheme
+│   ├── hooks/           # useTheme, useFoodSearch, useNotificationPermission, useNotificationSchedule
 │   └── generated/prisma/  # cliente Prisma generado (ignorado por git)
 ├── lib/                 # prisma.ts, foods.ts, email.ts
 ├── prisma/              # schema.prisma + migrations/
@@ -61,11 +61,15 @@ PWA personal mobile-first (iPhone) para trackear macros con foto + IA. La app es
 
 ## Convenciones
 
-- **Naming**: Componentes `PascalCase.tsx` con default export; hooks `useXxx.ts` named export; rutas y archivos del App Router en kebab-case (`forgot-password`, `reset-password`); texto UI y dominio en **español** (`nombre`, `categoria`, `desayuno`/`almuerzo`/`cena`/`snack`).
+- **Naming**: Componentes `PascalCase.tsx` con default export; hooks `useXxx.ts` named export; rutas y archivos del App Router en kebab-case (`forgot-password`, `reset-password`); texto UI y dominio en **español** (`nombre`, `categoria`, `desayuno`/`almuerzo`/`cena`/`snack`). Variables prefijadas con `_` (ej. `_id`, `_date`) marcan ítems intencionalmente sin uso; ESLint las ignora (configurado en `eslint.config.mjs`).
 - **Estilos**: Tailwind v4 utility-first inline. **Tokens vía CSS variables** expuestas a Tailwind con `@theme inline` (ej. `bg-bg-primary`, `text-text-primary`, `text-macro-protein`). Dark mode con clase `.dark` en `<html>` (toggle en Apariencia, default = claro). **Nunca clases dinámicas** (`"bg-" + color`) — Tailwind v4 purga clases no literales.
 - **Componentes**: Server Components por defecto; `"use client"` solo donde haya hooks/interactividad. Props con `type Props = {...}` inline. Primitivos del design system viven en `app/components/ui/`; componentes de feature en `app/components/`.
 - **Iconos**: siempre via `<Icon name={...}>` (wrapper de `lucide-react`), stroke 1.5, tamaño por defecto 20. **Cero emojis nativos** en JSX.
 - **Fuentes**: `font-sans` (Inter) para UI; `font-serif` (Fraunces) para números hero y títulos de pantalla. Números con `tabular-nums`.
+- **Patrones de estado**:
+  - Para leer de un *external store* (localStorage, Notification API, prefs del SO), usar `useSyncExternalStore` en lugar de `useState + useEffect`. Hooks de referencia: `useTheme`, `useNotificationPermission`, `useNotificationSchedule`.
+  - Para sincronizar un prop a múltiples states (típicamente al cambiar una entidad seleccionada), usar el patrón `key` prop en el parent en vez de un `useEffect` reactivo. Ejemplo: `MealList → <EditMealSheet key={editingMeal.id} meal={editingMeal} />`.
+  - Evitar `setState` síncrono dentro del cuerpo de `useEffect` (regla `react-hooks/set-state-in-effect`). Si necesitas estado derivado, calcúlalo durante el render.
 
 ## Comandos
 
