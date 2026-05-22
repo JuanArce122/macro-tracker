@@ -53,10 +53,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="h-full bg-gray-100 antialiased">
+      <body className="h-full bg-bg-tertiary antialiased">
         <SessionProvider>
           <ServiceWorkerRegistration />
-          <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+          <div className="mx-auto max-w-[430px] min-h-full flex flex-col bg-bg-primary">
             {children}
           </div>
         </SessionProvider>
