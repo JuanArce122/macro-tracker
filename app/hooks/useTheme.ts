@@ -1,8 +1,33 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useSyncExternalStore, useCallback, useEffect } from "react";
 
 export type Theme = "system" | "light" | "dark";
+
+const STORAGE_KEY = "theme";
+const CHANGE_EVENT = "theme-change";
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(CHANGE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(CHANGE_EVENT, callback);
+  };
+}
+
+function getSnapshot(): Theme {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    return v ?? "light";
+  } catch {
+    return "light";
+  }
+}
+
+function getServerSnapshot(): Theme {
+  return "light";
+}
 
 function applyTheme(theme: Theme) {
   const html = document.documentElement;
@@ -10,29 +35,22 @@ function applyTheme(theme: Theme) {
     html.classList.add("dark");
   } else if (theme === "light") {
     html.classList.remove("dark");
+  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    html.classList.add("dark");
   } else {
-    // Sistema: seguir preferencia del SO
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
-    }
+    html.classList.remove("dark");
   }
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>("system");
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
+  // Sincroniza la clase .dark con el theme actual. Cubre cambios cross-tab.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("theme") as Theme | null;
-      setThemeState(stored ?? "light");
-    } catch {
-      // localStorage no disponible
-    }
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
-  // Escuchar cambios del sistema cuando tema = "system"
+  // Reacciona a cambios del tema del SO cuando theme = "system".
   useEffect(() => {
     if (theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -42,13 +60,14 @@ export function useTheme() {
   }, [theme]);
 
   const setTheme = useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
     try {
-      localStorage.setItem("theme", newTheme);
+      localStorage.setItem(STORAGE_KEY, newTheme);
     } catch {
-      // silencioso
+      /* localStorage no disponible */
     }
-    applyTheme(newTheme);
+    // El evento `storage` solo dispara entre pestañas; este custom event
+    // notifica a otros consumidores del hook en la misma pestaña.
+    window.dispatchEvent(new Event(CHANGE_EVENT));
   }, []);
 
   return { theme, setTheme };

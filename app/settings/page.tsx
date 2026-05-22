@@ -9,6 +9,7 @@ import SettingsRow from "@/app/components/SettingsRow";
 import Avatar from "@/app/components/ui/Avatar";
 import Icon from "@/app/components/ui/Icon";
 import { useTheme } from "@/app/hooks/useTheme";
+import { useActiveNotifCount } from "@/app/hooks/useNotificationSchedule";
 
 type Profile = {
   name: string | null;
@@ -67,17 +68,6 @@ const THEME_LABELS: Record<string, string> = {
 
 const NOTIF_STORAGE_KEY = "notification_schedule";
 
-function getActiveNotifCount(): number {
-  try {
-    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-    if (!raw) return 0;
-    const s = JSON.parse(raw);
-    return Object.values(s).filter((v: unknown) => (v as { enabled: boolean }).enabled).length;
-  } catch {
-    return 0;
-  }
-}
-
 async function restoreNotifSchedule() {
   if (!("serviceWorker" in navigator) || !("Notification" in window)) return;
   if (Notification.permission !== "granted") return;
@@ -94,7 +84,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [goals, setGoals] = useState<Goals>(null);
   const [myFoodsCount, setMyFoodsCount] = useState(0);
-  const [activeNotifs, setActiveNotifs] = useState(0);
+  const activeNotifs = useActiveNotifCount();
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -113,7 +103,6 @@ export default function SettingsPage() {
       .then((d) => setMyFoodsCount(d.myFoods?.length ?? 0))
       .catch(() => null);
 
-    setActiveNotifs(getActiveNotifCount());
     restoreNotifSchedule();
   }, []);
 

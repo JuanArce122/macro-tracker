@@ -1,27 +1,21 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { EggFried, Salad, UtensilsCrossed, BarChart3, Bell, AlertTriangle, Info, ChevronLeft, Loader2 } from "lucide-react";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
-
-type ReminderKey = "breakfast" | "lunch" | "dinner" | "summary";
-
-type ReminderItem = {
-  enabled: boolean;
-  time: string;
-};
-
-type Schedule = Record<ReminderKey, ReminderItem>;
-
-const DEFAULTS: Schedule = {
-  breakfast: { enabled: false, time: "08:00" },
-  lunch:     { enabled: false, time: "13:00" },
-  dinner:    { enabled: false, time: "20:00" },
-  summary:   { enabled: false, time: "21:00" },
-};
+import {
+  useNotificationSchedule,
+  type ReminderKey,
+  type ReminderItem,
+  type Schedule,
+} from "@/app/hooks/useNotificationSchedule";
+import {
+  useNotificationPermission,
+  notifyPermissionChange,
+} from "@/app/hooks/useNotificationPermission";
 
 const LABELS: Record<ReminderKey, { icon: LucideIcon; title: string; desc: string }> = {
   breakfast: { icon: EggFried,        title: "Desayuno",      desc: "Recuerda registrar tu desayuno" },
@@ -30,24 +24,7 @@ const LABELS: Record<ReminderKey, { icon: LucideIcon; title: string; desc: strin
   summary:   { icon: BarChart3,       title: "Resumen diario", desc: "Revisa cómo quedaron tus macros" },
 };
 
-const STORAGE_KEY = "notification_schedule";
 const KEYS: ReminderKey[] = ["breakfast", "lunch", "dinner", "summary"];
-
-function loadSchedule(): Schedule {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULTS;
-    return { ...DEFAULTS, ...JSON.parse(raw) };
-  } catch {
-    return DEFAULTS;
-  }
-}
-
-function saveSchedule(schedule: Schedule) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
-  } catch { /* silencioso */ }
-}
 
 async function sendScheduleToSW(schedule: Schedule) {
   if (!("serviceWorker" in navigator)) return;
@@ -58,8 +35,8 @@ async function sendScheduleToSW(schedule: Schedule) {
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [schedule, setSchedule] = useState<Schedule>(DEFAULTS);
+  const permission = useNotificationPermission();
+  const [schedule, setSchedule] = useNotificationSchedule();
   const [requesting, setRequesting] = useState(false);
 
   // Detectar soporte iOS
@@ -70,33 +47,20 @@ export default function NotificationsPage() {
     (typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent) &&
       Number(navigator.userAgent.match(/OS (\d+)_/)?.[1] ?? 0) < 16);
 
-  useEffect(() => {
-    // Leer permiso actual
-    if ("Notification" in window) {
-      setPermission(Notification.permission);
-    }
-    // Leer schedule guardado
-    setSchedule(loadSchedule());
-  }, []);
-
   const updateItem = useCallback((key: ReminderKey, patch: Partial<ReminderItem>) => {
-    setSchedule((prev) => {
-      const next = { ...prev, [key]: { ...prev[key], ...patch } };
-      saveSchedule(next);
-      // Solo enviar al SW si tenemos permiso
-      if (Notification.permission === "granted") {
-        sendScheduleToSW(next);
-      }
-      return next;
-    });
-  }, []);
+    const next: Schedule = { ...schedule, [key]: { ...schedule[key], ...patch } };
+    setSchedule(next);
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      sendScheduleToSW(next);
+    }
+  }, [schedule, setSchedule]);
 
   async function requestPermission() {
     if (!("Notification" in window)) return;
     setRequesting(true);
     try {
       const result = await Notification.requestPermission();
-      setPermission(result);
+      notifyPermissionChange();
       if (result === "granted") {
         await sendScheduleToSW(schedule);
       }
