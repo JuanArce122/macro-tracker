@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Search, X, Camera, Image as ImageIcon, Loade
 import { calcMacros, type Food } from "@/lib/foods";
 import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
 import { REGION_FLAGS } from "@/lib/regions";
+import FoodBadge from "@/app/components/FoodBadge";
 import type { AnalysisResult } from "./StepCamera";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
@@ -107,8 +108,13 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, initialQ
             {isCustom && (
               <span className="text-[10px] uppercase tracking-[0.08em] bg-bg-tertiary text-text-secondary font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">Mío</span>
             )}
-            {food.source === "openfoodfacts" && (
-              <span className="text-[10px] uppercase tracking-[0.08em] bg-bg-tertiary text-text-secondary font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0">OFF</span>
+            {/* HU-04: badge Verificado / Comunidad */}
+            {!isCustom && (
+              <FoodBadge
+                verifiedAt={food.verifiedAt ?? null}
+                voteCount={food.voteCount ?? 0}
+                className="flex-shrink-0"
+              />
             )}
             {food.regionCode && REGION_FLAGS[food.regionCode] && (
               <span
