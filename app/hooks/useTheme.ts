@@ -26,7 +26,7 @@ export function useTheme() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem("theme") as Theme | null;
-      setThemeState(stored ?? "system");
+      setThemeState(stored ?? "light");
     } catch {
       // localStorage no disponible
     }
