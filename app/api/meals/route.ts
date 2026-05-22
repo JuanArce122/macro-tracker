@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     const userId = Number(session.user.id);
 
     const body = await req.json();
-    const { date, dateLocal, category, name, imageBase64, mimeType, weightG, calories, protein, carbs, fat, confidence, items } = body;
+    const { date, dateLocal, category, name, imageBase64, weightG, calories, protein, carbs, fat, confidence, items } = body;
 
     if (!date || !category || !name || weightG == null || calories == null || protein == null || carbs == null || fat == null || confidence == null) {
       return Response.json({ error: "Faltan campos requeridos" }, { status: 400 });
