@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, ChevronLeft, ChevronRight, Download, Check, Loader2 } from "lucide-react";
+import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
 
 type Modal = "history" | "account" | null;
@@ -12,7 +13,6 @@ function ConfirmModal({
   description,
   keyword,
   confirmLabel,
-  danger,
   onConfirm,
   onCancel,
   loading,
@@ -30,14 +30,21 @@ function ConfirmModal({
   const match = typed.trim().toUpperCase() === keyword.toUpperCase();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm px-4 pb-6">
-      <div className="w-full max-w-[420px] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6">
+      <div className="w-full max-w-[420px] bg-bg-primary rounded-2xl border border-border p-6 flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <span className="text-accent-warm flex-shrink-0 mt-0.5">
+            <Icon icon={AlertTriangle} size={22} />
+          </span>
+          <div>
+            <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary leading-tight">{title}</h2>
+            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{description}</p>
+          </div>
+        </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
-            Escribe <span className="font-bold text-gray-800 dark:text-gray-100">{keyword}</span> para confirmar
+          <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary">
+            Escribe <span className="text-text-primary">{keyword}</span> para confirmar
           </label>
           <input
             type="text"
@@ -45,37 +52,25 @@ function ConfirmModal({
             onChange={(e) => setTyped(e.target.value)}
             placeholder={keyword}
             autoFocus
-            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+            className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
           />
         </div>
 
         <div className="flex gap-2">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3 rounded-xl text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
-          >
+          <Button variant="secondary" onClick={onCancel} className="flex-1">
             Cancelar
-          </button>
+          </Button>
           <button
             onClick={onConfirm}
             disabled={!match || loading}
-            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
-              danger
-                ? "bg-red-500 hover:bg-red-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white"
-                : "bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white"
-            }`}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-medium bg-red-600 text-white active:bg-red-700 disabled:bg-bg-tertiary disabled:text-text-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
             {loading ? (
               <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
+                <Icon icon={Loader2} size={16} className="animate-spin" />
                 Procesando…
               </>
-            ) : (
-              confirmLabel
-            )}
+            ) : confirmLabel}
           </button>
         </div>
       </div>
@@ -141,7 +136,6 @@ export default function DataPage() {
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
       if (!res.ok) throw new Error();
-      // Redirigir a login tras eliminar cuenta
       window.location.href = "/auth";
     } catch {
       setModal(null);
@@ -149,8 +143,10 @@ export default function DataPage() {
     }
   }
 
+  const inputDate = "w-full bg-bg-primary border border-border rounded-xl text-text-primary px-3 py-2.5 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums";
+
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col flex-1 bg-bg-primary">
       {/* Modales */}
       {modal === "history" && (
         <ConfirmModal
@@ -178,130 +174,117 @@ export default function DataPage() {
       )}
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 pt-5 pb-4 flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-gray-400 dark:text-gray-500 p-1 -ml-1">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+      <div className="px-5 pt-7 pb-4 flex items-center gap-3">
+        <button onClick={() => router.back()} className="text-text-tertiary active:text-text-primary p-1 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]">
+          <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Mis datos</h1>
+        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary">Mis datos</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-5 pb-10 flex flex-col gap-5">
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-10 flex flex-col gap-4">
 
         {successMsg && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl px-4 py-3 flex items-center gap-2">
-            <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            <p className="text-emerald-700 dark:text-emerald-400 text-sm">{successMsg}</p>
+          <div className="bg-bg-secondary border border-border rounded-xl px-4 py-3 flex items-center gap-2">
+            <span className="text-macro-protein flex-shrink-0">
+              <Icon icon={Check} size={16} />
+            </span>
+            <p className="text-text-primary text-sm">{successMsg}</p>
           </div>
         )}
 
         {/* Exportar CSV */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 flex flex-col gap-4">
+        <div className="bg-bg-secondary rounded-xl border border-border p-5 flex flex-col gap-4">
           <div>
-            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Exportar historial</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Descarga un CSV con todas tus comidas registradas.</p>
+            <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-1">Exportar historial</p>
+            <p className="text-xs text-text-tertiary">Descarga un CSV con todas tus comidas registradas.</p>
           </div>
 
           {/* Rango de fechas opcional */}
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Rango de fechas (opcional)</p>
+            <p className="text-xs text-text-tertiary">Rango de fechas (opcional)</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400 dark:text-gray-500">Desde</label>
+                <label className="text-xs text-text-tertiary">Desde</label>
                 <input
                   type="date"
                   value={fromDate}
                   max={toDate || today}
                   onChange={(e) => setFromDate(e.target.value)}
-                  className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  className={inputDate}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400 dark:text-gray-500">Hasta</label>
+                <label className="text-xs text-text-tertiary">Hasta</label>
                 <input
                   type="date"
                   value={toDate}
                   min={fromDate}
                   max={today}
                   onChange={(e) => setToDate(e.target.value)}
-                  className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  className={inputDate}
                 />
               </div>
             </div>
             {(fromDate || toDate) && (
               <button
                 onClick={() => { setFromDate(""); setToDate(""); }}
-                className="text-xs text-gray-400 dark:text-gray-500 self-start underline"
+                className="text-xs text-text-tertiary self-start underline active:text-text-primary"
               >
                 Limpiar rango
               </button>
             )}
           </div>
 
-          <button
+          <Button
+            variant="primary"
             onClick={handleExport}
             disabled={exporting}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold rounded-xl py-3 text-sm transition-colors flex items-center justify-center gap-2"
+            leadingIcon={exporting ? <Icon icon={Loader2} size={16} className="animate-spin" /> : <Icon icon={Download} size={16} />}
+            className="w-full"
           >
-            {exporting ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                Exportando…
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {fromDate && toDate ? `Exportar ${fromDate} → ${toDate}` : "Exportar todo"}
-              </>
-            )}
-          </button>
+            {exporting
+              ? "Exportando…"
+              : (fromDate && toDate ? `Exportar ${fromDate} → ${toDate}` : "Exportar todo")}
+          </Button>
         </div>
 
         {/* Zona de peligro */}
         <div>
-          <p className="text-xs font-semibold text-red-400 uppercase tracking-wider px-1 mb-2">Zona de peligro</p>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-red-100 dark:border-red-900/40 shadow-sm overflow-hidden divide-y divide-red-50 dark:divide-red-900/30">
+          <p className="text-xs uppercase tracking-[0.08em] text-red-600 px-1 pt-2 pb-2">Zona de peligro</p>
+          <div className="bg-bg-secondary rounded-xl border border-border overflow-hidden divide-y divide-border">
 
             {/* Borrar historial */}
             <button
               onClick={() => setModal("history")}
-              className="w-full flex items-center gap-3.5 px-4 py-4 text-left active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
+              className="w-full flex items-center gap-3.5 px-5 py-4 text-left active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
             >
-              <span className="w-8 flex items-center justify-center text-red-500 flex-shrink-0">
+              <span className="w-8 flex items-center justify-center text-red-600 flex-shrink-0">
                 <Icon icon={Trash2} size={20} />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-red-500">Borrar historial</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Elimina todas tus comidas registradas</p>
+                <p className="text-sm font-medium text-red-600">Borrar historial</p>
+                <p className="text-xs text-text-tertiary mt-0.5">Elimina todas tus comidas registradas</p>
               </div>
-              <svg className="w-4 h-4 text-red-300 dark:text-red-800 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
+              <span className="text-text-tertiary flex-shrink-0">
+                <Icon icon={ChevronRight} size={18} />
+              </span>
             </button>
 
             {/* Borrar cuenta */}
             <button
               onClick={() => setModal("account")}
-              className="w-full flex items-center gap-3.5 px-4 py-4 text-left active:bg-red-50 dark:active:bg-red-900/20 transition-colors"
+              className="w-full flex items-center gap-3.5 px-5 py-4 text-left active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
             >
-              <span className="w-8 flex items-center justify-center text-red-500 flex-shrink-0">
+              <span className="w-8 flex items-center justify-center text-red-600 flex-shrink-0">
                 <Icon icon={AlertTriangle} size={20} />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-red-500">Eliminar mi cuenta</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Borra tu cuenta y todos tus datos permanentemente</p>
+                <p className="text-sm font-medium text-red-600">Eliminar mi cuenta</p>
+                <p className="text-xs text-text-tertiary mt-0.5">Borra tu cuenta y todos tus datos permanentemente</p>
               </div>
-              <svg className="w-4 h-4 text-red-300 dark:text-red-800 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
+              <span className="text-text-tertiary flex-shrink-0">
+                <Icon icon={ChevronRight} size={18} />
+              </span>
             </button>
           </div>
         </div>
