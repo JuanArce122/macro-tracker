@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { UtensilsCrossed, CalendarDays } from "lucide-react";
+import { UtensilsCrossed, CalendarDays, Search, X, Download, ChevronRight } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import Icon from "@/app/components/ui/Icon";
 
@@ -35,50 +35,58 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
   const day = meal.date.split("T")[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div
-        className="w-full max-w-[430px] mx-auto bg-white dark:bg-gray-900 rounded-t-3xl p-5 shadow-2xl"
+        className="w-full max-w-[430px] mx-auto bg-bg-primary rounded-t-3xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+        <div className="w-10 h-1 bg-bg-tertiary rounded-full mx-auto mb-5" />
 
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4 mb-5">
           {meal.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={meal.imageUrl} alt={meal.name} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
+            <div className="w-20 h-20 rounded-xl bg-bg-tertiary flex items-center justify-center flex-shrink-0 text-text-tertiary">
               <Icon icon={UtensilsCrossed} size={32} />
             </div>
           )}
-          <div className="flex-1">
-            <p className="font-bold text-gray-800 dark:text-gray-100 text-base">{meal.name}</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 capitalize mt-0.5">{meal.category} · {meal.weightG}g</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          <div className="flex-1 min-w-0">
+            <p className="font-serif text-xl tracking-[-0.02em] text-text-primary leading-tight">{meal.name}</p>
+            <p className="text-xs text-text-tertiary capitalize mt-1 tabular-nums">{meal.category} · {meal.weightG}g</p>
+            <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5">
               {format(parseISO(meal.date), "d 'de' MMMM yyyy", { locale: es })}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-4">
-          {[
-            { label: "kcal", val: meal.calories, color: "text-emerald-600" },
-            { label: "prot.", val: meal.protein, color: "text-blue-500" },
-            { label: "carbs", val: meal.carbs, color: "text-amber-500" },
-            { label: "grasa", val: meal.fat, color: "text-violet-500" },
-          ].map(({ label, val, color }) => (
-            <div key={label} className="text-center">
-              <p className={`text-lg font-bold ${color}`}>{val.toFixed(1)}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">{label}</p>
+        <div className="bg-bg-secondary border border-border rounded-xl p-5 mb-4">
+          <div className="grid grid-cols-4 gap-3 text-center">
+            <div>
+              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{meal.calories.toFixed(0)}</p>
+              <p className="text-xs text-text-tertiary mt-1">kcal</p>
             </div>
-          ))}
+            <div>
+              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{meal.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="text-xs text-text-tertiary mt-1">prot</p>
+            </div>
+            <div>
+              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{meal.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="text-xs text-text-tertiary mt-1">carbs</p>
+            </div>
+            <div>
+              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{meal.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="text-xs text-text-tertiary mt-1">grasa</p>
+            </div>
+          </div>
         </div>
 
         <button
           onClick={() => { router.push(`/day/${day}`); onClose(); }}
-          className="w-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium rounded-2xl py-3 text-sm"
+          className="w-full border border-text-primary text-text-primary font-medium rounded-xl py-3 text-sm active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)] inline-flex items-center justify-center gap-2"
         >
-          Ver día completo →
+          Ver día completo
+          <Icon icon={ChevronRight} size={16} />
         </button>
       </div>
     </div>
@@ -118,38 +126,38 @@ export default function HistoryPage() {
   const isSearching = query.trim().length > 0;
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col flex-1 bg-bg-primary">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 pt-5 pb-3">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Historial</h1>
+      <div className="px-5 pt-7 pb-4">
+        <div className="flex items-end justify-between mb-5">
+          <h1 className="font-serif text-[40px] leading-[1.1] tracking-[-0.02em] text-text-primary">Historial</h1>
           <a
             href="/api/export"
             download
-            className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-xl active:opacity-70"
+            className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.08em] font-medium text-text-primary border-b border-text-primary pb-0.5 active:opacity-70 transition-opacity duration-200 ease-[var(--ease-editorial)]"
           >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+            <Icon icon={Download} size={14} />
             CSV
           </a>
         </div>
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none flex items-center">
+            <Icon icon={Search} size={16} />
+          </span>
           <input
             type="text"
-            placeholder="Buscar alimento..."
+            placeholder="Buscar alimento…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-xl pl-9 pr-9 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+            className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary pl-10 pr-10 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
           />
           {query && (
-            <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary active:text-text-primary"
+              aria-label="Limpiar búsqueda"
+            >
+              <Icon icon={X} size={16} />
             </button>
           )}
         </div>
@@ -158,39 +166,37 @@ export default function HistoryPage() {
       <div className="flex-1 overflow-y-auto pb-20">
         {/* Resultados de búsqueda */}
         {isSearching && (
-          <div className="px-4 pt-4">
+          <div className="px-4 pt-2">
             {searching ? (
-              <p className="text-gray-400 text-sm text-center py-8">Buscando…</p>
+              <p className="text-text-tertiary text-sm text-center py-8">Buscando…</p>
             ) : searchResults.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-8">Sin resultados para "{query}"</p>
+              <p className="text-text-tertiary text-sm text-center py-8">Sin resultados para «{query}»</p>
             ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <p className="text-xs text-gray-400 dark:text-gray-500 px-4 py-2.5 border-b border-gray-50 dark:border-gray-700">
+              <div className="bg-bg-secondary border border-border rounded-xl overflow-hidden">
+                <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary px-5 py-3 border-b border-border">
                   {searchResults.length} resultado{searchResults.length !== 1 ? "s" : ""}
                 </p>
                 {searchResults.map((meal) => (
                   <button
                     key={meal.id}
                     onClick={() => setSelectedMeal(meal)}
-                    className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-gray-700/50 text-left"
+                    className="w-full flex items-center gap-3 px-5 py-3 border-b border-border last:border-0 active:bg-bg-tertiary text-left transition-colors duration-200 ease-[var(--ease-editorial)]"
                   >
                     {meal.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={meal.imageUrl} alt={meal.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
+                      <div className="w-11 h-11 rounded-lg bg-bg-tertiary flex items-center justify-center flex-shrink-0 text-text-tertiary">
                         <Icon icon={UtensilsCrossed} size={20} />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{meal.name}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                      <p className="text-sm font-medium text-text-primary truncate">{meal.name}</p>
+                      <p className="text-xs text-text-tertiary tabular-nums mt-0.5">
                         {format(parseISO(meal.date), "d MMM yyyy", { locale: es })} · {meal.calories.toFixed(0)} kcal
                       </p>
                     </div>
-                    <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <Icon icon={ChevronRight} size={16} className="text-text-tertiary flex-shrink-0" />
                   </button>
                 ))}
               </div>
@@ -200,7 +206,7 @@ export default function HistoryPage() {
 
         {/* Lista de días */}
         {!isSearching && (
-          <div className="px-4 pt-4 flex flex-col gap-2">
+          <div className="px-4 pt-2 flex flex-col gap-3">
             {/* Promedios últimos 7 días */}
             {!loading && days.length > 0 && (() => {
               const recent = days.slice(0, 7);
@@ -212,26 +218,26 @@ export default function HistoryPage() {
                 fat:      recent.reduce((s, d) => s + d.fat,      0) / n,
               };
               return (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-1">
-                  <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3">
+                <div className="bg-bg-secondary border border-border rounded-xl p-5">
+                  <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">
                     Promedio · últimos {n} {n === 1 ? "día" : "días"} registrados
                   </p>
-                  <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="grid grid-cols-4 gap-3 text-center">
                     <div>
-                      <p className="text-lg font-bold text-emerald-600">{avg.calories.toFixed(0)}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">kcal</p>
+                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{avg.calories.toFixed(0)}</p>
+                      <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-blue-500">{avg.protein.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">prot.</p>
+                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="text-xs text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-amber-500">{avg.carbs.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">carbs</p>
+                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="text-xs text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-violet-500">{avg.fat.toFixed(1)}g</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">grasa</p>
+                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="text-xs text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>
                 </div>
@@ -239,15 +245,15 @@ export default function HistoryPage() {
             })()}
 
             {loading && (
-              <p className="text-gray-400 text-sm text-center py-12">Cargando…</p>
+              <p className="text-text-tertiary text-sm text-center py-12">Cargando…</p>
             )}
             {!loading && days.length === 0 && (
               <div className="flex flex-col items-center py-16 text-center">
-                <span className="text-gray-300 dark:text-gray-600 mb-3">
+                <span className="text-text-tertiary mb-4">
                   <Icon icon={CalendarDays} size={48} />
                 </span>
-                <p className="text-gray-500 font-medium">Sin registros todavía</p>
-                <p className="text-gray-400 text-sm mt-1">Agrega comidas para verlas aquí</p>
+                <p className="text-text-secondary font-medium">Sin registros todavía</p>
+                <p className="text-text-tertiary text-sm mt-1">Agrega comidas para verlas aquí</p>
               </div>
             )}
             {days.map((day) => {
@@ -256,33 +262,28 @@ export default function HistoryPage() {
                 <button
                   key={day.date}
                   onClick={() => router.push(`/day/${day.date}`)}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-left active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+                  className="bg-bg-secondary border border-border rounded-xl p-5 text-left active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-gray-800 dark:text-gray-100 capitalize">
+                  <div className="flex items-baseline justify-between gap-3 mb-3">
+                    <div className="min-w-0">
+                      <p className="font-serif text-2xl leading-none tracking-[-0.02em] text-text-primary capitalize">
                         {format(parsed, "EEEE", { locale: es })}
                       </p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                      <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5 capitalize">
                         {format(parsed, "d 'de' MMMM yyyy", { locale: es })}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-emerald-600">{day.calories.toFixed(0)}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">kcal</p>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{day.calories.toFixed(0)}</p>
+                      <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                   </div>
-                  <div className="flex gap-4">
-                    {[
-                      { label: "P", val: day.protein, color: "text-blue-500" },
-                      { label: "C", val: day.carbs, color: "text-amber-500" },
-                      { label: "G", val: day.fat, color: "text-violet-500" },
-                    ].map(({ label, val, color }) => (
-                      <div key={label} className="flex items-baseline gap-1">
-                        <span className={`text-sm font-semibold ${color}`}>{val.toFixed(1)}g</span>
-                        <span className="text-xs text-gray-400">{label}</span>
-                      </div>
-                    ))}
+                  <div className="flex gap-3 text-xs tabular-nums">
+                    <span><span className="text-macro-protein font-medium">{day.protein.toFixed(1)}g</span><span className="text-text-tertiary"> P</span></span>
+                    <span className="text-text-tertiary">·</span>
+                    <span><span className="text-macro-carbs font-medium">{day.carbs.toFixed(1)}g</span><span className="text-text-tertiary"> C</span></span>
+                    <span className="text-text-tertiary">·</span>
+                    <span><span className="text-macro-fat font-medium">{day.fat.toFixed(1)}g</span><span className="text-text-tertiary"> G</span></span>
                   </div>
                 </button>
               );
