@@ -28,6 +28,7 @@ model User {
 
   meals         Meal[]
   goals         Goal[]
+  foodVotes     FoodVote[]
 }
 
 model Meal {
@@ -87,8 +88,32 @@ model Food {
   // Soporte regional (HU-12): null = global, "CO" = colombiano, "LAC" = LATAM genérico
   regionCode   String?
 
+  // BD dos capas + votos (HU-04)
+  verifiedAt   DateTime? // null = comunitario, fecha = verificado por admin
+  verifiedBy   String?   // email del admin que verificó
+  needsReview  Boolean   @default(false)
+  voteScore    Int       @default(0) // denormalizado: sum(vote) sobre FoodVote
+  voteCount    Int       @default(0) // denormalizado: count(*) sobre FoodVote
+
+  votes        FoodVote[]
+
   @@index([nombre])
   @@index([userId])
   @@index([lastUsedAt])
   @@index([regionCode])
+  @@index([needsReview])
+}
+
+model FoodVote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  foodId    Int
+  vote      Int      // +1 o -1
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food      Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, foodId])
+  @@index([foodId])
 }
