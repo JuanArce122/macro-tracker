@@ -323,7 +323,7 @@ export default function EditMealSheet({ meal, onClose }: Props) {
     <>
       <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-bg-primary rounded-t-3xl z-50 flex flex-col max-h-[90dvh]">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-bg-primary rounded-t-xl z-50 flex flex-col max-h-[90dvh]">
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-bg-tertiary" />
         </div>

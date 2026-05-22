@@ -24,7 +24,7 @@ export default function DayHeader({ date }: { date: string }) {
     <header className="flex items-center justify-between gap-3 px-5 pt-7 pb-6 bg-bg-primary">
       <button
         onClick={() => router.push(`/day/${prev}`)}
-        className="text-text-tertiary active:text-text-primary transition-colors p-1 -ml-1 flex-shrink-0"
+        className="text-text-tertiary active:text-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] p-1 -ml-1 flex-shrink-0"
         aria-label="Día anterior"
       >
         <Icon icon={ChevronLeft} size={22} />
@@ -42,7 +42,7 @@ export default function DayHeader({ date }: { date: string }) {
       <button
         onClick={() => router.push(`/day/${next}`)}
         disabled={isTodayDate}
-        className={`p-1 -mr-1 flex-shrink-0 transition-colors ${
+        className={`p-1 -mr-1 flex-shrink-0 transition-colors duration-200 ease-[var(--ease-editorial)] ${
           isTodayDate ? "text-bg-tertiary" : "text-text-tertiary active:text-text-primary"
         }`}
         aria-label="Día siguiente"

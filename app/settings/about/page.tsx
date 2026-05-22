@@ -30,7 +30,7 @@ export default function AboutPage() {
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-10 flex flex-col gap-6">
         {/* Logo + nombre */}
         <div className="flex flex-col items-center gap-3 pb-2">
-          <div className="w-20 h-20 rounded-2xl bg-bg-tertiary flex items-center justify-center text-text-primary">
+          <div className="w-20 h-20 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary">
             <Icon icon={Leaf} size={32} />
           </div>
           <div className="text-center">

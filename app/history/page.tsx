@@ -37,7 +37,7 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div
-        className="w-full max-w-[430px] mx-auto bg-bg-primary rounded-t-3xl p-6"
+        className="w-full max-w-[430px] mx-auto bg-bg-primary rounded-t-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-bg-tertiary rounded-full mx-auto mb-5" />

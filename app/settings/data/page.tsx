@@ -31,7 +31,7 @@ function ConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6">
-      <div className="w-full max-w-[420px] bg-bg-primary rounded-2xl border border-border p-6 flex flex-col gap-4">
+      <div className="w-full max-w-[420px] bg-bg-primary rounded-xl border border-border p-6 flex flex-col gap-4">
         <div className="flex items-start gap-3">
           <span className="text-accent-warm flex-shrink-0 mt-0.5">
             <Icon icon={AlertTriangle} size={22} />

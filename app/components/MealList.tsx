@@ -98,14 +98,14 @@ function MealItem({
       <div className="flex items-center gap-0.5 flex-shrink-0">
         <button
           onClick={() => onEdit(meal)}
-          className="p-2 text-text-tertiary active:text-text-primary transition-colors"
+          className="p-2 text-text-tertiary active:text-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
           aria-label="Editar"
         >
           <Icon icon={Pencil} size={18} />
         </button>
         <button
           onClick={() => onDelete(meal.id)}
-          className="p-2 text-text-tertiary active:text-accent-warm transition-colors"
+          className="p-2 text-text-tertiary active:text-accent-warm transition-colors duration-200 ease-[var(--ease-editorial)]"
           aria-label="Eliminar"
         >
           <Icon icon={Trash2} size={18} />

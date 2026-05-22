@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { Leaf, ChevronLeft, AlertTriangle } from "lucide-react";
+import Icon from "@/app/components/ui/Icon";
 import ResetPasswordForm from "./ResetPasswordForm";
 
 export const metadata = { title: "Nueva contraseña — Macro Tracker" };
@@ -28,21 +30,25 @@ export default async function ResetPasswordPage({
   const { valid, reason } = await validateToken(token ?? "");
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
-      <div className="bg-emerald-500 pt-16 pb-20 flex flex-col items-center gap-3 px-6">
-        <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg">
-          <span className="text-3xl font-black text-white">M</span>
+    <div className="min-h-screen flex flex-col bg-bg-primary">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 py-10 gap-8">
+        {/* Logo + branding */}
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="w-16 h-16 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary">
+            <Icon icon={Leaf} size={28} />
+          </div>
+          <div>
+            <h1 className="font-serif text-4xl tracking-[-0.02em] text-text-primary">Macro Tracker</h1>
+            <p className="text-sm text-text-tertiary mt-2">Nueva contraseña</p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Macro Tracker</h1>
-        <p className="text-emerald-100 text-sm">Nueva contraseña</p>
-      </div>
 
-      <div className="flex-1 flex flex-col px-5 -mt-10">
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden w-full max-w-[430px] mx-auto">
+        {/* Card */}
+        <div className="w-full max-w-[400px] bg-bg-secondary rounded-xl border border-border overflow-hidden">
           {!valid ? (
             <InvalidToken reason={reason!} />
           ) : (
-            <Suspense fallback={<div className="h-64 animate-pulse bg-gray-50 dark:bg-gray-800 rounded-3xl" />}>
+            <Suspense fallback={<div className="h-72 animate-pulse bg-bg-tertiary" />}>
               <ResetPasswordForm token={token!} />
             </Suspense>
           )}
@@ -50,11 +56,9 @@ export default async function ResetPasswordPage({
 
         <a
           href="/auth"
-          className="flex items-center justify-center gap-1.5 text-sm text-gray-400 dark:text-gray-600 mt-6 pb-8 active:opacity-60"
+          className="inline-flex items-center gap-1 text-sm text-text-tertiary active:text-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+          <Icon icon={ChevronLeft} size={16} />
           Volver al inicio de sesión
         </a>
       </div>
@@ -66,16 +70,14 @@ function InvalidToken({ reason }: { reason: "no-token" | "invalid" | "expired" }
   const isExpired = reason === "expired";
   return (
     <div className="px-6 py-8 flex flex-col items-center text-center gap-4">
-      <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-        <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+      <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center text-accent-warm">
+        <Icon icon={AlertTriangle} size={28} />
       </div>
       <div>
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-2">
           {isExpired ? "Enlace expirado" : "Enlace no válido"}
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="text-sm text-text-secondary leading-relaxed">
           {isExpired
             ? "Este enlace de recuperación ya expiró. Los enlaces son válidos por 15 minutos."
             : "Este enlace de recuperación no es válido o ya fue usado."}
@@ -83,7 +85,7 @@ function InvalidToken({ reason }: { reason: "no-token" | "invalid" | "expired" }
       </div>
       <a
         href="/auth/forgot-password"
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-2xl py-3.5 text-center transition-colors"
+        className="w-full inline-flex items-center justify-center bg-text-primary text-bg-primary font-medium rounded-xl py-3 px-6 text-sm active:opacity-90 transition-opacity duration-200 ease-[var(--ease-editorial)]"
       >
         Solicitar nuevo enlace
       </a>
