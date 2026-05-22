@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, AlertTriangle, ChevronLeft, ChevronRight, Download, Check, Loader2 } from "lucide-react";
+import { Trash2, AlertTriangle, ChevronLeft, ChevronRight, FileText, FileJson, FileType2, Check, Loader2 } from "lucide-react";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
 
@@ -78,41 +78,49 @@ function ConfirmModal({
   );
 }
 
+type ExportFormat = "csv" | "json" | "pdf";
+
+const EXPORT_META: Record<ExportFormat, { label: string; ext: string; endpoint: string; icon: typeof FileText }> = {
+  csv:  { label: "CSV",  ext: "csv",  endpoint: "/api/export",      icon: FileText  },
+  json: { label: "JSON", ext: "json", endpoint: "/api/export/json", icon: FileJson  },
+  pdf:  { label: "PDF",  ext: "pdf",  endpoint: "/api/export/pdf",  icon: FileType2 },
+};
+
 export default function DataPage() {
   const router = useRouter();
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [exporting, setExporting] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
   const [modal, setModal] = useState<Modal>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
 
-  function buildExportUrl() {
+  function buildExportUrl(format: ExportFormat) {
     const params = new URLSearchParams();
     if (fromDate) params.set("from", fromDate);
     if (toDate) params.set("to", toDate);
     const qs = params.toString();
-    return `/api/export${qs ? `?${qs}` : ""}`;
+    return `${EXPORT_META[format].endpoint}${qs ? `?${qs}` : ""}`;
   }
 
-  async function handleExport() {
-    setExporting(true);
+  async function handleExport(format: ExportFormat) {
+    setExportingFormat(format);
     try {
-      const res = await fetch(buildExportUrl());
+      const res = await fetch(buildExportUrl(format));
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `macros-${today}.csv`;
+      a.download = `macros-${today}.${EXPORT_META[format].ext}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
       // silencioso — el navegador mostrará el error de descarga
     } finally {
-      setExporting(false);
+      setExportingFormat(null);
     }
   }
 
@@ -235,17 +243,32 @@ export default function DataPage() {
             )}
           </div>
 
-          <Button
-            variant="primary"
-            onClick={handleExport}
-            disabled={exporting}
-            leadingIcon={exporting ? <Icon icon={Loader2} size={16} className="animate-spin" /> : <Icon icon={Download} size={16} />}
-            className="w-full"
-          >
-            {exporting
-              ? "Exportando…"
-              : (fromDate && toDate ? `Exportar ${fromDate} → ${toDate}` : "Exportar todo")}
-          </Button>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-text-tertiary">Formato</p>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(EXPORT_META) as ExportFormat[]).map((format) => {
+                const meta = EXPORT_META[format];
+                const isExporting = exportingFormat === format;
+                const anyExporting = exportingFormat !== null;
+                return (
+                  <Button
+                    key={format}
+                    variant="secondary"
+                    onClick={() => handleExport(format)}
+                    disabled={anyExporting}
+                    leadingIcon={isExporting ? <Icon icon={Loader2} size={14} className="animate-spin" /> : <Icon icon={meta.icon} size={14} />}
+                  >
+                    {meta.label}
+                  </Button>
+                );
+              })}
+            </div>
+            {fromDate && toDate && (
+              <p className="text-xs text-text-tertiary mt-1 tabular-nums">
+                Rango: {fromDate} → {toDate}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Zona de peligro */}

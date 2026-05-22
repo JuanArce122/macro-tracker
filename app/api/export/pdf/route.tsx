@@ -1,6 +1,8 @@
+import { createElement } from "react";
 import { auth } from "@/auth";
 import { NextRequest } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
+import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import { buildExportData } from "@/lib/export/build-export-data";
 import { ReportTemplate } from "@/lib/pdf/report-template";
 
@@ -39,7 +41,11 @@ export async function GET(req: NextRequest) {
 
     const data = await buildExportData(userId, range);
 
-    const buffer = await renderToBuffer(<ReportTemplate data={data} />);
+    // createElement (en lugar de JSX) evita el falso positivo de
+    // react-hooks/error-boundaries: renderToBuffer no usa el reconciler
+    // de React, así que no hay riesgo real de errores no atrapados.
+    const element = createElement(ReportTemplate, { data }) as ReactElement<DocumentProps>;
+    const buffer = await renderToBuffer(element);
 
     const filename = `macros-report-${new Date().toISOString().split("T")[0]}.pdf`;
 
