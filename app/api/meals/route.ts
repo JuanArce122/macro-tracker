@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { NextRequest } from "next/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
+import { MealCreateSchema } from "@/lib/schemas";
+import { validateBody } from "@/lib/api/validate";
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,12 +47,9 @@ export async function POST(req: NextRequest) {
     }
     const userId = Number(session.user.id);
 
-    const body = await req.json();
-    const { date, dateLocal, category, name, imageBase64, weightG, calories, protein, carbs, fat, confidence, items } = body;
-
-    if (!date || !category || !name || weightG == null || calories == null || protein == null || carbs == null || fat == null || confidence == null) {
-      return Response.json({ error: "Faltan campos requeridos" }, { status: 400 });
-    }
+    const parsed = await validateBody(req, MealCreateSchema);
+    if (!parsed.ok) return parsed.response;
+    const { date, dateLocal, category, name, imageBase64, weightG, calories, protein, carbs, fat, confidence, items } = parsed.data;
 
     let imageUrl: string | null = null;
 
@@ -82,12 +81,12 @@ export async function POST(req: NextRequest) {
         category,
         name,
         imageUrl,
-        weightG: Number(weightG),
-        calories: Number(calories),
-        protein: Number(protein),
-        carbs: Number(carbs),
-        fat: Number(fat),
-        confidence: Number(confidence),
+        weightG,
+        calories,
+        protein,
+        carbs,
+        fat,
+        confidence,
         items: items ? JSON.stringify(items) : null,
       },
     });

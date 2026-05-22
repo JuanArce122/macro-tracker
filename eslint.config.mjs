@@ -23,6 +23,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worktrees temporales de claude code (no son código de la app)
+    ".claude/**",
+    // Salidas generadas
+    "app/generated/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { NextRequest } from "next/server";
+import { ProfileUpdateSchema } from "@/lib/schemas";
+import { validateBody } from "@/lib/api/validate";
 
 export async function GET() {
   try {
@@ -41,20 +43,21 @@ export async function PUT(req: NextRequest) {
     }
     const userId = Number(session.user.id);
 
-    const { name, avatarEmoji, age, sex, weightKg, heightCm, activityLevel, fitnessGoal } =
-      await req.json();
+    const parsed = await validateBody(req, ProfileUpdateSchema);
+    if (!parsed.ok) return parsed.response;
+    const data = parsed.data;
 
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
-        name: name ?? null,
-        avatarEmoji: avatarEmoji ?? null,
-        age: age ? Number(age) : null,
-        sex: sex ?? null,
-        weightKg: weightKg ? Number(weightKg) : null,
-        heightCm: heightCm ? Number(heightCm) : null,
-        activityLevel: activityLevel ?? null,
-        fitnessGoal: fitnessGoal ?? null,
+        name: data.name ?? null,
+        avatarEmoji: data.avatarEmoji ?? null,
+        age: data.age ?? null,
+        sex: data.sex ?? null,
+        weightKg: data.weightKg ?? null,
+        heightCm: data.heightCm ?? null,
+        activityLevel: data.activityLevel ?? null,
+        fitnessGoal: data.fitnessGoal ?? null,
       },
       select: {
         name: true,

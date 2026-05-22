@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { searchFoods } from "@/lib/foods"; // fallback offline
+import { FoodCreateSchema } from "@/lib/schemas";
+import { validateBody } from "@/lib/api/validate";
 
 // ─── Tipos Open Food Facts ────────────────────────────────────────────────────
 
@@ -71,18 +73,20 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = Number(session.user.id);
 
-  const body = await req.json();
-  const { nombre, cal, p, c, f } = body;
-  if (!nombre?.trim() || !cal) return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
+  const parsed = await validateBody(req, FoodCreateSchema);
+  if (!parsed.ok) return parsed.response;
+  const { nombre, cal, p, c, f, gramsPerUnit, unitLabel } = parsed.data;
 
   const food = await prisma.food.create({
     data: {
-      nombre: nombre.trim(),
+      nombre,
       categoria: "user",
-      cal: Number(cal),
-      p: Number(p) || 0,
-      c: Number(c) || 0,
-      f: Number(f) || 0,
+      cal,
+      p,
+      c,
+      f,
+      gramsPerUnit: gramsPerUnit ?? null,
+      unitLabel: unitLabel ?? null,
       source: "user",
       userId,
     },
