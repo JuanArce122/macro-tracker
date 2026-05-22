@@ -3,11 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { Sunrise, Sun, Moon, Apple } from "lucide-react";
+import { Sunrise, Sun, Moon, Apple, ChevronLeft, ChevronRight, Plus, X, Loader2, Check } from "lucide-react";
 import type { AnalysisResult, MealItem } from "./StepCamera";
 import { calcMacros } from "@/lib/foods";
 import type { Food } from "@/lib/foods";
-import { useFoodSearch } from "@/app/hooks/useFoodSearch";
+import Button from "@/app/components/ui/Button";
+import FoodDropdown from "@/app/components/ui/FoodDropdown";
 import Icon from "@/app/components/ui/Icon";
 
 type Category = "desayuno" | "almuerzo" | "cena" | "snack";
@@ -29,13 +30,13 @@ function defaultCategory(): Category {
 
 function ConfidenceBadge({ confidence }: { confidence: number }) {
   if (confidence >= 0.85) return (
-    <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Alta</span>
+    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-macro-protein px-2 py-0.5 rounded-full">Alta</span>
   );
   if (confidence >= 0.6) return (
-    <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Media</span>
+    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-macro-fat px-2 py-0.5 rounded-full">Media</span>
   );
   return (
-    <span className="text-xs font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Baja</span>
+    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-accent-warm px-2 py-0.5 rounded-full">Baja</span>
   );
 }
 
@@ -85,38 +86,8 @@ function todayString() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function FoodDropdown({ query, onSelect }: { query: string; onSelect: (food: Food) => void }) {
-  const { results, loading } = useFoodSearch(query);
-  if (loading) return (
-    <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2">
-      <svg className="w-4 h-4 text-emerald-400 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-      </svg>
-      <span className="text-sm text-gray-400">Buscando…</span>
-    </div>
-  );
-  if (results.length === 0) return null;
-  return (
-    <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
-      {results.map((food) => (
-        <button key={food.id} type="button"
-          onMouseDown={(e) => { e.preventDefault(); onSelect(food); }}
-          className="w-full flex items-start gap-2 px-4 py-2.5 text-left active:bg-emerald-50 dark:active:bg-emerald-900/20 border-b border-gray-50 dark:border-gray-700 last:border-0">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{food.nombre}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs text-gray-400 dark:text-gray-500">{food.cal} kcal/100g</span>
-              {food.source === "openfoodfacts" && (
-                <span className="text-[10px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full">OFF</span>
-              )}
-            </div>
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-}
+const inputClass = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]";
+const inputClassSmall = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums";
 
 export default function StepConfirm({ result, date: _date, onBack, onSaved }: Props) {
   const router = useRouter();
@@ -145,7 +116,6 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
   function applyFoodFromDB(itemId: string, food: Food, currentWeight: number) {
     const weight = currentWeight > 0 ? currentWeight : 100;
     const macros = calcMacros(food, weight);
-    // Registrar uso para recientes y frecuentes
     fetch(`/api/foods/${food.id}/use`, { method: "POST" }).catch(() => {});
     setItems((prev) =>
       prev.map((item) =>
@@ -221,7 +191,6 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
           proteina: newProteina,
           carbs: newCarbs,
           grasa: newGrasa,
-          // actualizar base para que el recálculo por peso siga siendo coherente
           _baseWeight: newPeso,
           _baseCalorias: newCalorias,
           _baseProteina: newProteina,
@@ -310,21 +279,19 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-y-auto">
+    <div className="flex flex-col flex-1 overflow-y-auto bg-bg-primary">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-        <button onClick={onBack} className="text-gray-400 dark:text-gray-500">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+      <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-border flex-shrink-0">
+        <button onClick={onBack} className="text-text-tertiary active:text-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]">
+          <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Confirmar plato</h1>
+        <h1 className="font-serif text-2xl tracking-[-0.02em] text-text-primary">Confirmar plato</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5">
+      <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6">
         {/* Foto */}
         {result.imagePreviewUrl && (
-          <div className="w-full max-h-48 rounded-2xl overflow-hidden bg-gray-100">
+          <div className="w-full max-h-48 rounded-xl overflow-hidden bg-bg-tertiary">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={result.imagePreviewUrl} alt="Foto" className="w-full h-full object-cover" />
           </div>
@@ -332,14 +299,16 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
 
         {/* Categoría */}
         <div>
-          <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-2">Categoría</label>
+          <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-2">Categoría</label>
           <div className="grid grid-cols-4 gap-2">
             {CATEGORIES.map(({ key, label, icon }) => (
               <button
                 key={key}
                 onClick={() => setCategory(key)}
-                className={`flex flex-col items-center gap-1 py-2 rounded-xl text-xs font-medium transition-colors ${
-                  category === key ? "bg-emerald-500 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                className={`flex flex-col items-center gap-1 py-3 rounded-xl text-xs font-medium transition-colors duration-200 ease-[var(--ease-editorial)] ${
+                  category === key
+                    ? "bg-text-primary text-bg-primary"
+                    : "bg-bg-tertiary text-text-secondary active:opacity-80"
                 }`}
               >
                 <Icon icon={icon} size={18} />
@@ -351,66 +320,74 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
 
         {/* Fecha */}
         <div>
-          <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">Fecha</label>
+          <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-2">Fecha</label>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+            className={inputClass}
           />
         </div>
 
         {/* Nombre del plato */}
         <div>
-          <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1.5">Nombre del plato</label>
+          <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-2">Nombre del plato</label>
           <input
             type="text"
             value={nombrePlato}
             onChange={(e) => setNombrePlato(e.target.value)}
-            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+            className={inputClass}
           />
         </div>
 
         {/* Ítems / modo manual */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary">
               {items.length > 0 ? `Ingredientes (${items.length})` : "Macros del plato"}
             </label>
             <button
               onClick={addItem}
-              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 active:opacity-70"
+              className="flex items-center gap-1 text-xs font-medium text-text-primary active:opacity-70"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
+              <Icon icon={Plus} size={14} />
               Ingrediente
             </button>
           </div>
 
           {items.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
-              <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
-                La IA no detectó ingredientes. Ingresa los macros manualmente o toca &quot;+ Ingrediente&quot;.
+            <div className="bg-bg-secondary border border-border rounded-xl p-5 flex flex-col gap-4">
+              <p className="text-xs text-accent-warm bg-bg-tertiary rounded-lg px-3 py-2">
+                La IA no detectó ingredientes. Ingresa los macros manualmente o toca «+ Ingrediente».
               </p>
               <div>
-                <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Peso total (g)</label>
-                <input type="number" inputMode="decimal" placeholder="ej: 350" value={flatWeight}
+                <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">Peso total (g)</label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="ej: 350"
+                  value={flatWeight}
                   onChange={(e) => setFlatWeight(e.target.value)}
-                  className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                  className={inputClassSmall}
+                />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: "Calorías (kcal)", val: flatCalories, set: setFlatCalories, color: "focus:ring-emerald-300" },
-                  { label: "Proteína (g)",    val: flatProtein,  set: setFlatProtein,  color: "focus:ring-blue-300"    },
-                  { label: "Carbs (g)",       val: flatCarbs,    set: setFlatCarbs,    color: "focus:ring-amber-300"   },
-                  { label: "Grasa (g)",       val: flatFat,      set: setFlatFat,      color: "focus:ring-violet-300"  },
-                ].map(({ label, val, set, color }) => (
+                  { label: "Calorías (kcal)", val: flatCalories, set: setFlatCalories },
+                  { label: "Proteína (g)",    val: flatProtein,  set: setFlatProtein  },
+                  { label: "Carbs (g)",       val: flatCarbs,    set: setFlatCarbs    },
+                  { label: "Grasa (g)",       val: flatFat,      set: setFlatFat      },
+                ].map(({ label, val, set }) => (
                   <div key={label}>
-                    <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">{label}</label>
-                    <input type="number" inputMode="decimal" placeholder="0" value={val}
+                    <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">{label}</label>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={val}
                       onChange={(e) => set(e.target.value)}
-                      className={`w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 ${color}`} />
+                      className={inputClassSmall}
+                    />
                   </div>
                 ))}
               </div>
@@ -420,45 +397,41 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
             {items.map((item) => {
               const isExpanded = expandedId === item.id;
               return (
-                <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <div key={item.id} className="bg-bg-secondary border border-border rounded-xl overflow-hidden">
                   {/* Fila principal */}
                   <div className="flex items-center gap-3 px-4 py-3">
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : item.id)}
                       className="flex-1 flex items-center gap-2 text-left min-w-0"
                     >
-                      <svg
-                        className={`w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0 transition-transform ${isExpanded ? "rotate-90" : ""}`}
-                        fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
+                      <span className={`text-text-tertiary flex-shrink-0 transition-transform duration-200 ease-[var(--ease-editorial)] ${isExpanded ? "rotate-90" : ""}`}>
+                        <Icon icon={ChevronRight} size={16} />
+                      </span>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{item.nombre}</p>
+                          <p className="text-sm font-medium text-text-primary truncate">{item.nombre}</p>
                           <ConfidenceBadge confidence={item.confianza} />
                         </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                        <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
                           {item.unidades > 1 ? `${item.unidades} und · ` : ""}{item.pesoG}g · {Math.round(item.calorias)} kcal
                         </p>
                       </div>
                     </button>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="p-1.5 text-text-tertiary active:text-accent-warm transition-colors duration-200 ease-[var(--ease-editorial)] flex-shrink-0"
+                      aria-label="Quitar ingrediente"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <Icon icon={X} size={16} />
                     </button>
                   </div>
 
                   {/* Panel expandido */}
                   {isExpanded && (
-                    <div className="border-t border-gray-50 dark:border-gray-700 px-4 py-3 flex flex-col gap-3 bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="border-t border-border px-4 py-4 flex flex-col gap-3 bg-bg-tertiary/40">
                       {/* Nombre con búsqueda */}
                       <div className="relative" ref={nameSearch?.id === item.id ? dropdownRef : null}>
-                        <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Nombre</label>
+                        <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">Nombre</label>
                         <input
                           type="text"
                           value={nameSearch?.id === item.id ? nameSearch.query : item.nombre}
@@ -467,7 +440,7 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
                             if (!e.target.value.trim()) updateItem(item.id, "nombre", e.target.value);
                           }}
                           onFocus={() => setNameSearch({ id: item.id, query: item.nombre })}
-                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white dark:bg-gray-700 dark:text-gray-100"
+                          className={inputClassSmall}
                           placeholder="Busca un alimento…"
                           autoComplete="off"
                         />
@@ -482,54 +455,54 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
 
                       {/* Unidades */}
                       <div>
-                        <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Unidades</label>
+                        <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">Unidades</label>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => updateItemUnits(item.id, item.unidades - 1)}
                             disabled={item.unidades <= 1}
-                            className="w-9 h-9 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-medium disabled:opacity-30"
+                            className="w-9 h-9 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary font-medium disabled:opacity-30 active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
                           >
                             −
                           </button>
-                          <span className="text-lg font-bold text-gray-800 dark:text-gray-100 w-6 text-center">{item.unidades}</span>
+                          <span className="font-serif text-xl tabular-nums tracking-[-0.02em] text-text-primary w-6 text-center">{item.unidades}</span>
                           <button
                             onClick={() => updateItemUnits(item.id, item.unidades + 1)}
-                            className="w-9 h-9 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-medium"
+                            className="w-9 h-9 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
                           >
                             +
                           </button>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">— escala los macros</span>
+                          <span className="text-xs text-text-tertiary">— escala los macros</span>
                         </div>
                       </div>
 
                       {/* Peso */}
                       <div>
-                        <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">Peso total (g)</label>
+                        <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">Peso total (g)</label>
                         <input
                           type="number"
                           inputMode="decimal"
                           value={item.pesoG}
                           onChange={(e) => updateItemWeight(item.id, Number(e.target.value) || 0)}
-                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white dark:bg-gray-700 dark:text-gray-100"
+                          className={inputClassSmall}
                         />
                       </div>
 
                       {/* Macros */}
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { label: "Calorías (kcal)", field: "calorias" as keyof MealItem, val: item.calorias, color: "focus:ring-emerald-300" },
-                          { label: "Proteína (g)",    field: "proteina" as keyof MealItem, val: item.proteina, color: "focus:ring-blue-300"    },
-                          { label: "Carbohidratos (g)", field: "carbs" as keyof MealItem, val: item.carbs,    color: "focus:ring-amber-300"   },
-                          { label: "Grasa (g)",       field: "grasa" as keyof MealItem,   val: item.grasa,   color: "focus:ring-violet-300"  },
-                        ].map(({ label, field, val, color }) => (
+                          { label: "Calorías (kcal)", field: "calorias" as keyof MealItem, val: item.calorias },
+                          { label: "Proteína (g)",    field: "proteina" as keyof MealItem, val: item.proteina },
+                          { label: "Carbohidratos (g)", field: "carbs" as keyof MealItem, val: item.carbs },
+                          { label: "Grasa (g)",       field: "grasa" as keyof MealItem,   val: item.grasa },
+                        ].map(({ label, field, val }) => (
                           <div key={label}>
-                            <label className="text-xs text-gray-400 dark:text-gray-500 block mb-1">{label}</label>
+                            <label className="text-xs uppercase tracking-[0.08em] text-text-tertiary block mb-1.5">{label}</label>
                             <input
                               type="number"
                               inputMode="decimal"
                               value={val}
                               onChange={(e) => updateItem(item.id, field, e.target.value)}
-                              className={`w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 ${color} bg-white dark:bg-gray-700 dark:text-gray-100`}
+                              className={inputClassSmall}
                             />
                           </div>
                         ))}
@@ -539,73 +512,60 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
                 </div>
               );
             })}
-
           </div>
           )}
         </div>
 
         {/* Totales */}
-        <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl p-4">
-          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-3">Total del plato</p>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{Math.round(totals.calorias)}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">kcal</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-blue-500">{(Math.round(totals.proteina * 10) / 10)}g</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">proteína</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-amber-500">{(Math.round(totals.carbs * 10) / 10)}g</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">carbs</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-violet-500">{(Math.round(totals.grasa * 10) / 10)}g</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">grasa</p>
+        {items.length > 0 && (
+          <div className="bg-bg-secondary border border-border rounded-xl p-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">Total del plato</p>
+            <div className="grid grid-cols-4 gap-3 text-center">
+              <div>
+                <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{Math.round(totals.calorias)}</p>
+                <p className="text-xs text-text-tertiary mt-1">kcal</p>
+              </div>
+              <div>
+                <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{(Math.round(totals.proteina * 10) / 10)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                <p className="text-xs text-text-tertiary mt-1">prot</p>
+              </div>
+              <div>
+                <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{(Math.round(totals.carbs * 10) / 10)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                <p className="text-xs text-text-tertiary mt-1">carbs</p>
+              </div>
+              <div>
+                <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{(Math.round(totals.grasa * 10) / 10)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                <p className="text-xs text-text-tertiary mt-1">grasa</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-3">
-            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+          <div className="bg-bg-secondary border border-border rounded-xl p-3 flex items-start gap-2.5">
+            <span className="text-accent-warm flex-shrink-0 mt-0.5">
+              <Icon icon={X} size={16} />
+            </span>
+            <p className="text-text-primary text-sm">{error}</p>
           </div>
         )}
       </div>
 
       {/* Botones fijos */}
-      <div className="flex gap-3 px-5 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
-        <button
-          onClick={onBack}
-          className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-2xl py-3.5 active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
-        >
+      <div className="flex gap-3 px-5 py-4 border-t border-border bg-bg-primary flex-shrink-0">
+        <Button variant="secondary" onClick={onBack} className="flex-1">
           Cancelar
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
+          size="lg"
           onClick={handleSave}
           disabled={saving || saved || !nombrePlato || (items.length === 0 && !Number(flatCalories))}
-          className={`flex-[2] text-white font-semibold rounded-2xl py-3.5 transition-colors flex items-center justify-center gap-2 ${
-            saved ? "bg-emerald-600" : "bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500"
-          }`}
+          leadingIcon={saved ? <Icon icon={Check} size={18} /> : saving ? <Icon icon={Loader2} size={18} className="animate-spin" /> : undefined}
+          className="flex-[2]"
         >
-          {saved ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Guardado
-            </>
-          ) : saving ? (
-            <>
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              Guardando…
-            </>
-          ) : "Guardar"}
-        </button>
+          {saved ? "Guardado" : saving ? "Guardando…" : "Guardar"}
+        </Button>
       </div>
     </div>
   );
