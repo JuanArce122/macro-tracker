@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: Lint + Vitest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          # Prisma generate corre en postinstall; necesita estos defaults
+          DATABASE_URL: "file:./dev.db"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check (build smoke)
+        run: npx tsc --noEmit
+
+      - name: Unit tests (Vitest)
+        run: npm test
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    # E2E es opcional en cada PR — corre pero no bloquea merge
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: "file:./dev.db"
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Prisma db push (test DB)
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: "file:./dev.db"
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: "file:./dev.db"
+          NEXTAUTH_SECRET: "ci-secret-not-for-prod"
+          NEXTAUTH_URL: "http://localhost:3000"
+          GEMINI_API_KEY: "ci-mock-key"
+
+      - name: Start app + Run Playwright
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 -t 60000
+          npx playwright test
+        env:
+          DATABASE_URL: "file:./dev.db"
+          NEXTAUTH_SECRET: "ci-secret-not-for-prod"
+          NEXTAUTH_URL: "http://localhost:3000"
+          GEMINI_API_KEY: "ci-mock-key"
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

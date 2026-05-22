@@ -45,3 +45,12 @@ next-env.d.ts
 /prisma/dev.db-journal
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# DB local (Sprint 0+)
+/dev.db
+/dev.db-journal
+
+# Playwright + Vitest output
+/playwright-report
+/test-results
+/coverage
