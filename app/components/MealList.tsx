@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { Sunrise, Sun, Moon, Apple, UtensilsCrossed } from "lucide-react";
+import { Sunrise, Sun, Moon, Apple, UtensilsCrossed, Pencil, Trash2 } from "lucide-react";
 import EditMealSheet from "./EditMealSheet";
 import Toast from "./Toast";
 import Icon from "@/app/components/ui/Icon";
@@ -37,9 +37,9 @@ const CATEGORIES: { key: string; label: string; icon: LucideIcon }[] = [
 ];
 
 function ConfidenceDot({ confidence }: { confidence: number }) {
-  if (confidence >= 0.85) return <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" title="Alta confianza" />;
-  if (confidence >= 0.6) return <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" title="Confianza media" />;
-  return <span className="w-2 h-2 rounded-full bg-red-400 inline-block" title="Baja confianza" />;
+  if (confidence >= 0.85) return <span className="w-2 h-2 rounded-full bg-macro-protein inline-block flex-shrink-0" title="Alta confianza" />;
+  if (confidence >= 0.6)  return <span className="w-2 h-2 rounded-full bg-macro-fat inline-block flex-shrink-0" title="Confianza media" />;
+  return <span className="w-2 h-2 rounded-full bg-accent-warm inline-block flex-shrink-0" title="Baja confianza" />;
 }
 
 function MealItem({
@@ -52,9 +52,9 @@ function MealItem({
   onDelete: (id: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 py-3 px-4 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
+    <div className="flex items-center gap-3 py-4 px-5 border-b border-border last:border-0">
       {meal.imageUrl ? (
-        <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+        <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-bg-tertiary">
           <Image
             src={meal.imageUrl}
             alt={meal.name}
@@ -64,52 +64,51 @@ function MealItem({
           />
         </div>
       ) : (
-        <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 dark:text-gray-500">
-          <Icon icon={UtensilsCrossed} size={24} />
+        <div className="w-14 h-14 rounded-xl bg-bg-tertiary flex items-center justify-center flex-shrink-0 text-text-tertiary">
+          <Icon icon={UtensilsCrossed} size={22} />
         </div>
       )}
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
+        <div className="flex items-center gap-2 mb-0.5">
           <ConfidenceDot confidence={meal.confidence} />
-          <p className="font-medium text-sm text-gray-800 dark:text-gray-100 truncate">{meal.name}</p>
+          <p className="font-medium text-sm text-text-primary truncate">{meal.name}</p>
         </div>
         {meal.items && (() => {
           try {
             const parsed: { nombre: string; unidades: number }[] = JSON.parse(meal.items);
             return (
-              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-                {parsed.map((item) => item.unidades > 1 ? `${item.unidades}x ${item.nombre}` : item.nombre).join(" · ")}
+              <p className="text-xs text-text-tertiary truncate">
+                {parsed.map((item) => item.unidades > 1 ? `${item.unidades}× ${item.nombre}` : item.nombre).join(" · ")}
               </p>
             );
           } catch { return null; }
         })()}
-        <div className="flex gap-2 mt-1 text-xs">
-          <span className="text-emerald-600 font-semibold">{meal.calories.toFixed(0)} kcal</span>
-          <span className="text-blue-500">{meal.protein.toFixed(1)}P</span>
-          <span className="text-amber-500">{meal.carbs.toFixed(1)}C</span>
-          <span className="text-violet-500">{meal.fat.toFixed(1)}G</span>
-        </div>
+        <p className="text-xs mt-1 tabular-nums">
+          <span className="text-text-primary font-medium">{meal.calories.toFixed(0)} kcal</span>
+          <span className="text-text-tertiary"> · </span>
+          <span className="text-macro-protein">{meal.protein.toFixed(1)}P</span>
+          <span className="text-text-tertiary"> · </span>
+          <span className="text-macro-carbs">{meal.carbs.toFixed(1)}C</span>
+          <span className="text-text-tertiary"> · </span>
+          <span className="text-macro-fat">{meal.fat.toFixed(1)}G</span>
+        </p>
       </div>
 
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-0.5 flex-shrink-0">
         <button
           onClick={() => onEdit(meal)}
-          className="p-2 text-gray-300 dark:text-gray-600 hover:text-blue-400 active:text-blue-500 transition-colors"
+          className="p-2 text-text-tertiary active:text-text-primary transition-colors"
           aria-label="Editar"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z" />
-          </svg>
+          <Icon icon={Pencil} size={18} />
         </button>
         <button
           onClick={() => onDelete(meal.id)}
-          className="p-2 text-gray-300 dark:text-gray-600 hover:text-red-400 active:text-red-500 transition-colors"
+          className="p-2 text-text-tertiary active:text-accent-warm transition-colors"
           aria-label="Eliminar"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
+          <Icon icon={Trash2} size={18} />
         </button>
       </div>
     </div>
@@ -175,12 +174,12 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
   if (filled.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-          <span className="text-gray-300 dark:text-gray-600 mb-3">
+        <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+          <span className="text-text-tertiary mb-4">
             <Icon icon={UtensilsCrossed} size={48} />
           </span>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Sin comidas registradas</p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Toca el <span className="text-emerald-500 font-semibold">+</span> para agregar</p>
+          <p className="text-text-secondary font-medium">Sin comidas registradas</p>
+          <p className="text-text-tertiary text-sm mt-1">Pulsa «Agregar comida» abajo para empezar</p>
         </div>
         {toast && <Toast {...toast} onDismiss={dismissToast} />}
       </>
@@ -193,12 +192,14 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
         {filled.map(({ key, label, icon }) => {
           const group = visibleMeals.filter((m) => m.category === key);
           return (
-            <div key={key} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">
+            <div key={key} className="bg-bg-secondary border border-border rounded-xl overflow-hidden">
+              <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border">
+                <span className="text-text-tertiary flex-shrink-0">
                   <Icon icon={icon} size={18} />
                 </span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 capitalize">{label}</span>
+                <h3 className="font-serif text-xl tracking-[-0.02em] text-text-primary capitalize leading-none">
+                  {label}
+                </h3>
               </div>
               {group.map((meal) => (
                 <MealItem

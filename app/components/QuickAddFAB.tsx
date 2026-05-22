@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import StepCamera, { type AnalysisResult } from "./add/StepCamera";
 import StepSearch from "./add/StepSearch";
 import StepConfirm from "./add/StepConfirm";
+import Icon from "@/app/components/ui/Icon";
 
 type Step = "closed" | "camera" | "search" | "confirm";
 
@@ -50,28 +52,23 @@ export default function QuickAddFAB({ date }: { date: string }) {
 
   return (
     <>
-      {/* ── FAB ── */}
+      {/* ── Pill horizontal sticky ── */}
       <button
         onClick={openSearch}
         aria-label="Agregar comida"
-        className="fixed z-20 left-1/2 -translate-x-1/2 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 rounded-full shadow-lg flex items-center justify-center transition-all"
+        className="fixed z-20 left-1/2 -translate-x-1/2 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-text-primary text-bg-primary text-sm font-medium active:opacity-90 transition-opacity duration-200 ease-[var(--ease-editorial)] shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
         style={{
           bottom: "calc(4rem + env(safe-area-inset-bottom) + 0.75rem)",
-          boxShadow: "0 4px 20px rgba(16,185,129,0.45)",
         }}
       >
-        <svg
-          className={`w-7 h-7 text-white transition-transform duration-200 ${isOpen ? "rotate-45" : "rotate-0"}`}
-          fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
+        <Icon icon={Plus} size={18} />
+        Agregar comida
       </button>
 
       {/* ── Overlay full-screen ── */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-white dark:bg-gray-900 flex flex-col overflow-y-auto"
+          className="fixed inset-0 z-30 bg-bg-primary flex flex-col overflow-y-auto"
           style={{ maxWidth: 430, margin: "0 auto" }}
         >
           {step === "search" && (
