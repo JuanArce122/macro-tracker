@@ -108,7 +108,7 @@ export default function GoalsPage() {
           <button onClick={() => router.back()} className="text-text-tertiary active:text-text-primary p-1 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]">
             <Icon icon={ChevronLeft} size={20} />
           </button>
-          <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary truncate">Metas diarias</h1>
+          <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary truncate">Metas diarias</h1>
         </div>
         {/* Indicador auto-save */}
         <div className="h-6 flex items-center flex-shrink-0">
@@ -150,7 +150,7 @@ export default function GoalsPage() {
                     onChange={(e) => {
                       setGoals((prev) => ({ ...prev, [key]: Number(e.target.value) || 0 }));
                     }}
-                    className={`flex-1 bg-transparent border-0 outline-none font-serif text-4xl leading-none tabular-nums tracking-[-0.02em] ${textColor} focus:outline-none p-0`}
+                    className={`flex-1 bg-transparent border-0 outline-none font-numbers text-4xl leading-none tabular-nums tracking-[0.01em] ${textColor} focus:outline-none p-0`}
                   />
                   <span className="text-text-tertiary text-sm font-medium w-10">{unit}</span>
                 </div>

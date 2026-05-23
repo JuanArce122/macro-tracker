@@ -44,7 +44,7 @@ export default async function ResetPasswordPage({
             className="w-16 h-16"
           />
           <div>
-            <h1 className="font-serif text-4xl tracking-[-0.02em] text-text-primary">Macro Tracker</h1>
+            <h1 className="font-display text-4xl tracking-[-0.02em] font-semibold text-text-primary">Macro Tracker</h1>
             <p className="text-sm text-text-tertiary mt-2">Nueva contraseña</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ function InvalidToken({ reason }: { reason: "no-token" | "invalid" | "expired" }
         <Icon icon={AlertTriangle} size={28} />
       </div>
       <div>
-        <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-2">
+        <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary mb-2">
           {isExpired ? "Enlace expirado" : "Enlace no válido"}
         </h2>
         <p className="text-sm text-text-secondary leading-relaxed">

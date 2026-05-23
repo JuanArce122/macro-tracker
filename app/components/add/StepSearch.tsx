@@ -152,7 +152,7 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
           <Icon icon={ChevronLeft} size={16} />
           Cancelar
         </button>
-        <h1 className="font-serif text-xl tracking-[-0.02em] text-text-primary">Agregar comida</h1>
+        <h1 className="font-display text-xl tracking-[-0.02em] font-medium text-text-primary">Agregar comida</h1>
         <div className="w-16" />
       </div>
 
@@ -310,7 +310,7 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
                   onClick={() => setUnits((u) => Math.max(1, u - 1))}
                   className="w-11 h-11 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary text-xl font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
                 >−</button>
-                <span className="font-serif text-3xl tabular-nums tracking-[-0.02em] text-text-primary w-10 text-center">{units}</span>
+                <span className="font-numbers text-3xl tabular-nums tracking-[0.01em] text-text-primary w-10 text-center">{units}</span>
                 <button
                   onClick={() => setUnits((u) => u + 1)}
                   className="w-11 h-11 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary text-xl font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]"
@@ -343,19 +343,19 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
                 <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">{label}</p>
                 <div className="grid grid-cols-4 gap-3 text-center">
                   <div>
-                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{m.calorias}</p>
+                    <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{m.calorias}</p>
                     <p className="text-xs text-text-tertiary mt-1">kcal</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{m.proteina}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{m.proteina}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                     <p className="text-xs text-text-tertiary mt-1">prot</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{m.carbs}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{m.carbs}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                     <p className="text-xs text-text-tertiary mt-1">carbs</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{m.grasa}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                    <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{m.grasa}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                     <p className="text-xs text-text-tertiary mt-1">grasa</p>
                   </div>
                 </div>

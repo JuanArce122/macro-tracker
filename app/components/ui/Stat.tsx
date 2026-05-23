@@ -41,7 +41,7 @@ export default function Stat({
           {label}
         </span>
       )}
-      <div className={`font-serif tabular-nums tracking-[-0.02em] ${sizeClass[size]} ${colorClass[color]}`}>
+      <div className={`font-numbers tabular-nums tracking-[0.01em] ${sizeClass[size]} ${colorClass[color]}`}>
         {value}
         {unit && (
           <span className="font-sans text-sm tracking-normal text-text-tertiary ml-1">

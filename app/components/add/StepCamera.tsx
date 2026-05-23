@@ -195,7 +195,7 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
         Atrás
       </button>
 
-      <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary mb-8">Foto con IA</h1>
+      <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary mb-8">Foto con IA</h1>
 
       {/* Inputs ocultos — solo usados si no hay initialFile */}
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />

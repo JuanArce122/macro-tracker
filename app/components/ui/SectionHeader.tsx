@@ -16,7 +16,7 @@ export default function SectionHeader({
   return (
     <div className={`flex items-end justify-between gap-4 ${className}`}>
       <div className="min-w-0">
-        <h1 className="font-serif text-[40px] leading-[1.1] tracking-[-0.02em] text-text-primary">
+        <h1 className="font-display text-[40px] leading-[1.1] tracking-[-0.02em] font-medium text-text-primary">
           {title}
         </h1>
         {subtitle && (

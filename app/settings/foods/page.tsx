@@ -91,7 +91,7 @@ export default function FoodsPage() {
           <button onClick={() => router.back()} className="text-text-tertiary active:text-text-primary p-1 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]">
             <Icon icon={ChevronLeft} size={20} />
           </button>
-          <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary truncate">Mis alimentos</h1>
+          <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary truncate">Mis alimentos</h1>
         </div>
         <button
           onClick={() => { setShowForm((v) => !v); setError(null); setForm(EMPTY); }}

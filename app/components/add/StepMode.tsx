@@ -19,7 +19,7 @@ export default function StepMode({ onSelect, onBack }: Props) {
         Cancelar
       </button>
 
-      <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary mb-2">Agregar comida</h1>
+      <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary mb-2">Agregar comida</h1>
       <p className="text-sm text-text-tertiary mb-8">¿Cómo quieres registrarla?</p>
 
       <div className="flex flex-col gap-3">

@@ -48,7 +48,7 @@ export default function ForgotPasswordForm() {
           <Icon icon={Mail} size={28} />
         </div>
         <div>
-          <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-2">Revisa tu email</h2>
+          <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary mb-2">Revisa tu email</h2>
           <p className="text-sm text-text-secondary leading-relaxed">
             Si <span className="text-text-primary font-medium">{email}</span> está registrado,
             recibirás un enlace para restablecer tu contraseña. El enlace expira en 15 minutos.
@@ -62,7 +62,7 @@ export default function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="p-6 flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-1.5">¿Olvidaste tu contraseña?</h2>
+        <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary mb-1.5">¿Olvidaste tu contraseña?</h2>
         <p className="text-sm text-text-secondary leading-relaxed">
           Ingresa tu email y te enviaremos un enlace para crear una nueva contraseña.
         </p>

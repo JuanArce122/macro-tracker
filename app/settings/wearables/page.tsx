@@ -127,7 +127,7 @@ function WearablesPageInner() {
         >
           <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary">Dispositivos</h1>
+        <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary">Dispositivos</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-10 flex flex-col gap-3">

@@ -33,7 +33,7 @@ function ProfileCard({ profile }: { profile: Profile | null }) {
       <div className="mx-4 mt-4 mb-2 bg-bg-secondary rounded-xl border border-border p-5 flex items-center gap-4 active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]">
         <Avatar name={profile?.name} size="xl" />
         <div className="flex-1 min-w-0">
-          <p className="font-serif text-xl tracking-[-0.02em] text-text-primary truncate leading-tight">{name}</p>
+          <p className="font-display text-xl tracking-[-0.02em] font-medium text-text-primary truncate leading-tight">{name}</p>
           <p className="text-sm text-text-tertiary mt-1">{goal}</p>
         </div>
         <span className="text-text-tertiary flex-shrink-0">
@@ -122,7 +122,7 @@ export default function SettingsPage() {
     <div className="flex flex-col flex-1 bg-bg-primary">
       {/* Header */}
       <div className="px-5 pt-7 pb-2">
-        <h1 className="font-serif text-[40px] leading-[1.1] tracking-[-0.02em] text-text-primary">Ajustes</h1>
+        <h1 className="font-display text-[40px] leading-[1.1] tracking-[-0.02em] font-medium text-text-primary">Ajustes</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-24">

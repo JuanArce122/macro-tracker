@@ -210,7 +210,7 @@ export default function StepVoice({ onResult, onBack }: Props) {
           <Icon icon={ChevronLeft} size={16} />
           Atrás
         </button>
-        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary mb-4">Registro por voz</h1>
+        <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary mb-4">Registro por voz</h1>
         <div className="bg-bg-secondary border border-border rounded-xl p-5 flex items-start gap-3">
           <span className="text-accent-warm flex-shrink-0 mt-0.5">
             <Icon icon={AlertTriangle} size={20} />
@@ -236,7 +236,7 @@ export default function StepVoice({ onResult, onBack }: Props) {
         Atrás
       </button>
 
-      <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary mb-2">Registro por voz</h1>
+      <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary mb-2">Registro por voz</h1>
       <p className="text-xs text-text-tertiary mb-6">
         Dí lo que comiste, ej. <span className="text-text-secondary">&quot;dos huevos revueltos con una arepa y café con leche&quot;</span>.
       </p>

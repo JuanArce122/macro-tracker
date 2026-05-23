@@ -66,7 +66,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           <Icon icon={Check} size={28} />
         </div>
         <div>
-          <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-2">¡Contraseña actualizada!</h2>
+          <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary mb-2">¡Contraseña actualizada!</h2>
           <p className="text-sm text-text-secondary">Redirigiendo al inicio de sesión…</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   return (
     <form onSubmit={handleSubmit} noValidate className="p-6 flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary mb-1.5">Nueva contraseña</h2>
+        <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary mb-1.5">Nueva contraseña</h2>
         <p className="text-sm text-text-secondary">Elige una contraseña segura para tu cuenta.</p>
       </div>
 
