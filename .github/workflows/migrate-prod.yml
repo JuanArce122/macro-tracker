@@ -11,9 +11,9 @@ name: Migrate prod DB
 # con un schema desfasado que rompió el login. Este workflow garantiza
 # que la DB de prod se sincroniza con cada deploy.
 #
-# Secrets requeridos en el repo:
+# Secrets requeridos en el repo (Settings → Secrets and variables → Actions):
 #   - AUTH_SECRET   (mismo valor que tiene Vercel en su env de producción)
-#   - PROD_APP_URL  (ej. https://macro-tracker-beta-topaz.vercel.app)
+#   - PROD_APP_URL  (ej. https://macro-tracker-beta-topaz.vercel.app, sin slash final)
 
 on:
   push:
@@ -29,46 +29,105 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Validate required secrets
+        # Si los secrets no están configurados, fallar inmediatamente con
+        # mensaje claro en lugar de explotar con un curl exit 3 ("URL
+        # malformed") ocho líneas más abajo. La causa más común del fallo
+        # de este workflow es que falta PROD_APP_URL en el repo.
+        run: |
+          MISSING=""
+          if [ -z "$PROD_APP_URL" ]; then
+            MISSING="$MISSING PROD_APP_URL"
+          fi
+          if [ -z "$AUTH_SECRET" ]; then
+            MISSING="$MISSING AUTH_SECRET"
+          fi
+          if [ -n "$MISSING" ]; then
+            echo "::error::Faltan secrets en el repo:$MISSING"
+            echo ""
+            echo "Configurar en GitHub → Settings → Secrets and variables → Actions:"
+            echo "  - PROD_APP_URL  (ej. https://macro-tracker-beta-topaz.vercel.app)"
+            echo "  - AUTH_SECRET   (mismo valor que la env de Vercel)"
+            exit 1
+          fi
+          # Validar que PROD_APP_URL tiene esquema http(s):// — protege
+          # contra typos como "macro-tracker.vercel.app" sin protocolo.
+          case "$PROD_APP_URL" in
+            http://*|https://*) ;;
+            *)
+              echo "::error::PROD_APP_URL debe empezar con http:// o https:// (recibido: ${PROD_APP_URL:0:20}…)"
+              exit 1
+              ;;
+          esac
+          # Normalizar: quitar slash final para evitar // en el path
+          NORMALIZED="${PROD_APP_URL%/}"
+          echo "PROD_APP_URL=$NORMALIZED" >> "$GITHUB_ENV"
+          # Log no sensible: solo mostramos host, no la URL completa por
+          # paranoia (aunque PROD_APP_URL no es realmente secreta).
+          HOST="${NORMALIZED#https://}"
+          HOST="${HOST#http://}"
+          echo "Host objetivo: $HOST"
+        env:
+          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
       - name: Wait for Vercel production deploy
         # Polling simple: la migración necesita que el endpoint
         # /api/admin/migrate esté presente en el deploy actual. Un sleep
         # corto + retry es suficiente para la mayoría de los deploys.
         run: |
+          ENDPOINT="$PROD_APP_URL/api/admin/migrate"
           for i in $(seq 1 30); do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$PROD_APP_URL/api/admin/migrate")
-            # 401 = endpoint disponible (rechaza por falta de auth). 404 = aún sin desplegar.
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ENDPOINT" || echo "000")
+            # 401 = endpoint disponible (rechaza por falta de auth).
+            # 404 = aún sin desplegar (Vercel todavía sirve la versión vieja).
+            # 000 = error de red / DNS / URL.
             if [ "$CODE" = "401" ]; then
               echo "Endpoint listo (HTTP $CODE)"
               exit 0
             fi
-            echo "[$i/30] Endpoint todavía no disponible (HTTP $CODE), retry en 10s…"
+            if [ "$CODE" = "000" ]; then
+              echo "[$i/30] Curl no logró conectar (posible DNS / host inválido). Retry en 10s…"
+            else
+              echo "[$i/30] Endpoint todavía no disponible (HTTP $CODE). Retry en 10s…"
+            fi
             sleep 10
           done
-          echo "Timeout esperando el deploy"
+          echo "::error::Timeout esperando el deploy ($ENDPOINT no respondió 401 en 5 min)"
           exit 1
-        env:
-          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
 
       - name: Apply migrations
         run: |
+          ENDPOINT="$PROD_APP_URL/api/admin/migrate"
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "$PROD_APP_URL/api/admin/migrate" \
+            "$ENDPOINT" \
             -H "Authorization: Bearer $AUTH_SECRET")
           BODY=$(echo "$RESPONSE" | head -n -1)
           STATUS=$(echo "$RESPONSE" | tail -n 1)
           echo "Status: $STATUS"
           echo "$BODY" | head -c 4000
-          if [ "$STATUS" != "200" ]; then
-            echo "Migración devolvió $STATUS — falló"
-            exit 1
-          fi
+          echo ""
+          case "$STATUS" in
+            200) ;;
+            401)
+              echo "::error::AUTH_SECRET en GitHub no coincide con el de Vercel. Revisar ambos valores."
+              exit 1 ;;
+            404)
+              echo "::error::Endpoint no existe en producción (deploy aún no propagado o ruta removida)."
+              exit 1 ;;
+            5*)
+              echo "::error::Error interno del endpoint ($STATUS). Revisar logs de Vercel."
+              exit 1 ;;
+            *)
+              echo "::error::Status inesperado ($STATUS) al invocar la migración."
+              exit 1 ;;
+          esac
           # Validamos que el endpoint no reportó errores internos
           ERRORS=$(echo "$BODY" | grep -oE '"errors":[0-9]+' | head -1 | cut -d':' -f2)
           if [ "${ERRORS:-0}" != "0" ]; then
-            echo "Migración completó con $ERRORS errores"
+            echo "::error::Migración completó con $ERRORS errores (ver body arriba)"
             exit 1
           fi
           echo "Migración OK"
         env:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
