@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Search, X, Camera, Image as ImageIcon, Barcode, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X, Camera, Image as ImageIcon, Barcode, Mic, Loader2 } from "lucide-react";
 import { calcMacros, type Food } from "@/lib/foods";
 import { useFoodSearch, type FoodWithSource } from "@/app/hooks/useFoodSearch";
 import { REGION_FLAGS } from "@/lib/regions";
@@ -23,10 +23,11 @@ type Props = {
   onBack: () => void;
   onPhotoSelected?: (file: File) => void;
   onScanBarcode?: () => void;
+  onVoice?: () => void;
   initialQuery?: string;
 };
 
-export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBarcode, initialQuery = "" }: Props) {
+export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBarcode, onVoice, initialQuery = "" }: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [selected, setSelected] = useState<FoodWithSource | null>(null);
   const [weightG, setWeightG] = useState<string>("");
@@ -235,6 +236,18 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
             className="w-11 h-11 flex-shrink-0 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary cursor-pointer active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
             <Icon icon={Barcode} size={18} />
+          </button>
+        )}
+
+        {onVoice && (
+          <button
+            type="button"
+            onClick={onVoice}
+            title="Registrar por voz"
+            aria-label="Registrar por voz"
+            className="w-11 h-11 flex-shrink-0 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary cursor-pointer active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
+          >
+            <Icon icon={Mic} size={18} />
           </button>
         )}
       </div>
