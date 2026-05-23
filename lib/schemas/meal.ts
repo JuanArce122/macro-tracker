@@ -3,12 +3,17 @@ import { DateLocalSchema, PositiveNumberSchema } from "./common";
 
 /**
  * Categorías de comida del día.
- * Coincide con `Meal.category` en la DB.
+ * Coincide con `Meal.category` en la DB y con la convención del proyecto
+ * (texto de UI y dominio en español; ver CLAUDE.md → Convenciones).
+ *
+ * NOTA: `MealPlan.mealType` (HU-06) usa el set en inglés ("breakfast"…)
+ * porque es su propio dominio interno de planificación, distinto de
+ * `Meal.category`.
  */
 export const MealCategorySchema = z.enum([
-  "breakfast",
-  "lunch",
-  "dinner",
+  "desayuno",
+  "almuerzo",
+  "cena",
   "snack",
 ]);
 
