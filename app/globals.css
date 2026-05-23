@@ -5,9 +5,9 @@
 
 :root {
   /* ── Backgrounds ─────────────────────────────── */
-  --bg-primary:   #F5F1EA;  /* crema cálido — fondo principal */
+  --bg-primary:   #EEEAE2;  /* beige neutro — fondo principal */
   --bg-secondary: #FFFFFF;  /* tarjetas */
-  --bg-tertiary:  #EDE7DC;  /* áreas elevadas, tracks, fondo de avatar */
+  --bg-tertiary:  #E6E0D4;  /* áreas elevadas, tracks, fondo de avatar */
 
   /* ── Text ────────────────────────────────────── */
   --text-primary:   #1A1A1A;
@@ -15,7 +15,7 @@
   --text-tertiary:  #9A9A9A;
 
   /* ── Borders ─────────────────────────────────── */
-  --border: #E5DFD3;
+  --border: #DDD7CC;
 
   /* ── Accents ─────────────────────────────────── */
   --accent-primary: #3D5A3D;  /* verde botánico */
