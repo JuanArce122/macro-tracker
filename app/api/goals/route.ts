@@ -1,6 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { NextRequest } from "next/server";
+import { GoalUpdateSchema } from "@/lib/schemas";
+import { validateBody } from "@/lib/api/validate";
+
+const DEFAULT_GOAL = {
+  calories: 2000,
+  protein: 150,
+  carbs: 200,
+  fat: 65,
+  adjustmentMode: "manual",
+};
 
 export async function GET() {
   try {
@@ -16,7 +26,7 @@ export async function GET() {
     });
 
     if (!goal) {
-      return Response.json({ calories: 2000, protein: 150, carbs: 200, fat: 65 });
+      return Response.json(DEFAULT_GOAL);
     }
 
     return Response.json(goal);
@@ -34,34 +44,30 @@ export async function PUT(req: NextRequest) {
     }
     const userId = Number(session.user.id);
 
-    const { calories, protein, carbs, fat } = await req.json();
-
-    if (calories == null || protein == null || carbs == null || fat == null) {
-      return Response.json({ error: "Faltan campos requeridos" }, { status: 400 });
-    }
+    const parsed = await validateBody(req, GoalUpdateSchema);
+    if (!parsed.ok) return parsed.response;
+    const { calories, protein, carbs, fat, adjustmentMode } = parsed.data;
 
     const existing = await prisma.goal.findFirst({
       where: { userId },
       orderBy: { id: "desc" },
     });
 
+    // Solo actualizamos adjustmentMode si fue provisto; preservamos el
+    // valor anterior si no.
+    const baseData = { calories, protein, carbs, fat };
+    const data =
+      adjustmentMode !== undefined
+        ? { ...baseData, adjustmentMode }
+        : baseData;
+
     const goal = existing
-      ? await prisma.goal.update({
-          where: { id: existing.id },
-          data: {
-            calories: Number(calories),
-            protein: Number(protein),
-            carbs: Number(carbs),
-            fat: Number(fat),
-          },
-        })
+      ? await prisma.goal.update({ where: { id: existing.id }, data })
       : await prisma.goal.create({
           data: {
             userId,
-            calories: Number(calories),
-            protein: Number(protein),
-            carbs: Number(carbs),
-            fat: Number(fat),
+            ...baseData,
+            adjustmentMode: adjustmentMode ?? "manual",
           },
         });
 

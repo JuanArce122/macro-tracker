@@ -6,6 +6,7 @@ import MacroSummary from "@/app/components/MacroSummary";
 import MealList from "@/app/components/MealList";
 import QuickAddFAB from "@/app/components/QuickAddFAB";
 import BottomNav from "@/app/components/BottomNav";
+import SuggestionBanner from "@/app/components/SuggestionBanner";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -22,7 +23,19 @@ async function getMeals(userId: number, date: string) {
 
 async function getGoals(userId: number) {
   const goal = await prisma.goal.findFirst({ where: { userId }, orderBy: { id: "desc" } });
-  return goal ?? { calories: 2000, protein: 150, carbs: 200, fat: 65 };
+  return (
+    goal ?? {
+      calories: 2000,
+      protein: 150,
+      carbs: 200,
+      fat: 65,
+      adjustmentMode: "manual",
+    }
+  );
+}
+
+function todayLocal(): string {
+  return new Date().toISOString().split("T")[0];
 }
 
 export default async function DayPage({
@@ -48,11 +61,18 @@ export default async function DayPage({
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
 
+  // HU-05: solo mostramos el banner de sugerencia cuando el usuario
+  // está viendo el día de hoy. En días pasados es menos relevante y
+  // evitamos un fetch extra por cada navegación al historial.
+  const isToday = date === todayLocal();
+  const adjustmentMode = "adjustmentMode" in goals ? goals.adjustmentMode : "manual";
+
   return (
     <div className="flex flex-col flex-1 bg-bg-primary">
       <DayHeader date={date} />
       <div className="flex-1 overflow-y-auto pb-32">
         <MacroSummary totals={totals} goals={goals} />
+        {isToday && <SuggestionBanner adjustmentMode={adjustmentMode} />}
         <MealList meals={meals} date={date} />
       </div>
       <QuickAddFAB date={date} />
