@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Target, Salad, Bell, Palette, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
+import { Target, Salad, Scale, Bell, Palette, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
 import Avatar from "@/app/components/ui/Avatar";
@@ -137,6 +137,12 @@ export default function SettingsPage() {
             title="Metas diarias"
             subtitle={goalsSubtitle}
             href="/settings/goals"
+          />
+          <SettingsRow
+            icon={Scale}
+            title="Peso"
+            subtitle="Registrar peso y ver tendencia"
+            href="/settings/weight"
           />
           <SettingsRow
             icon={Salad}
