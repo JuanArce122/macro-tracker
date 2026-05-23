@@ -20,11 +20,22 @@ self.addEventListener("install", () => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    (async () => {
+      // Borrar caches viejos (v4 y previos)
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      );
+      await self.clients.claim();
+      // Notificar a todas las pestañas abiertas para que recarguen y
+      // tomen el HTML/chunks frescos (fix del bug donde HTML viejo
+      // referenciaba chunks JS borrados tras un deploy).
+      const clients = await self.clients.matchAll({ type: "window" });
+      for (const client of clients) {
+        client.postMessage({ type: "SW_UPDATED", version: CACHE_NAME });
+      }
+    })()
   );
-  self.clients.claim();
 });
 
 // ─── Fetch (cache) ────────────────────────────────────────────────────────────
