@@ -5,10 +5,11 @@ import { Plus } from "lucide-react";
 import StepCamera, { type AnalysisResult } from "./add/StepCamera";
 import StepSearch from "./add/StepSearch";
 import StepBarcode from "./add/StepBarcode";
+import StepVoice from "./add/StepVoice";
 import StepConfirm from "./add/StepConfirm";
 import Icon from "@/app/components/ui/Icon";
 
-type Step = "closed" | "camera" | "search" | "barcode" | "confirm";
+type Step = "closed" | "camera" | "search" | "barcode" | "voice" | "confirm";
 
 export default function QuickAddFAB({ date }: { date: string }) {
   const [step, setStep] = useState<Step>("closed");
@@ -32,6 +33,10 @@ export default function QuickAddFAB({ date }: { date: string }) {
 
   function handleScanBarcode() {
     setStep("barcode");
+  }
+
+  function handleVoice() {
+    setStep("voice");
   }
 
   function handleBarcodeNotFound(_barcode: string) {
@@ -89,6 +94,7 @@ export default function QuickAddFAB({ date }: { date: string }) {
               onBack={closeAll}
               onPhotoSelected={handlePhotoSelected}
               onScanBarcode={handleScanBarcode}
+              onVoice={handleVoice}
             />
           )}
           {step === "camera" && (
@@ -103,6 +109,12 @@ export default function QuickAddFAB({ date }: { date: string }) {
             <StepBarcode
               onResult={handleResult}
               onNotFound={handleBarcodeNotFound}
+              onBack={() => setStep("search")}
+            />
+          )}
+          {step === "voice" && (
+            <StepVoice
+              onResult={handleResult}
               onBack={() => setStep("search")}
             />
           )}

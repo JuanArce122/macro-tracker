@@ -15,4 +15,5 @@ export * from "./vote";
 export * from "./weight";
 export * from "./goal";
 export * from "./push";
+export * from "./voice";
 export * from "./common";
