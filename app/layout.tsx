@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter, Oswald, Bebas_Neue, Fraunces } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import SessionProvider from "./components/SessionProvider";
@@ -7,9 +7,26 @@ import SessionProvider from "./components/SessionProvider";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
+const oswald = Oswald({
+  variable: "--font-oswald",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const bebas = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+// Fraunces se mantiene cargada solo durante la migración tipográfica
+// (Fases 2-4). Se elimina al cerrar la Fase 4.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
@@ -51,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${fraunces.variable} h-full`}>
+    <html lang="es" className={`${inter.variable} ${oswald.variable} ${bebas.variable} ${fraunces.variable} h-full`}>
       <head>
         {/* Aplica .dark antes de hidratar para evitar flash.
             Default = light: solo aplica si el usuario eligió "dark" explícitamente
