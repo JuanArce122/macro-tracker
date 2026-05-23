@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Check, AlertTriangle, Loader2, Watch, ExternalLink } from "lucide-react";
 import Button from "@/app/components/ui/Button";
@@ -61,7 +61,26 @@ function readInitialBanner(
   return null;
 }
 
+/**
+ * Wrapper que envuelve el contenido en <Suspense>. Next.js 16 lo requiere
+ * porque `useSearchParams` puede bailar el CSR y necesita un fallback
+ * durante el prerender.
+ */
 export default function WearablesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col flex-1 bg-bg-primary items-center justify-center">
+          <Icon icon={Loader2} size={24} className="text-text-tertiary animate-spin" />
+        </div>
+      }
+    >
+      <WearablesPageInner />
+    </Suspense>
+  );
+}
+
+function WearablesPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [connections, setConnections] = useState<Connection[]>([]);
