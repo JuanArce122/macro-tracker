@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Target, Salad, Scale, Bell, Palette, Apple, Watch, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
+import { Target, Salad, Scale, Bell, Palette, Apple, Watch, BarChart3, Info, ChevronRight, LogOut, CalendarDays } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
 import Avatar from "@/app/components/ui/Avatar";
@@ -149,6 +149,12 @@ export default function SettingsPage() {
             title="Mis alimentos"
             subtitle={foodsSubtitle}
             href="/settings/foods"
+          />
+          <SettingsRow
+            icon={CalendarDays}
+            title="Plan semanal"
+            subtitle="Genera tu plan de comidas con recetas"
+            href="/plan"
           />
         </RowGroup>
 
