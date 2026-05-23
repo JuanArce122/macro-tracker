@@ -106,8 +106,8 @@ function scheduleNotification(key, timeStr) {
     // Mostrar siempre (la app puede estar en background o cerrada)
     self.registration.showNotification(NOTIFICATION_TITLES[key], {
       body: NOTIFICATION_BODIES[key],
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
       tag: key,            // reemplaza notificación previa del mismo tipo
       renotify: true,
       data: { url: "/" }, // URL a abrir al hacer clic
@@ -168,8 +168,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title ?? "Macro Tracker", {
       body: body ?? "",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
       tag: insightId ? `insight-${insightId}` : "macros-push",
       renotify: true,
       data: { url: url ?? "/", insightId },
