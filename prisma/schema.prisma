@@ -29,6 +29,8 @@ model User {
   meals         Meal[]
   goals         Goal[]
   foodVotes     FoodVote[]
+  weights       WeightEntry[]
+  goalLogs      GoalAdjustmentLog[]
 }
 
 model Meal {
@@ -60,6 +62,46 @@ model Goal {
   protein  Float
   carbs    Float
   fat      Float
+
+  // Targets adaptativos (HU-05): "manual" | "suggested" | "auto"
+  adjustmentMode String @default("manual")
+
+  adjustments GoalAdjustmentLog[]
+}
+
+model WeightEntry {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String   // YYYY-MM-DD
+  weightKg  Float
+  source    String   @default("manual") // "manual" | "wearable"
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model GoalAdjustmentLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  goalId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  // Snapshot del goal anterior y nuevo
+  oldCalories Float
+  oldProtein  Float
+  oldCarbs    Float
+  oldFat      Float
+  newCalories Float
+  newProtein  Float
+  newCarbs    Float
+  newFat      Float
+  reason      String   // "trend_loss_too_slow" | "trend_loss_too_fast" | "user_manual" | ...
+  mode        String   // "suggested" | "auto"
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model PasswordResetToken {
