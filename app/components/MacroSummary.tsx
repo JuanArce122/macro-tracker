@@ -16,7 +16,7 @@ function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCard
       <span className="text-xs uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
       <p className={`font-numbers text-3xl leading-none tabular-nums tracking-[0.01em] ${textColor}`}>
         {value.toFixed(1)}
-        <span className="font-sans text-sm tracking-normal text-text-tertiary ml-1">{unit}</span>
+        <span className="font-body text-sm tracking-normal text-text-tertiary ml-1">{unit}</span>
       </p>
       <div className="h-1 bg-bg-tertiary rounded-full overflow-hidden">
         <div
