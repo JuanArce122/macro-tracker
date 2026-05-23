@@ -10,6 +10,7 @@ import type { Food } from "@/lib/foods";
 import Button from "@/app/components/ui/Button";
 import FoodDropdown from "@/app/components/ui/FoodDropdown";
 import Icon from "@/app/components/ui/Icon";
+import ConfidenceBadge from "./ConfidenceBadge";
 
 type Category = "desayuno" | "almuerzo" | "cena" | "snack";
 
@@ -26,18 +27,6 @@ function defaultCategory(): Category {
   if (h >= 11 && h < 16) return "almuerzo";
   if (h >= 16 && h < 20) return "cena";
   return "snack";
-}
-
-function ConfidenceBadge({ confidence }: { confidence: number }) {
-  if (confidence >= 0.85) return (
-    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-macro-protein px-2 py-0.5 rounded-full">Alta</span>
-  );
-  if (confidence >= 0.6) return (
-    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-macro-fat px-2 py-0.5 rounded-full">Media</span>
-  );
-  return (
-    <span className="text-[10px] uppercase tracking-[0.08em] font-semibold bg-bg-tertiary text-accent-warm px-2 py-0.5 rounded-full">Baja</span>
-  );
 }
 
 type EditableItem = MealItem & {
@@ -396,8 +385,17 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
           <div className="flex flex-col gap-2">
             {items.map((item) => {
               const isExpanded = expandedId === item.id;
+              // HU-01: resaltado visual cuando la IA tiene baja confianza
+              const lowConfidence = item.confianza < 0.6;
               return (
-                <div key={item.id} className="bg-bg-secondary border border-border rounded-xl overflow-hidden">
+                <div
+                  key={item.id}
+                  className={`rounded-xl overflow-hidden border ${
+                    lowConfidence
+                      ? "bg-accent-warm/5 border-accent-warm/40"
+                      : "bg-bg-secondary border-border"
+                  }`}
+                >
                   {/* Fila principal */}
                   <div className="flex items-center gap-3 px-4 py-3">
                     <button

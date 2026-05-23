@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Camera, Image as ImageIcon, AlertTriangle, Sparkles, ChevronLeft, X, Search, Pencil, Loader2 } from "lucide-react";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
+import CameraGuide from "./CameraGuide";
 
 export type MealItem = {
   nombre: string;
@@ -207,14 +208,15 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
         </div>
       )}
 
-      {/* Preview de la foto */}
+      {/* Preview de la foto (con guía de encuadre superpuesta — HU-01) */}
       {!processing && previewUrl && (
         <div className="relative mb-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={previewUrl} alt="Preview" className="w-full max-h-64 object-cover rounded-xl" />
+          <CameraGuide />
           <button
             onClick={clearPhoto}
-            className="absolute top-2 right-2 bg-black/40 text-white rounded-full p-1.5"
+            className="absolute top-2 right-2 bg-black/40 text-white rounded-full p-1.5 z-10"
             aria-label="Quitar foto"
           >
             <Icon icon={X} size={16} />
