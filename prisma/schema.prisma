@@ -95,6 +95,9 @@ model Food {
   voteScore    Int       @default(0) // denormalizado: sum(vote) sobre FoodVote
   voteCount    Int       @default(0) // denormalizado: count(*) sobre FoodVote
 
+  // Barcode (HU-03): EAN-13 / EAN-8 / UPC normalizado
+  barcode      String?   @unique
+
   votes        FoodVote[]
 
   @@index([nombre])
