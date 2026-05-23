@@ -34,7 +34,9 @@ export default function FoodDropdown({ query, onSelect }: Props) {
           <div className="flex-1 min-w-0">
             <p className="text-sm text-text-primary font-medium truncate">{food.nombre}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs text-text-tertiary tabular-nums">{food.cal} kcal/100g</span>
+              <span className="text-xs text-text-tertiary tabular-nums">
+                <span className="font-numbers tracking-[0.01em]">{food.cal}</span> kcal/<span className="font-numbers tracking-[0.01em]">100</span>g
+              </span>
               {food.source === "openfoodfacts" && (
                 <span className="text-[10px] font-semibold bg-bg-tertiary text-text-secondary px-1.5 py-0.5 rounded-full">OFF</span>
               )}

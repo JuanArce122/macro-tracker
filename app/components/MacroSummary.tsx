@@ -24,7 +24,9 @@ function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCard
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-xs text-text-tertiary tabular-nums">{remaining.toFixed(1)}{unit} restantes</p>
+      <p className="text-xs text-text-tertiary tabular-nums">
+        <span className="font-numbers tracking-[0.01em]">{remaining.toFixed(1)}</span>{unit} restantes
+      </p>
     </div>
   );
 }

@@ -85,13 +85,17 @@ function MealItem({
           } catch { return null; }
         })()}
         <p className="text-xs mt-1 tabular-nums">
-          <span className="text-text-primary font-medium">{meal.calories.toFixed(0)} kcal</span>
+          <span className="font-numbers tracking-[0.01em] text-text-primary">{meal.calories.toFixed(0)}</span>
+          <span className="text-text-primary"> kcal</span>
           <span className="text-text-tertiary"> · </span>
-          <span className="text-macro-protein">{meal.protein.toFixed(1)}P</span>
+          <span className="font-numbers tracking-[0.01em] text-macro-protein">{meal.protein.toFixed(1)}</span>
+          <span className="text-macro-protein">P</span>
           <span className="text-text-tertiary"> · </span>
-          <span className="text-macro-carbs">{meal.carbs.toFixed(1)}C</span>
+          <span className="font-numbers tracking-[0.01em] text-macro-carbs">{meal.carbs.toFixed(1)}</span>
+          <span className="text-macro-carbs">C</span>
           <span className="text-text-tertiary"> · </span>
-          <span className="text-macro-fat">{meal.fat.toFixed(1)}G</span>
+          <span className="font-numbers tracking-[0.01em] text-macro-fat">{meal.fat.toFixed(1)}</span>
+          <span className="text-macro-fat">G</span>
         </p>
       </div>
 

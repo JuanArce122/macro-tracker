@@ -120,21 +120,23 @@ export default function SuggestionBanner({ adjustmentMode }: { adjustmentMode: s
           <div className="grid grid-cols-2 gap-3 mt-3 text-xs tabular-nums">
             <div>
               <p className="text-text-tertiary">Meta actual</p>
-              <p className="text-text-primary font-medium">{currentGoal.calories} kcal</p>
+              <p className="text-text-primary">
+                <span className="font-numbers tracking-[0.01em]">{currentGoal.calories}</span> kcal
+              </p>
             </div>
             <div>
               <p className="text-text-tertiary">Sugerencia</p>
-              <p className="text-text-primary font-medium">
-                {suggestedGoal.calories} kcal
+              <p className="text-text-primary">
+                <span className="font-numbers tracking-[0.01em]">{suggestedGoal.calories}</span> kcal
                 <span className="text-text-tertiary ml-1">
-                  ({sign}{calorieDelta})
+                  (<span className="font-numbers tracking-[0.01em]">{sign}{calorieDelta}</span>)
                 </span>
               </p>
             </div>
           </div>
 
           <p className="text-[10px] text-text-tertiary mt-2 tabular-nums">
-            Tendencia: {trendKgPerWeek > 0 ? "+" : ""}{trendKgPerWeek.toFixed(2)} kg/sem
+            Tendencia: <span className="font-numbers tracking-[0.01em]">{trendKgPerWeek > 0 ? "+" : ""}{trendKgPerWeek.toFixed(2)}</span> kg/sem
           </p>
         </div>
       </div>

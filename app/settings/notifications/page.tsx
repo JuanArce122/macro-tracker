@@ -192,7 +192,7 @@ export default function NotificationsPage() {
                         type="time"
                         value={item.time}
                         onChange={(e) => updateItem(key, { time: e.target.value })}
-                        className="bg-bg-primary border border-border rounded-xl px-3 py-1.5 text-sm font-medium text-text-primary tabular-nums focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
+                        className="bg-bg-primary border border-border rounded-xl px-3 py-1.5 text-sm text-text-primary tabular-nums font-numbers tracking-[0.01em] focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]"
                       />
                       <p className="text-xs text-text-tertiary tabular-nums">
                         {msUntilLabel(item.time)}

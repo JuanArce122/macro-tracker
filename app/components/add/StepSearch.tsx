@@ -129,9 +129,18 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
             )}
           </div>
           <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
-            {food.gramsPerUnit
-              ? `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por ${food.gramsPerUnit}g (1 ${food.unitLabel})`
-              : `${food.cal} kcal · ${food.p}g P · ${food.c}g C · ${food.f}g G — por 100g`}
+            <span className="font-numbers tracking-[0.01em]">{food.cal}</span> kcal ·{" "}
+            <span className="font-numbers tracking-[0.01em]">{food.p}</span>g P ·{" "}
+            <span className="font-numbers tracking-[0.01em]">{food.c}</span>g C ·{" "}
+            <span className="font-numbers tracking-[0.01em]">{food.f}</span>g G — por{" "}
+            {food.gramsPerUnit ? (
+              <>
+                <span className="font-numbers tracking-[0.01em]">{food.gramsPerUnit}</span>g
+                {" "}(<span className="font-numbers tracking-[0.01em]">1</span> {food.unitLabel})
+              </>
+            ) : (
+              <><span className="font-numbers tracking-[0.01em]">100</span>g</>
+            )}
           </p>
         </div>
         <Icon icon={ChevronRight} size={16} className="text-text-tertiary flex-shrink-0 ml-2" />
@@ -294,9 +303,18 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-2">Seleccionado</p>
             <p className="text-base font-medium text-text-primary mb-1">{selected.nombre}</p>
             <p className="text-xs text-text-tertiary tabular-nums">
-              {selected.gramsPerUnit
-                ? `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G — por ${selected.gramsPerUnit}g (1 ${selected.unitLabel})`
-                : `${selected.cal} kcal · ${selected.p}g P · ${selected.c}g C · ${selected.f}g G por 100g`}
+              <span className="font-numbers tracking-[0.01em]">{selected.cal}</span> kcal ·{" "}
+              <span className="font-numbers tracking-[0.01em]">{selected.p}</span>g P ·{" "}
+              <span className="font-numbers tracking-[0.01em]">{selected.c}</span>g C ·{" "}
+              <span className="font-numbers tracking-[0.01em]">{selected.f}</span>g G {selected.gramsPerUnit ? "— por " : "por "}
+              {selected.gramsPerUnit ? (
+                <>
+                  <span className="font-numbers tracking-[0.01em]">{selected.gramsPerUnit}</span>g
+                  {" "}(<span className="font-numbers tracking-[0.01em]">1</span> {selected.unitLabel})
+                </>
+              ) : (
+                <><span className="font-numbers tracking-[0.01em]">100</span>g</>
+              )}
             </p>
           </div>
 
@@ -328,7 +346,7 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
                 value={weightG}
                 onChange={(e) => setWeightG(e.target.value)}
                 autoFocus
-                className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums"
+                className="w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums font-numbers tracking-[0.01em]"
               />
             </div>
           )}

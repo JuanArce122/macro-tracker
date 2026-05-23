@@ -177,7 +177,7 @@ export default function ProfilePage() {
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => set(e.target.value)}
-                    className="w-full bg-bg-primary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2.5 text-sm font-medium tabular-nums focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] pr-8"
+                    className="w-full bg-bg-primary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2.5 text-sm tabular-nums font-numbers tracking-[0.01em] focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] pr-8"
                   />
                   <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-tertiary">
                     {suffix}

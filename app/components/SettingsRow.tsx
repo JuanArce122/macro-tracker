@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -6,7 +7,7 @@ import Icon from "@/app/components/ui/Icon";
 type Props = {
   icon: LucideIcon;
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   href?: string;
   soon?: boolean;
   danger?: boolean;

@@ -106,17 +106,28 @@ export default function SettingsPage() {
     restoreNotifSchedule();
   }, []);
 
-  const goalsSubtitle = goals
-    ? `${goals.calories.toFixed(0)} kcal · ${goals.protein.toFixed(0)}g P · ${goals.carbs.toFixed(0)}g C · ${goals.fat.toFixed(0)}g G`
-    : "Configura tus metas diarias";
+  const goalsSubtitle = goals ? (
+    <>
+      <span className="font-numbers tracking-[0.01em]">{goals.calories.toFixed(0)}</span> kcal ·{" "}
+      <span className="font-numbers tracking-[0.01em]">{goals.protein.toFixed(0)}</span>g P ·{" "}
+      <span className="font-numbers tracking-[0.01em]">{goals.carbs.toFixed(0)}</span>g C ·{" "}
+      <span className="font-numbers tracking-[0.01em]">{goals.fat.toFixed(0)}</span>g G
+    </>
+  ) : "Configura tus metas diarias";
 
-  const foodsSubtitle = myFoodsCount > 0
-    ? `${myFoodsCount} alimento${myFoodsCount !== 1 ? "s" : ""} guardado${myFoodsCount !== 1 ? "s" : ""}`
-    : "Agrega tus alimentos habituales";
+  const foodsSubtitle = myFoodsCount > 0 ? (
+    <>
+      <span className="font-numbers tracking-[0.01em]">{myFoodsCount}</span>{" "}
+      alimento{myFoodsCount !== 1 ? "s" : ""} guardado{myFoodsCount !== 1 ? "s" : ""}
+    </>
+  ) : "Agrega tus alimentos habituales";
 
-  const notifSubtitle = activeNotifs > 0
-    ? `${activeNotifs} recordatorio${activeNotifs !== 1 ? "s" : ""} activo${activeNotifs !== 1 ? "s" : ""}`
-    : "Recordatorios de comidas";
+  const notifSubtitle = activeNotifs > 0 ? (
+    <>
+      <span className="font-numbers tracking-[0.01em]">{activeNotifs}</span>{" "}
+      recordatorio{activeNotifs !== 1 ? "s" : ""} activo{activeNotifs !== 1 ? "s" : ""}
+    </>
+  ) : "Recordatorios de comidas";
 
   return (
     <div className="flex flex-col flex-1 bg-bg-primary">
