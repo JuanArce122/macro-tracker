@@ -1,0 +1,74 @@
+name: Migrate prod DB
+
+# Llama a POST /api/admin/migrate en producción para aplicar los DDL
+# de docs/migrations/*.sql que estén pendientes en Turso. El endpoint
+# es idempotente (chequea pragma_table_info / sqlite_master antes de
+# cada ALTER / CREATE), así que correr esto en cada push a main es
+# barato y resiliente.
+#
+# Motivación: el flujo manual `turso db shell ... < migration.sql` se
+# saltó múltiples sprints sin que nadie lo notara, dejando producción
+# con un schema desfasado que rompió el login. Este workflow garantiza
+# que la DB de prod se sincroniza con cada deploy.
+#
+# Secrets requeridos en el repo:
+#   - AUTH_SECRET   (mismo valor que tiene Vercel en su env de producción)
+#   - PROD_APP_URL  (ej. https://macro-tracker-beta-topaz.vercel.app)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permite disparar manualmente desde la UI
+
+jobs:
+  migrate:
+    name: Apply pending migrations
+    runs-on: ubuntu-latest
+    # Damos margen para que Vercel termine el deploy de producción del
+    # mismo commit antes de invocar el endpoint.
+    timeout-minutes: 10
+
+    steps:
+      - name: Wait for Vercel production deploy
+        # Polling simple: la migración necesita que el endpoint
+        # /api/admin/migrate esté presente en el deploy actual. Un sleep
+        # corto + retry es suficiente para la mayoría de los deploys.
+        run: |
+          for i in $(seq 1 30); do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$PROD_APP_URL/api/admin/migrate")
+            # 401 = endpoint disponible (rechaza por falta de auth). 404 = aún sin desplegar.
+            if [ "$CODE" = "401" ]; then
+              echo "Endpoint listo (HTTP $CODE)"
+              exit 0
+            fi
+            echo "[$i/30] Endpoint todavía no disponible (HTTP $CODE), retry en 10s…"
+            sleep 10
+          done
+          echo "Timeout esperando el deploy"
+          exit 1
+        env:
+          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
+
+      - name: Apply migrations
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "$PROD_APP_URL/api/admin/migrate" \
+            -H "Authorization: Bearer $AUTH_SECRET")
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          STATUS=$(echo "$RESPONSE" | tail -n 1)
+          echo "Status: $STATUS"
+          echo "$BODY" | head -c 4000
+          if [ "$STATUS" != "200" ]; then
+            echo "Migración devolvió $STATUS — falló"
+            exit 1
+          fi
+          # Validamos que el endpoint no reportó errores internos
+          ERRORS=$(echo "$BODY" | grep -oE '"errors":[0-9]+' | head -1 | cut -d':' -f2)
+          if [ "${ERRORS:-0}" != "0" ]; then
+            echo "Migración completó con $ERRORS errores"
+            exit 1
+          fi
+          echo "Migración OK"
+        env:
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}

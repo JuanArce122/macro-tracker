@@ -81,7 +81,7 @@ PWA personal mobile-first (iPhone) para trackear macros con foto + IA. La app es
 - **postinstall**: `prisma generate` (automático tras `npm install`)
 - **DB local**: `npx prisma migrate dev --name <nombre>`
 - **Seed**: `npx tsx scripts/seed-foods.ts`
-- **DB prod (Turso)**: `turso db shell macro-tracker < prisma/migrations/<nombre>/migration.sql` (Prisma 7 no soporta `migrate deploy` contra libsql:// directamente)
+- **DB prod (Turso)**: automatizado vía GitHub Action `.github/workflows/migrate-prod.yml` — cada push a `main` invoca `POST /api/admin/migrate` (idempotente, chequea `pragma_table_info`/`sqlite_master`). Para añadir cambios de schema: actualizar `prisma/schema.prisma`, registrar los DDL nuevos en `app/api/admin/migrate/route.ts` (catálogo `COLUMN_ADDS` / `TABLE_CREATES` / `INDEX_CREATES`), y opcionalmente seguir manteniendo `docs/migrations/HU-XX-*.sql` como referencia. Override manual: `turso db shell macro-tracker < docs/migrations/<nombre>.sql`.
 
 ## Design System
 
