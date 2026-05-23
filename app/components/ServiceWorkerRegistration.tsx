@@ -19,6 +19,18 @@ export default function ServiceWorkerRegistration() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    // Escuchar SW_UPDATED del nuevo SW para recargar y tomar HTML/chunks
+    // frescos. Sin esto, una pestaña que ya cargó HTML del SW viejo
+    // sigue con chunks JS que ya no existen tras el deploy.
+    let reloaded = false;
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "SW_UPDATED" && !reloaded) {
+        reloaded = true;
+        window.location.reload();
+      }
+    };
+    navigator.serviceWorker.addEventListener("message", onMessage);
+
     navigator.serviceWorker
       .register("/sw.js")
       .then((reg) => {
@@ -35,6 +47,10 @@ export default function ServiceWorkerRegistration() {
         }
       })
       .catch((err) => console.error("[SW] Error al registrar:", err));
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+    };
   }, []);
 
   return null;
