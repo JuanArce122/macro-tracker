@@ -1,12 +1,20 @@
-const CACHE_NAME = "macro-tracker-v4";
-const STATIC_ASSETS = ["/", "/history", "/settings"];
+// Bump v5: NO precacheamos HTML de páginas porque el HTML referencia
+// chunks JS con hashes que cambian en cada deploy. Si pre-cacheamos /
+// + /history + /settings con el SW viejo, tras un deploy el HTML viejo
+// apunta a chunks que ya no existen → la app queda en blanco / no abre.
+//
+// Estrategia v5:
+//   - install: solo skipWaiting (sin precaching de HTML)
+//   - activate: borra todos los caches viejos para liberar al usuario
+//   - fetch: cache-first SOLO para /_next/static/* (hashes inmutables);
+//            stale-while-revalidate para APIs idempotentes;
+//            network-first para navegación (HTML).
+const CACHE_NAME = "macro-tracker-v5";
 
 // ─── Instalación ──────────────────────────────────────────────────────────────
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+self.addEventListener("install", () => {
+  // Sin precaching de HTML — evita chunks JS huérfanos tras deploys.
   self.skipWaiting();
 });
 
@@ -60,7 +68,19 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match(request)));
+    // Network-first; cachea respuestas OK para que offline funcione sin
+    // precaching del install (que generaba el bug de chunks huérfanos).
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(request))
+    );
   }
 });
 
