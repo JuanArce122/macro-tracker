@@ -2,13 +2,14 @@ import { describe, it, expect } from "vitest";
 import { MealCreateSchema, MealItemSchema, MealCategorySchema } from "@/lib/schemas";
 
 describe("MealCategorySchema", () => {
-  it("accepts valid categories", () => {
-    for (const cat of ["breakfast", "lunch", "dinner", "snack"]) {
+  it("accepts valid categories (Spanish, per CLAUDE.md convention)", () => {
+    for (const cat of ["desayuno", "almuerzo", "cena", "snack"]) {
       expect(MealCategorySchema.safeParse(cat).success).toBe(true);
     }
   });
 
   it("rejects invalid categories", () => {
+    expect(MealCategorySchema.safeParse("breakfast").success).toBe(false);
     expect(MealCategorySchema.safeParse("brunch").success).toBe(false);
     expect(MealCategorySchema.safeParse("").success).toBe(false);
   });
@@ -74,7 +75,7 @@ describe("MealCreateSchema", () => {
   const validMeal = {
     date: "2026-05-22T12:00:00.000Z",
     dateLocal: "2026-05-22",
-    category: "lunch" as const,
+    category: "almuerzo" as const,
     name: "Almuerzo de prueba",
     weightG: 300,
     calories: 500,
