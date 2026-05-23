@@ -26,11 +26,13 @@ model User {
   // Soporte regional (HU-12): ISO 3166-1 alpha-2 ("CO", "MX", "AR", etc.)
   countryCode   String?
 
-  meals         Meal[]
-  goals         Goal[]
-  foodVotes     FoodVote[]
-  weights       WeightEntry[]
-  goalLogs      GoalAdjustmentLog[]
+  meals             Meal[]
+  goals             Goal[]
+  foodVotes         FoodVote[]
+  weights           WeightEntry[]
+  goalLogs          GoalAdjustmentLog[]
+  insights          Insight[]
+  pushSubscriptions PushSubscription[]
 }
 
 model Meal {
@@ -102,6 +104,37 @@ model GoalAdjustmentLog {
   createdAt   DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+// Coaching contextual (HU-09)
+model Insight {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String    // "trend_calories" | "adherence" | "streak" | "macro_imbalance" | "milestone"
+  title         String
+  body          String
+  dataJson      String    // JSON serializado con datos para gráfica
+  createdAt     DateTime  @default(now())
+  dismissedAt   DateTime?
+  dismissReason String?   // "not_useful" | "seen" | "not_relevant"
+  pushedAt      DateTime? // cuando se envió push (null si solo in-app)
+
+  @@index([userId, createdAt])
+  @@index([userId, dismissedAt])
+}
+
+// Web Push subscriptions (HU-09)
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model PasswordResetToken {
