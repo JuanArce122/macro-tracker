@@ -37,6 +37,9 @@ export type MealItem = z.infer<typeof MealItemSchema>;
  * - `date`: ISO 8601 (timestamp UTC del registro)
  * - `dateLocal`: YYYY-MM-DD del usuario (zona horaria local)
  * - `imageBase64`: opcional, se sube a blob y queda en `imageUrl` server-side
+ * - `foodId` (HU-07): si el cliente identifica un Food específico (de
+ *   búsqueda, barcode o voz), server hace snapshot de micros automáticamente
+ *   escalando del valor por 100g al weightG real.
  */
 export const MealCreateSchema = z.object({
   date: z.string().min(1, "Fecha requerida"), // ISO 8601 o YYYY-MM-DD
@@ -51,6 +54,7 @@ export const MealCreateSchema = z.object({
   fat: PositiveNumberSchema,
   confidence: z.number().min(0).max(1).default(1),
   items: z.array(MealItemSchema).optional(),
+  foodId: z.number().int().positive().optional(),
 });
 
 export type MealCreateInput = z.infer<typeof MealCreateSchema>;
