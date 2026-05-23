@@ -7,6 +7,7 @@ import MealList from "@/app/components/MealList";
 import QuickAddFAB from "@/app/components/QuickAddFAB";
 import BottomNav from "@/app/components/BottomNav";
 import SuggestionBanner from "@/app/components/SuggestionBanner";
+import InsightCard from "@/app/components/InsightCard";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -72,7 +73,12 @@ export default async function DayPage({
       <DayHeader date={date} />
       <div className="flex-1 overflow-y-auto pb-32">
         <MacroSummary totals={totals} goals={goals} />
-        {isToday && <SuggestionBanner adjustmentMode={adjustmentMode} />}
+        {isToday && (
+          <>
+            <SuggestionBanner adjustmentMode={adjustmentMode} />
+            <InsightCard />
+          </>
+        )}
         <MealList meals={meals} date={date} />
       </div>
       <QuickAddFAB date={date} />
