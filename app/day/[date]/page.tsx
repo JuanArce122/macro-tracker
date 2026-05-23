@@ -10,6 +10,7 @@ import SuggestionBanner from "@/app/components/SuggestionBanner";
 import InsightCard from "@/app/components/InsightCard";
 import HabitsDashboard from "@/app/components/HabitsDashboard";
 import SafeUseBanner from "@/app/components/SafeUseBanner";
+import MicrosCard from "@/app/components/MicrosCard";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -93,7 +94,10 @@ export default async function DayPage({
         {isHabitsMode ? (
           <HabitsDashboard date={date} fitnessGoal={fitnessGoal ?? null} />
         ) : (
-          <MacroSummary totals={totals} goals={goals} />
+          <>
+            <MacroSummary totals={totals} goals={goals} />
+            <MicrosCard date={date} />
+          </>
         )}
         {isToday && (
           <>
