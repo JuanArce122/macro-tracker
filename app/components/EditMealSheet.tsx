@@ -73,7 +73,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 }
 
 const inputClass = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]";
-const inputClassSmall = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums";
+const inputClassSmall = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums font-numbers tracking-[0.01em]";
 
 type Props = {
   meal: Meal;
@@ -382,7 +382,11 @@ export default function EditMealSheet({ meal, onClose }: Props) {
                               <ConfidenceBadge confidence={item.confianza} />
                             </div>
                             <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
-                              {item.unidades > 1 ? `${item.unidades} und · ` : ""}{item.pesoG}g · {Math.round(item.calorias)} kcal
+                              {item.unidades > 1 && (
+                                <><span className="font-numbers tracking-[0.01em]">{item.unidades}</span> und · </>
+                              )}
+                              <span className="font-numbers tracking-[0.01em]">{item.pesoG}</span>g ·{" "}
+                              <span className="font-numbers tracking-[0.01em]">{Math.round(item.calorias)}</span> kcal
                             </p>
                           </div>
                         </button>

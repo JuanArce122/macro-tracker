@@ -107,7 +107,7 @@ export default function MicrosCard({ date }: { date: string }) {
               <div className="flex justify-between text-xs tabular-nums">
                 <span className="text-text-primary font-medium">{m.label}</span>
                 <span className="text-text-tertiary">
-                  {m.consumed.toFixed(0)} / {m.target.toFixed(0)} {m.unit}
+                  <span className="font-numbers tracking-[0.01em]">{m.consumed.toFixed(0)}</span> / <span className="font-numbers tracking-[0.01em]">{m.target.toFixed(0)}</span> {m.unit}
                 </span>
               </div>
               <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden">

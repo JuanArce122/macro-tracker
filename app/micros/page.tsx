@@ -103,11 +103,11 @@ export default function MicrosPage() {
 
                   <div className="flex items-baseline justify-between text-xs tabular-nums">
                     <span className="text-text-tertiary">
-                      {m.consumed.toFixed(m.consumed < 10 ? 1 : 0)} {m.unit}
+                      <span className="font-numbers tracking-[0.01em]">{m.consumed.toFixed(m.consumed < 10 ? 1 : 0)}</span> {m.unit}
                     </span>
                     <span className="text-text-tertiary">
-                      Meta: {m.rdaMin.toFixed(0)}
-                      {m.rdaMax ? ` · UL ${m.rdaMax.toFixed(0)}` : ""} {m.unit}
+                      Meta: <span className="font-numbers tracking-[0.01em]">{m.rdaMin.toFixed(0)}</span>
+                      {m.rdaMax ? <> · UL <span className="font-numbers tracking-[0.01em]">{m.rdaMax.toFixed(0)}</span></> : null} {m.unit}
                     </span>
                   </div>
 
@@ -119,7 +119,7 @@ export default function MicrosPage() {
                   </div>
 
                   <p className="text-[10px] text-text-tertiary tabular-nums">
-                    {m.pctOfTarget}% de la meta
+                    <span className="font-numbers tracking-[0.01em]">{m.pctOfTarget}</span>% de la meta
                   </p>
                 </div>
               ))}

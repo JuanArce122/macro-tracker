@@ -183,14 +183,21 @@ export default function FoodsPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text-primary truncate">{food.nombre}</p>
                   <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
-                    <span className="text-text-primary font-medium">{food.cal}</span>
-                    {" kcal · "}
-                    <span className="text-macro-protein">{food.p}g P</span>
+                    <span className="font-numbers tracking-[0.01em] text-text-primary">{food.cal}</span>
+                    <span className="text-text-primary"> kcal</span>
                     {" · "}
-                    <span className="text-macro-carbs">{food.c}g C</span>
+                    <span className="text-macro-protein">
+                      <span className="font-numbers tracking-[0.01em]">{food.p}</span>g P
+                    </span>
                     {" · "}
-                    <span className="text-macro-fat">{food.f}g G</span>
-                    <span className="text-text-tertiary"> — por 100g</span>
+                    <span className="text-macro-carbs">
+                      <span className="font-numbers tracking-[0.01em]">{food.c}</span>g C
+                    </span>
+                    {" · "}
+                    <span className="text-macro-fat">
+                      <span className="font-numbers tracking-[0.01em]">{food.f}</span>g G
+                    </span>
+                    <span className="text-text-tertiary"> — por <span className="font-numbers tracking-[0.01em]">100</span>g</span>
                   </p>
                 </div>
                 <button

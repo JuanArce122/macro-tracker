@@ -193,7 +193,8 @@ export default function HistoryPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{meal.name}</p>
                       <p className="text-xs text-text-tertiary tabular-nums mt-0.5">
-                        {format(parseISO(meal.date), "d MMM yyyy", { locale: es })} · {meal.calories.toFixed(0)} kcal
+                        {format(parseISO(meal.date), "d MMM yyyy", { locale: es })} ·{" "}
+                        <span className="font-numbers tracking-[0.01em]">{meal.calories.toFixed(0)}</span> kcal
                       </p>
                     </div>
                     <Icon icon={ChevronRight} size={16} className="text-text-tertiary flex-shrink-0" />
@@ -279,11 +280,23 @@ export default function HistoryPage() {
                     </div>
                   </div>
                   <div className="flex gap-3 text-xs tabular-nums">
-                    <span><span className="text-macro-protein font-medium">{day.protein.toFixed(1)}g</span><span className="text-text-tertiary"> P</span></span>
+                    <span>
+                      <span className="font-numbers tracking-[0.01em] text-macro-protein">{day.protein.toFixed(1)}</span>
+                      <span className="text-macro-protein">g</span>
+                      <span className="text-text-tertiary"> P</span>
+                    </span>
                     <span className="text-text-tertiary">·</span>
-                    <span><span className="text-macro-carbs font-medium">{day.carbs.toFixed(1)}g</span><span className="text-text-tertiary"> C</span></span>
+                    <span>
+                      <span className="font-numbers tracking-[0.01em] text-macro-carbs">{day.carbs.toFixed(1)}</span>
+                      <span className="text-macro-carbs">g</span>
+                      <span className="text-text-tertiary"> C</span>
+                    </span>
                     <span className="text-text-tertiary">·</span>
-                    <span><span className="text-macro-fat font-medium">{day.fat.toFixed(1)}g</span><span className="text-text-tertiary"> G</span></span>
+                    <span>
+                      <span className="font-numbers tracking-[0.01em] text-macro-fat">{day.fat.toFixed(1)}</span>
+                      <span className="text-macro-fat">g</span>
+                      <span className="text-text-tertiary"> G</span>
+                    </span>
                   </div>
                 </button>
               );

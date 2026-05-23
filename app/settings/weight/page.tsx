@@ -118,7 +118,7 @@ export default function WeightPage() {
               placeholder="ej. 70.5"
               value={weightInput}
               onChange={(e) => setWeightInput(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-base font-medium tabular-nums focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] pr-12"
+              className="w-full bg-bg-primary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-base tabular-nums font-numbers tracking-[0.01em] focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] pr-12"
               aria-label="Peso en kilogramos"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary text-sm font-medium pointer-events-none">
