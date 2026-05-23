@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/outliers",
       "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/insights",
+      "schedule": "0 14 * * 0"
     }
   ],
   "headers": [
