@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Leaf, Camera, Search, BarChart3, Target, Download, Mail, Lock, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { Camera, Search, BarChart3, Target, Download, Mail, Lock, ChevronLeft, ChevronRight } from "lucide-react";
 import Icon from "@/app/components/ui/Icon";
 
 const VERSION = "1.0.0";
@@ -30,9 +31,13 @@ export default function AboutPage() {
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-10 flex flex-col gap-6">
         {/* Logo + nombre */}
         <div className="flex flex-col items-center gap-3 pb-2">
-          <div className="w-20 h-20 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary">
-            <Icon icon={Leaf} size={32} />
-          </div>
+          <Image
+            src="/icon.svg"
+            alt="Macro Tracker"
+            width={80}
+            height={80}
+            className="w-20 h-20"
+          />
           <div className="text-center">
             <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary">Macro Tracker</h2>
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1">Versión {VERSION}</p>

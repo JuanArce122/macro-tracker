@@ -97,13 +97,13 @@ Definidos como CSS variables en `app/globals.css`, expuestos a Tailwind v4 vía 
 
 | Token | Hex | Uso |
 |---|---|---|
-| `--bg-primary` | `#EEEAE2` | Fondo principal (beige neutro) |
-| `--bg-secondary` | `#FFFFFF` | Tarjetas |
-| `--bg-tertiary` | `#E6E0D4` | Áreas elevadas, tracks de progreso, fondo de avatares |
+| `--bg-primary` | `#FAFAF9` | Fondo principal (blanco roto) |
+| `--bg-secondary` | `#F4F3F0` | Tarjetas (sutilmente más oscuras que el fondo) |
+| `--bg-tertiary` | `#EDEBE6` | Áreas elevadas, tracks de progreso, fondo de avatares |
 | `--text-primary` | `#1A1A1A` | Texto principal y números hero |
 | `--text-secondary` | `#6B6B6B` | Texto secundario |
 | `--text-tertiary` | `#9A9A9A` | Labels, metadatos, placeholders |
-| `--border` | `#DDD7CC` | Bordes y separadores |
+| `--border` | `#E5E4E0` | Bordes y separadores |
 | `--accent-primary` | `#3D5A3D` | Verde botánico (acciones, links, estado activo) |
 | `--accent-warm` | `#C66B4A` | Terracota (highlights cálidos) |
 

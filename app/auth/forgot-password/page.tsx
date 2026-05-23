@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { Leaf, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import Image from "next/image";
 import Icon from "@/app/components/ui/Icon";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
@@ -15,9 +16,14 @@ export default async function ForgotPasswordPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-10 gap-8">
         {/* Logo + branding */}
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-16 h-16 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-primary">
-            <Icon icon={Leaf} size={28} />
-          </div>
+          <Image
+            src="/icon.svg"
+            alt="Macro Tracker"
+            width={64}
+            height={64}
+            priority
+            className="w-16 h-16"
+          />
           <div>
             <h1 className="font-serif text-4xl tracking-[-0.02em] text-text-primary">Macro Tracker</h1>
             <p className="text-sm text-text-tertiary mt-2">Recuperar contraseña</p>
