@@ -72,6 +72,10 @@ jobs:
           DATABASE_URL: "file:./dev.db"
           NEXTAUTH_SECRET: "ci-secret-not-for-prod"
           NEXTAUTH_URL: "http://localhost:3000"
+          # NextAuth v5: en `next start` fuera de Vercel hay que confiar el
+          # host explícitamente, de lo contrario `auth()` lanza UntrustedHost
+          # y la lógica de redirect en /auth queda inconsistente.
+          AUTH_TRUST_HOST: "true"
           GEMINI_API_KEY: "ci-mock-key"
 
       - name: Start app + Run Playwright
@@ -83,6 +87,7 @@ jobs:
           DATABASE_URL: "file:./dev.db"
           NEXTAUTH_SECRET: "ci-secret-not-for-prod"
           NEXTAUTH_URL: "http://localhost:3000"
+          AUTH_TRUST_HOST: "true"
           GEMINI_API_KEY: "ci-mock-key"
 
       - name: Upload Playwright report on failure
