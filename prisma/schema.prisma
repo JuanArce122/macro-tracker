@@ -57,6 +57,23 @@ model Meal {
   items      String?
   createdAt  DateTime @default(now())
 
+  // Snapshot de micros al momento de registrar (HU-07)
+  fiber      Float?
+  sugar      Float?
+  sodium     Float?
+  potassium  Float?
+  calcium    Float?
+  iron       Float?
+  vitaminC   Float?
+  vitaminD   Float?
+  vitaminB12 Float?
+  vitaminA   Float?
+  folate     Float?
+  magnesium  Float?
+  zinc       Float?
+  omega3     Float?
+  omega6     Float?
+
   @@index([userId, dateLocal])
 }
 
@@ -194,6 +211,29 @@ model Food {
 
   // Barcode (HU-03): EAN-13 / EAN-8 / UPC normalizado
   barcode      String?   @unique
+
+  // Micronutrientes (HU-07) — por 100g, todos opcionales (no todas las
+  // fuentes los proveen). Unidades: g (fiber, sugar, omega3/6), mg
+  // (sodium, potassium, calcium, iron, vitC, magnesium, zinc), µg
+  // (vitD, vitB12, folate), µg RAE (vitA).
+  fiber        Float?
+  sugar        Float?
+  sodium       Float?
+  potassium    Float?
+  calcium      Float?
+  iron         Float?
+  vitaminC     Float?
+  vitaminD     Float?
+  vitaminB12   Float?
+  vitaminA     Float?
+  folate       Float?
+  magnesium    Float?
+  zinc         Float?
+  omega3       Float?
+  omega6       Float?
+
+  // FDC ID en USDA FoodData Central — para deduplicar imports
+  fdcId        Int?      @unique
 
   votes        FoodVote[]
 
