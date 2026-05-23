@@ -470,15 +470,15 @@ export default function EditMealSheet({ meal, onClose }: Props) {
                       <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{Math.round(totals.proteina * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{Math.round(totals.proteina * 10) / 10}<span className="font-body text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{Math.round(totals.carbs * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{Math.round(totals.carbs * 10) / 10}<span className="font-body text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{Math.round(totals.grasa * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{Math.round(totals.grasa * 10) / 10}<span className="font-body text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>

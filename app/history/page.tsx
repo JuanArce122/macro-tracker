@@ -67,15 +67,15 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
               <p className="text-xs text-text-tertiary mt-1">kcal</p>
             </div>
             <div>
-              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{meal.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{meal.protein.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">prot</p>
             </div>
             <div>
-              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{meal.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{meal.carbs.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">carbs</p>
             </div>
             <div>
-              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{meal.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{meal.fat.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">grasa</p>
             </div>
           </div>
@@ -229,15 +229,15 @@ export default function HistoryPage() {
                       <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>

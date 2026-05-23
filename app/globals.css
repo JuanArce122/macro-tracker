@@ -55,7 +55,7 @@ html.dark {
 }
 
 /* Exponer tokens a Tailwind v4: genera utilities bg-bg-primary, text-text-primary,
-   text-macro-protein, border-border, font-sans, font-serif, etc. */
+   text-macro-protein, border-border, font-body, font-display, font-numbers, etc. */
 @theme inline {
   --color-bg-primary:   var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
@@ -77,16 +77,10 @@ html.dark {
 
   /* ── Tipografía ──────────────────────────────────
      Sistema: Oswald (display) + Bebas Neue (números) + Inter (body).
-     `font-display`, `font-numbers`, `font-body` son las clases Tailwind
-     correctas. `font-sans` / `font-serif` quedan como alias temporales
-     durante la migración (Fases 2-4) y se eliminan al cerrar Fase 4. */
+     Clases Tailwind: `font-display`, `font-numbers`, `font-body`. */
   --font-body:    var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-oswald), system-ui, sans-serif;
   --font-numbers: var(--font-bebas), Impact, sans-serif;
-
-  /* Aliases temporales — NO usar en código nuevo. */
-  --font-sans:  var(--font-inter), system-ui, sans-serif;
-  --font-serif: var(--font-fraunces), Georgia, serif;
 }
 
 body {

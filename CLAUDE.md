@@ -65,7 +65,7 @@ PWA personal mobile-first (iPhone) para trackear macros con foto + IA. La app es
 - **Estilos**: Tailwind v4 utility-first inline. **Tokens vía CSS variables** expuestas a Tailwind con `@theme inline` (ej. `bg-bg-primary`, `text-text-primary`, `text-macro-protein`). Dark mode con clase `.dark` en `<html>` (toggle en Apariencia, default = claro). **Nunca clases dinámicas** (`"bg-" + color`) — Tailwind v4 purga clases no literales.
 - **Componentes**: Server Components por defecto; `"use client"` solo donde haya hooks/interactividad. Props con `type Props = {...}` inline. Primitivos del design system viven en `app/components/ui/`; componentes de feature en `app/components/`.
 - **Iconos**: siempre via `<Icon name={...}>` (wrapper de `lucide-react`), stroke 1.5, tamaño por defecto 20. **Cero emojis nativos** en JSX.
-- **Fuentes**: tres roles, una fuente por rol. `font-body` (Inter) para UI/labels/botones; `font-display` (Oswald, weights 400-700) para títulos, headers de meal, nombres, brand; `font-numbers` (Bebas Neue 400) para todo número visible (kcal, gramos, contadores, inputs numéricos). Números siempre con `tabular-nums`; Bebas Neue usa `tracking-[0.01em]` (positivo), Oswald usa `tracking-[-0.02em]`. **No usar** `font-sans`/`font-serif` (alias legacy en migración).
+- **Fuentes**: tres roles, una fuente por rol. `font-body` (Inter) para UI/labels/botones; `font-display` (Oswald, weights 400-700) para títulos, headers de meal, nombres, brand; `font-numbers` (Bebas Neue 400) para todo número visible (kcal, gramos, contadores, inputs numéricos). Números siempre con `tabular-nums`; Bebas Neue usa `tracking-[0.01em]` (positivo), Oswald usa `tracking-[-0.02em]`. **No usar** `font-sans`/`font-serif` — fueron eliminados al cerrar la migración.
 - **Patrones de estado**:
   - Para leer de un *external store* (localStorage, Notification API, prefs del SO), usar `useSyncExternalStore` en lugar de `useState + useEffect`. Hooks de referencia: `useTheme`, `useNotificationPermission`, `useNotificationSchedule`.
   - Para sincronizar un prop a múltiples states (típicamente al cambiar una entidad seleccionada), usar el patrón `key` prop en el parent en vez de un `useEffect` reactivo. Ejemplo: `MealList → <EditMealSheet key={editingMeal.id} meal={editingMeal} />`.
@@ -147,7 +147,7 @@ Sistema dual de tres roles. **Regla mental**: ¿número o stat? → Bebas Neue. 
   - Labels uppercase Inter: `tracking-[0.08em]`, `text-xs`, color `text-text-tertiary`.
 - **`font-variant-numeric: tabular-nums`** obligatorio en todo número Bebas Neue (uses la clase Tailwind `tabular-nums`).
 - **Tamaños de referencia**: `text-[88px]` (hero kcal en Bebas), `text-[40px]` (títulos de pantalla en Oswald), `text-2xl` (headers de meal), `text-sm`/`text-base` (cuerpo), `text-xs` (labels).
-- **No usar** `font-serif` ni `font-sans` (son alias legacy durante la migración; se eliminan al cerrar Fase 4).
+- **No usar** `font-serif` ni `font-sans` — fueron eliminados al cerrar la migración tipográfica.
 
 ### Iconografía
 
@@ -168,7 +168,7 @@ Sistema dual de tres roles. **Regla mental**: ¿número o stat? → Bebas Neue. 
 
 ### Primitivos en `app/components/ui/`
 
-`Button` (variants: `primary` | `secondary` | `ghost` | `destructive`; sizes: `sm` | `md` | `lg`) · `Card` · `Input` (con `leadingIcon`/`trailingIcon`) · `Icon` (wrapper Lucide) · `Label` · `Stat` (número Fraunces + sub-label Inter) · `SectionHeader` · `Divider` · `Avatar` (iniciales en círculo).
+`Button` (variants: `primary` | `secondary` | `ghost` | `destructive`; sizes: `sm` | `md` | `lg`) · `Card` · `Input` (con `leadingIcon`/`trailingIcon`) · `Icon` (wrapper Lucide) · `Label` · `Stat` (número Bebas Neue + sub-label Inter) · `SectionHeader` · `Divider` · `Avatar` (iniciales en círculo).
 
 ## Reglas para Claude
 
