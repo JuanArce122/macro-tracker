@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import StepCamera, { type AnalysisResult } from "./add/StepCamera";
 import StepSearch from "./add/StepSearch";
+import StepBarcode from "./add/StepBarcode";
 import StepConfirm from "./add/StepConfirm";
 import Icon from "@/app/components/ui/Icon";
 
-type Step = "closed" | "camera" | "search" | "confirm";
+type Step = "closed" | "camera" | "search" | "barcode" | "confirm";
 
 export default function QuickAddFAB({ date }: { date: string }) {
   const [step, setStep] = useState<Step>("closed");
@@ -27,6 +28,17 @@ export default function QuickAddFAB({ date }: { date: string }) {
   function handlePhotoSelected(file: File) {
     setPendingFile(file);
     setStep("camera");
+  }
+
+  function handleScanBarcode() {
+    setStep("barcode");
+  }
+
+  function handleBarcodeNotFound(_barcode: string) {
+    // Cuando el barcode no se encuentra en OFF, volvemos a la búsqueda.
+    // En el futuro podríamos pre-poblar un form de "crear alimento" con
+    // el barcode pre-llenado, pero por ahora la búsqueda es buen fallback.
+    setStep("search");
   }
 
   function handleResult(r: AnalysisResult) {
@@ -76,6 +88,7 @@ export default function QuickAddFAB({ date }: { date: string }) {
               onResult={handleResult}
               onBack={closeAll}
               onPhotoSelected={handlePhotoSelected}
+              onScanBarcode={handleScanBarcode}
             />
           )}
           {step === "camera" && (
@@ -84,6 +97,13 @@ export default function QuickAddFAB({ date }: { date: string }) {
               onBack={() => { setPendingFile(null); setStep("search"); }}
               onSwitchToSearch={() => { setPendingFile(null); setStep("search"); }}
               initialFile={pendingFile ?? undefined}
+            />
+          )}
+          {step === "barcode" && (
+            <StepBarcode
+              onResult={handleResult}
+              onNotFound={handleBarcodeNotFound}
+              onBack={() => setStep("search")}
             />
           )}
           {step === "confirm" && result && (
