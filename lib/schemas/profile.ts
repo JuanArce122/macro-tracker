@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidCountryCode } from "@/lib/regions";
+import { TrackingModeSchema } from "./habits";
 
 export const SexSchema = z.enum(["male", "female"]);
 
@@ -60,6 +61,8 @@ export const ProfileUpdateSchema = z.object({
   activityLevel: ActivityLevelSchema.nullable().optional(),
   fitnessGoal: FitnessGoalSchema.nullable().optional(),
   countryCode: CountryCodeSchema,
+  // HU-11: si no se envía, se preserva el valor anterior
+  trackingMode: TrackingModeSchema.optional(),
 });
 
 export type ProfileUpdateInput = z.infer<typeof ProfileUpdateSchema>;

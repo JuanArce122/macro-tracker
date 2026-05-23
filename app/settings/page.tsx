@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Target, Salad, Scale, Bell, Palette, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
+import { Target, Salad, Scale, Bell, Palette, Apple, BarChart3, Info, ChevronRight, LogOut } from "lucide-react";
 import BottomNav from "@/app/components/BottomNav";
 import SettingsRow from "@/app/components/SettingsRow";
 import Avatar from "@/app/components/ui/Avatar";
@@ -160,6 +160,12 @@ export default function SettingsPage() {
             title="Notificaciones"
             subtitle={notifSubtitle}
             href="/settings/notifications"
+          />
+          <SettingsRow
+            icon={Apple}
+            title="Modo de tracking"
+            subtitle="Macros exactos o porciones visuales"
+            href="/settings/tracking-mode"
           />
           <SettingsRow
             icon={Palette}
