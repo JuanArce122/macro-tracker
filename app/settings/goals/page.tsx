@@ -2,30 +2,59 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Check, Loader2 } from "lucide-react";
+import { ChevronLeft, Check, Loader2, Settings2, Sparkles, Bot } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Icon from "@/app/components/ui/Icon";
 
-type Goals = { calories: number; protein: number; carbs: number; fat: number };
+type Goals = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  adjustmentMode: AdjustmentMode;
+};
 
-const MACRO_FIELDS: { key: keyof Goals; label: string; unit: string; textColor: string }[] = [
+type AdjustmentMode = "manual" | "suggested" | "auto";
+
+const MACRO_FIELDS: { key: Exclude<keyof Goals, "adjustmentMode">; label: string; unit: string; textColor: string }[] = [
   { key: "calories", label: "Calorías",      unit: "kcal", textColor: "text-text-primary" },
   { key: "protein",  label: "Proteína",      unit: "g",    textColor: "text-macro-protein" },
   { key: "carbs",    label: "Carbohidratos", unit: "g",    textColor: "text-macro-carbs" },
   { key: "fat",      label: "Grasa",         unit: "g",    textColor: "text-macro-fat" },
 ];
 
+const MODE_OPTIONS: { value: AdjustmentMode; label: string; icon: LucideIcon; desc: string }[] = [
+  { value: "manual",    label: "Manual",    icon: Settings2, desc: "Tú ajustas las metas a mano" },
+  { value: "suggested", label: "Sugerido",  icon: Sparkles,  desc: "Te proponemos ajustes; tú decides" },
+  { value: "auto",      label: "Automático",icon: Bot,       desc: "Ajustamos solos cada 2 semanas" },
+];
+
 type SaveStatus = "idle" | "saving" | "saved";
 
 export default function GoalsPage() {
   const router = useRouter();
-  const [goals, setGoals] = useState<Goals>({ calories: 2000, protein: 150, carbs: 200, fat: 65 });
+  const [goals, setGoals] = useState<Goals>({
+    calories: 2000,
+    protein: 150,
+    carbs: 200,
+    fat: 65,
+    adjustmentMode: "manual",
+  });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<SaveStatus>("idle");
 
   useEffect(() => {
     fetch("/api/goals")
       .then((r) => r.json())
-      .then((d) => setGoals({ calories: d.calories, protein: d.protein, carbs: d.carbs, fat: d.fat }))
+      .then((d) =>
+        setGoals({
+          calories: d.calories,
+          protein: d.protein,
+          carbs: d.carbs,
+          fat: d.fat,
+          adjustmentMode: (d.adjustmentMode as AdjustmentMode) ?? "manual",
+        })
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -140,6 +169,44 @@ export default function GoalsPage() {
                 <span><span className="text-macro-protein font-medium">P</span> <span className="text-text-secondary">{pPct}%</span></span>
                 <span><span className="text-macro-carbs font-medium">C</span> <span className="text-text-secondary">{cPct}%</span></span>
                 <span><span className="text-macro-fat font-medium">G</span> <span className="text-text-secondary">{fPct}%</span></span>
+              </div>
+            </div>
+
+            {/* Modo de ajuste (HU-05) */}
+            <div className="bg-bg-secondary rounded-xl border border-border p-5 flex flex-col gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary">Modo de ajuste</p>
+                <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
+                  Las sugerencias usan tu peso registrado en{" "}
+                  <a href="/settings/weight" className="text-text-secondary underline">Peso</a>{" "}
+                  y tu objetivo fitness.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                {MODE_OPTIONS.map(({ value, label, icon, desc }) => {
+                  const isActive = goals.adjustmentMode === value;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setGoals((prev) => ({ ...prev, adjustmentMode: value }))}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors duration-200 ease-[var(--ease-editorial)] ${
+                        isActive
+                          ? "bg-text-primary text-bg-primary"
+                          : "bg-bg-tertiary text-text-primary active:opacity-80"
+                      }`}
+                      aria-pressed={isActive}
+                    >
+                      <Icon icon={icon} size={18} className="flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{label}</p>
+                        <p className={`text-xs mt-0.5 ${isActive ? "opacity-70" : "text-text-tertiary"}`}>
+                          {desc}
+                        </p>
+                      </div>
+                      {isActive && <Icon icon={Check} size={16} className="flex-shrink-0" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </>
