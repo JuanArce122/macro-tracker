@@ -39,6 +39,8 @@ model User {
   habits            HabitEntry[]
   wearables         WearableConnection[]
   activities        ActivityData[]
+  recipes           Recipe[]
+  mealPlans         MealPlan[]
 }
 
 model Meal {
@@ -200,6 +202,86 @@ model ActivityData {
   @@index([userId, date])
 }
 
+// Meal Planning (HU-06): recetas + planes semanales
+model Recipe {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?
+  instructions String
+  prepTimeMin  Int
+  cookTimeMin  Int
+  servings     Int       @default(1)
+  // Tags como CSV (sqlite no soporta arrays nativos)
+  dietTags     String    @default("") // CSV: "vegano,vegetariano,keto,paleo,sin-gluten"
+  allergyTags  String    @default("") // CSV: "lacteos,gluten,frutos-secos,mariscos,huevo,soja"
+  costLevel    Int       @default(2)  // 1 bajo, 2 medio, 3 alto
+  cuisineCode  String?   // "CO", "MX", "ITA", etc.
+  source       String    @default("seed") // "seed" | "user" | "imported"
+  userId       Int?      // null = pública (seed/imported)
+  imageUrl     String?
+  // Macros estimadas por serving (denormalizado para listing rápido)
+  caloriesPerServing Int?
+  proteinPerServing  Float?
+  carbsPerServing    Float?
+  fatPerServing      Float?
+  createdAt    DateTime  @default(now())
+
+  user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredients  RecipeIngredient[]
+  plannedMeals PlannedMeal[]
+
+  @@index([cuisineCode])
+  @@index([userId])
+}
+
+model RecipeIngredient {
+  id              Int     @id @default(autoincrement())
+  recipeId        Int
+  foodId          Int
+  gramsPerServing Float
+  optional        Boolean @default(false)
+
+  recipe          Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  food            Food    @relation(fields: [foodId], references: [id])
+
+  @@index([recipeId])
+  @@index([foodId])
+}
+
+model MealPlan {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate   String    // YYYY-MM-DD (lunes de la semana)
+  endDate     String    // YYYY-MM-DD (domingo)
+  preferences String    // JSON: { diet, allergies, mealsPerDay, maxPrepMinutes, costLevel }
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  plannedMeals PlannedMeal[]
+
+  @@index([userId, startDate])
+  @@index([userId, isActive])
+}
+
+model PlannedMeal {
+  id         Int      @id @default(autoincrement())
+  planId     Int
+  date       String   // YYYY-MM-DD
+  mealType   String   // "breakfast" | "lunch" | "dinner" | "snack"
+  recipeId   Int
+  servings   Float    @default(1)
+  consumed   Boolean  @default(false)
+  consumedAt DateTime?
+
+  plan       MealPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+
+  @@unique([planId, date, mealType])
+  @@index([planId, date])
+  @@index([recipeId])
+}
+
 // Modo hábitos (HU-11): porciones visuales por día en lugar de macros exactos
 model HabitEntry {
   id              Int      @id @default(autoincrement())
@@ -240,6 +322,8 @@ model Food {
   userId       Int?
   usageCount   Int       @default(0)
   lastUsedAt   DateTime?
+
+  recipeIngredients RecipeIngredient[]
 
   // Soporte regional (HU-12): null = global, "CO" = colombiano, "LAC" = LATAM genérico
   regionCode   String?
