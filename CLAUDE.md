@@ -13,7 +13,7 @@ PWA personal mobile-first (iPhone) para trackear macros con foto + IA. La app es
 | Lenguaje | TypeScript (`strict: true`) | 5.x |
 | Estilos | Tailwind CSS v4 (`@tailwindcss/postcss`) | 4.x |
 | Iconos | lucide-react (outline, stroke 1.5) — *pendiente de instalar* | — |
-| Fuentes | Inter + Fraunces (`next/font/google`) — *pendiente de migración desde Geist* | — |
+| Fuentes | Inter (body) + Oswald (display) + Bebas Neue (numbers) (`next/font/google`) | — |
 | ORM | Prisma + `@prisma/adapter-libsql` | 7.x |
 | Base de datos | SQLite local (`file:./dev.db`) / Turso libSQL (prod) | — |
 | Auth | Auth.js v5 (Credentials + JWT) + bcryptjs | 5.0.0-beta |
@@ -133,11 +133,21 @@ Definidos como CSS variables en `app/globals.css`, expuestos a Tailwind v4 vía 
 
 ### Tipografía
 
-- **Display / números hero**: Fraunces (serif variable, Google Fonts) — tracking `-0.02em`.
-- **UI / cuerpo**: Inter (Google Fonts).
-- **Números**: siempre `font-variant-numeric: tabular-nums`.
-- **Labels uppercase**: tracking `+0.08em`, `text-xs`, color `text-text-tertiary`.
-- **Tamaños de referencia**: `text-[72px]` (hero kcal), `text-[40px]` (títulos de pantalla), `text-2xl` (headers de meal), `text-sm`/`text-base` (cuerpo), `text-xs` (labels).
+Sistema dual de tres roles. **Regla mental**: ¿número o stat? → Bebas Neue. ¿título, nombre, encabezado? → Oswald. ¿label, descripción, botón, navegación? → Inter.
+
+| Rol | Fuente | Pesos | Clase Tailwind | Variable CSS | Uso |
+|---|---|---|---|---|---|
+| Display | Oswald | 400, 500, 600, 700 | `font-display` | `--font-display` | Títulos de pantalla, días de la semana, headers de meal, nombre de usuario, brand |
+| Numbers | Bebas Neue | 400 (único) | `font-numbers` | `--font-numbers` | Todos los números: calorías, gramos, kcal en historial, promedios, steppers, inputs numéricos |
+| Body / UI | Inter | 400, 500, 600 | `font-body` | `--font-body` | Labels, descripciones, botones, navegación, texto secundario, unidades inline (kcal, g) |
+
+- **Tracking**:
+  - Oswald (display): `tracking-[-0.02em]` por defecto.
+  - Bebas Neue (numbers): `tracking-[0.01em]` (positivo, NO negativo).
+  - Labels uppercase Inter: `tracking-[0.08em]`, `text-xs`, color `text-text-tertiary`.
+- **`font-variant-numeric: tabular-nums`** obligatorio en todo número Bebas Neue (uses la clase Tailwind `tabular-nums`).
+- **Tamaños de referencia**: `text-[88px]` (hero kcal en Bebas), `text-[40px]` (títulos de pantalla en Oswald), `text-2xl` (headers de meal), `text-sm`/`text-base` (cuerpo), `text-xs` (labels).
+- **No usar** `font-serif` ni `font-sans` (son alias legacy durante la migración; se eliminan al cerrar Fase 4).
 
 ### Iconografía
 
