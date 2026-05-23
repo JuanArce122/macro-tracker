@@ -61,7 +61,8 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Prisma db push (test DB)
-        run: npx prisma db push --skip-generate
+        # Prisma 7 ya no soporta --skip-generate; postinstall corrió generate
+        run: npx prisma db push
         env:
           DATABASE_URL: "file:./dev.db"
 
