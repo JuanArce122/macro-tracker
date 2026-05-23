@@ -8,6 +8,7 @@ import QuickAddFAB from "@/app/components/QuickAddFAB";
 import BottomNav from "@/app/components/BottomNav";
 import SuggestionBanner from "@/app/components/SuggestionBanner";
 import InsightCard from "@/app/components/InsightCard";
+import HabitsDashboard from "@/app/components/HabitsDashboard";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -35,6 +36,13 @@ async function getGoals(userId: number) {
   );
 }
 
+async function getProfileForDashboard(userId: number) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { trackingMode: true, fitnessGoal: true },
+  });
+}
+
 function todayLocal(): string {
   return new Date().toISOString().split("T")[0];
 }
@@ -50,7 +58,11 @@ export default async function DayPage({
   const userId = Number(session.user.id);
   const { date } = await params;
 
-  const [meals, goals] = await Promise.all([getMeals(userId, date), getGoals(userId)]);
+  const [meals, goals, userInfo] = await Promise.all([
+    getMeals(userId, date),
+    getGoals(userId),
+    getProfileForDashboard(userId),
+  ]);
 
   const totals = meals.reduce(
     (acc, m) => ({
@@ -67,12 +79,21 @@ export default async function DayPage({
   // evitamos un fetch extra por cada navegación al historial.
   const isToday = date === todayLocal();
   const adjustmentMode = "adjustmentMode" in goals ? goals.adjustmentMode : "manual";
+  // HU-11: si el usuario está en modo hábitos, reemplazamos MacroSummary
+  // por HabitsDashboard. MealList se mantiene en ambos modos porque
+  // refleja datos crudos que son útiles independientemente del modo.
+  const isHabitsMode = userInfo?.trackingMode === "habits";
+  const fitnessGoal = userInfo?.fitnessGoal as "lose" | "maintain" | "gain" | null | undefined;
 
   return (
     <div className="flex flex-col flex-1 bg-bg-primary">
       <DayHeader date={date} />
       <div className="flex-1 overflow-y-auto pb-32">
-        <MacroSummary totals={totals} goals={goals} />
+        {isHabitsMode ? (
+          <HabitsDashboard date={date} fitnessGoal={fitnessGoal ?? null} />
+        ) : (
+          <MacroSummary totals={totals} goals={goals} />
+        )}
         {isToday && (
           <>
             <SuggestionBanner adjustmentMode={adjustmentMode} />
