@@ -9,6 +9,7 @@ import BottomNav from "@/app/components/BottomNav";
 import SuggestionBanner from "@/app/components/SuggestionBanner";
 import InsightCard from "@/app/components/InsightCard";
 import HabitsDashboard from "@/app/components/HabitsDashboard";
+import SafeUseBanner from "@/app/components/SafeUseBanner";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -96,6 +97,7 @@ export default async function DayPage({
         )}
         {isToday && (
           <>
+            <SafeUseBanner trackingMode={userInfo?.trackingMode ?? "macros"} />
             <SuggestionBanner adjustmentMode={adjustmentMode} />
             <InsightCard />
           </>
