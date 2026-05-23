@@ -12,4 +12,5 @@ export * from "./meal";
 export * from "./food";
 export * from "./profile";
 export * from "./vote";
+export * from "./weight";
 export * from "./common";
