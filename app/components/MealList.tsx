@@ -197,7 +197,7 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
                 <span className="text-text-tertiary flex-shrink-0">
                   <Icon icon={icon} size={18} />
                 </span>
-                <h3 className="font-serif text-xl tracking-[-0.02em] text-text-primary capitalize leading-none">
+                <h3 className="font-display text-xl tracking-[-0.02em] font-medium text-text-primary capitalize leading-none">
                   {label}
                 </h3>
               </div>

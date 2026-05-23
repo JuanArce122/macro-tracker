@@ -25,7 +25,7 @@ export default function AboutPage() {
         <button onClick={() => router.back()} className="text-text-tertiary active:text-text-primary p-1 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]">
           <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary">Sobre la app</h1>
+        <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary">Sobre la app</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-10 flex flex-col gap-6">
@@ -39,7 +39,7 @@ export default function AboutPage() {
             className="w-20 h-20"
           />
           <div className="text-center">
-            <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary">Macro Tracker</h2>
+            <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary">Macro Tracker</h2>
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1">Versión {VERSION}</p>
           </div>
           <p className="text-sm text-center text-text-secondary max-w-[280px] leading-relaxed">

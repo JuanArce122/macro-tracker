@@ -52,7 +52,7 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="font-serif text-xl tracking-[-0.02em] text-text-primary leading-tight">{meal.name}</p>
+            <p className="font-display text-xl tracking-[-0.02em] font-medium text-text-primary leading-tight">{meal.name}</p>
             <p className="text-xs text-text-tertiary capitalize mt-1 tabular-nums">{meal.category} · {meal.weightG}g</p>
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5">
               {format(parseISO(meal.date), "d 'de' MMMM yyyy", { locale: es })}
@@ -63,19 +63,19 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
         <div className="bg-bg-secondary border border-border rounded-xl p-5 mb-4">
           <div className="grid grid-cols-4 gap-3 text-center">
             <div>
-              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{meal.calories.toFixed(0)}</p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{meal.calories.toFixed(0)}</p>
               <p className="text-xs text-text-tertiary mt-1">kcal</p>
             </div>
             <div>
-              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{meal.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{meal.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">prot</p>
             </div>
             <div>
-              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{meal.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{meal.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">carbs</p>
             </div>
             <div>
-              <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{meal.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+              <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{meal.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
               <p className="text-xs text-text-tertiary mt-1">grasa</p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="px-5 pt-7 pb-4">
         <div className="flex items-end justify-between mb-5">
-          <h1 className="font-serif text-[40px] leading-[1.1] tracking-[-0.02em] text-text-primary">Historial</h1>
+          <h1 className="font-display text-[40px] leading-[1.1] tracking-[-0.02em] font-medium text-text-primary">Historial</h1>
           <a
             href="/api/export"
             download
@@ -224,19 +224,19 @@ export default function HistoryPage() {
                   </p>
                   <div className="grid grid-cols-4 gap-3 text-center">
                     <div>
-                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{avg.calories.toFixed(0)}</p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{avg.calories.toFixed(0)}</p>
                       <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-sans text-sm text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>
@@ -266,7 +266,7 @@ export default function HistoryPage() {
                 >
                   <div className="flex items-baseline justify-between gap-3 mb-3">
                     <div className="min-w-0">
-                      <p className="font-serif text-2xl leading-none tracking-[-0.02em] text-text-primary capitalize">
+                      <p className="font-display text-2xl leading-none tracking-[-0.02em] font-medium text-text-primary capitalize">
                         {format(parsed, "EEEE", { locale: es })}
                       </p>
                       <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5 capitalize">
@@ -274,7 +274,7 @@ export default function HistoryPage() {
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-serif text-2xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{day.calories.toFixed(0)}</p>
+                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{day.calories.toFixed(0)}</p>
                       <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                   </div>

@@ -31,7 +31,7 @@ export default function DayHeader({ date }: { date: string }) {
       </button>
 
       <div className="flex flex-col items-center text-center min-w-0">
-        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary capitalize leading-tight">
+        <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary capitalize leading-tight">
           {dayLabel}
         </h1>
         <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1 capitalize">

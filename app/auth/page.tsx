@@ -26,7 +26,7 @@ export default async function AuthPage() {
             className="w-16 h-16"
           />
           <div>
-            <h1 className="font-serif text-4xl tracking-[-0.02em] text-text-primary">Macro Tracker</h1>
+            <h1 className="font-display text-4xl tracking-[-0.02em] font-semibold text-text-primary">Macro Tracker</h1>
             <p className="text-sm text-text-tertiary mt-2">Seguimiento nutricional con IA</p>
           </div>
         </div>

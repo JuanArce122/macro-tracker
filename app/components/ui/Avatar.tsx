@@ -25,7 +25,7 @@ export default function Avatar({ name, size = "md", className = "" }: Props) {
   const initials = getInitials(name);
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-full bg-bg-tertiary text-text-primary font-medium ${sizeClass[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full bg-bg-tertiary text-text-primary font-display font-medium ${sizeClass[size]} ${className}`}
       aria-label={name ? `Avatar de ${name}` : "Avatar"}
     >
       {initials}

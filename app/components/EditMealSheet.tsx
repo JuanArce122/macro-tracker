@@ -314,7 +314,7 @@ export default function EditMealSheet({ meal, onClose }: Props) {
         </div>
 
         <div className="flex items-center justify-between px-5 py-3 border-b border-border flex-shrink-0">
-          <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary">Editar comida</h2>
+          <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary">Editar comida</h2>
           <button onClick={onClose} className="text-text-tertiary active:text-text-primary p-1 transition-colors duration-200 ease-[var(--ease-editorial)]" aria-label="Cerrar">
             <Icon icon={X} size={20} />
           </button>
@@ -423,7 +423,7 @@ export default function EditMealSheet({ meal, onClose }: Props) {
                             <div className="flex items-center gap-3">
                               <button onClick={() => updateItemUnits(item.id, item.unidades - 1)} disabled={item.unidades <= 1}
                                 className="w-9 h-9 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary font-medium disabled:opacity-30 active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]">−</button>
-                              <span className="font-serif text-xl tabular-nums tracking-[-0.02em] text-text-primary w-6 text-center">{item.unidades}</span>
+                              <span className="font-numbers text-xl tabular-nums tracking-[0.01em] text-text-primary w-6 text-center">{item.unidades}</span>
                               <button onClick={() => updateItemUnits(item.id, item.unidades + 1)}
                                 className="w-9 h-9 rounded-xl bg-bg-secondary border border-border flex items-center justify-center text-text-primary font-medium active:opacity-80 transition-opacity duration-200 ease-[var(--ease-editorial)]">+</button>
                             </div>
@@ -462,19 +462,19 @@ export default function EditMealSheet({ meal, onClose }: Props) {
                   <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">Total</p>
                   <div className="grid grid-cols-4 gap-3 text-center">
                     <div>
-                      <p className="font-serif text-xl leading-none tabular-nums tracking-[-0.02em] text-text-primary">{Math.round(totals.calorias)}</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{Math.round(totals.calorias)}</p>
                       <p className="text-xs text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="font-serif text-xl leading-none tabular-nums tracking-[-0.02em] text-macro-protein">{Math.round(totals.proteina * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{Math.round(totals.proteina * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="font-serif text-xl leading-none tabular-nums tracking-[-0.02em] text-macro-carbs">{Math.round(totals.carbs * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{Math.round(totals.carbs * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="font-serif text-xl leading-none tabular-nums tracking-[-0.02em] text-macro-fat">{Math.round(totals.grasa * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{Math.round(totals.grasa * 10) / 10}<span className="font-sans text-xs text-text-tertiary">g</span></p>
                       <p className="text-xs text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>

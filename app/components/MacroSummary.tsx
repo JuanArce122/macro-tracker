@@ -14,7 +14,7 @@ function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCard
   return (
     <div className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col gap-3">
       <span className="text-xs uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
-      <p className={`font-serif text-3xl leading-none tabular-nums tracking-[-0.02em] ${textColor}`}>
+      <p className={`font-numbers text-3xl leading-none tabular-nums tracking-[0.01em] ${textColor}`}>
         {value.toFixed(1)}
         <span className="font-sans text-sm tracking-normal text-text-tertiary ml-1">{unit}</span>
       </p>
@@ -49,7 +49,7 @@ export default function MacroSummary({ totals, goals }: Props) {
           </span>
         </div>
         <div className="flex items-baseline gap-2 mb-5">
-          <span className="font-serif text-[72px] leading-none tabular-nums tracking-[-0.02em] text-text-primary">
+          <span className="font-numbers text-[88px] leading-none tabular-nums tracking-[0.01em] text-text-primary">
             {totals.calories.toFixed(0)}
           </span>
           <span className="text-sm text-text-tertiary tabular-nums">

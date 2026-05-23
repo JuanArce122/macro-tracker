@@ -168,7 +168,7 @@ export default function StepBarcode({ onResult, onNotFound, onBack }: Props) {
         >
           <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="font-serif text-2xl tracking-[-0.02em] text-text-primary">Escanear código</h1>
+        <h1 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary">Escanear código</h1>
         <button onClick={onBack} className="w-7 opacity-0" aria-hidden="true" tabIndex={-1}>
           <Icon icon={X} size={20} />
         </button>

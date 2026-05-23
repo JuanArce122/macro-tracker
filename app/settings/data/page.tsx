@@ -37,7 +37,7 @@ function ConfirmModal({
             <Icon icon={AlertTriangle} size={22} />
           </span>
           <div>
-            <h2 className="font-serif text-2xl tracking-[-0.02em] text-text-primary leading-tight">{title}</h2>
+            <h2 className="font-display text-2xl tracking-[-0.02em] font-medium text-text-primary leading-tight">{title}</h2>
             <p className="text-sm text-text-secondary mt-2 leading-relaxed">{description}</p>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function DataPage() {
         <button onClick={() => router.back()} className="text-text-tertiary active:text-text-primary p-1 -ml-1 transition-colors duration-200 ease-[var(--ease-editorial)]">
           <Icon icon={ChevronLeft} size={20} />
         </button>
-        <h1 className="font-serif text-3xl tracking-[-0.02em] text-text-primary">Mis datos</h1>
+        <h1 className="font-display text-3xl tracking-[-0.02em] font-medium text-text-primary">Mis datos</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-2 pb-10 flex flex-col gap-4">
