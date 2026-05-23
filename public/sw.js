@@ -148,6 +148,35 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// ─── Web Push (HU-09: coaching contextual) ────────────────────────────────────
+//
+// Recibe pushes del servidor (lib/push.ts) y muestra la notificación.
+// El payload es un JSON: { title, body, url, insightId }.
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "Macro Tracker", body: event.data.text(), url: "/" };
+  }
+
+  const { title, body, url, insightId } = payload;
+
+  event.waitUntil(
+    self.registration.showNotification(title ?? "Macro Tracker", {
+      body: body ?? "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: insightId ? `insight-${insightId}` : "macros-push",
+      renotify: true,
+      data: { url: url ?? "/", insightId },
+    })
+  );
+});
+
 // ─── Clic en notificación ─────────────────────────────────────────────────────
 
 self.addEventListener("notificationclick", (event) => {
