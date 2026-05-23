@@ -26,6 +26,9 @@ model User {
   // Soporte regional (HU-12): ISO 3166-1 alpha-2 ("CO", "MX", "AR", etc.)
   countryCode   String?
 
+  // Modo de tracking (HU-11): "macros" (default) | "habits"
+  trackingMode  String   @default("macros")
+
   meals             Meal[]
   goals             Goal[]
   foodVotes         FoodVote[]
@@ -33,6 +36,7 @@ model User {
   goalLogs          GoalAdjustmentLog[]
   insights          Insight[]
   pushSubscriptions PushSubscription[]
+  habits            HabitEntry[]
 }
 
 model Meal {
@@ -135,6 +139,24 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// Modo hábitos (HU-11): porciones visuales por día en lugar de macros exactos
+model HabitEntry {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date            String   // YYYY-MM-DD
+  proteinPortions Int      @default(0)
+  vegPortions     Int      @default(0)
+  carbPortions   Int      @default(0)
+  fatPortions     Int      @default(0)
+  fruitPortions   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
 
 model PasswordResetToken {
