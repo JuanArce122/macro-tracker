@@ -13,6 +13,7 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "seed:regional-co": "tsx scripts/seed-regional-co.ts",
+    "seed:recipes": "tsx scripts/seed-recipes.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
