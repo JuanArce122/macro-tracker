@@ -54,13 +54,16 @@ npm run dev                              # servidor en http://localhost:3000
 
 ## Producción (Turso + Vercel)
 
-La base de datos en producción es **Turso** (libSQL cloud). Las migraciones **no** se aplican con `prisma migrate deploy` (no soporta URLs libsql directamente); se aplican manualmente:
+La base de datos en producción es **Turso** (libSQL cloud). Prisma 7 no soporta `prisma migrate deploy` contra URLs `libsql://` directamente, así que el flujo es:
 
-```bash
-turso db shell macro-tracker < prisma/migrations/<nombre>/migration.sql
-```
+1. **Schema source of truth**: `prisma/schema.prisma`. `npx prisma db push` lo aplica a la DB local.
+2. **Catálogo de DDL declarado**: `app/api/admin/migrate/route.ts` enumera cada `ALTER TABLE ADD COLUMN`, `CREATE TABLE IF NOT EXISTS` y `CREATE INDEX IF NOT EXISTS` necesario. El endpoint chequea `pragma_table_info` / `sqlite_master` antes de cada paso → idempotente.
+3. **Aplicación automática**: la GitHub Action `.github/workflows/migrate-prod.yml` invoca el endpoint en cada push a `main` con `Authorization: Bearer ${AUTH_SECRET}`. Si la respuesta tiene `errors > 0`, el workflow falla.
+4. **Override manual**: para casos puntuales, `turso db shell macro-tracker < docs/migrations/<nombre>.sql` sigue funcionando. Los `.sql` se mantienen como referencia legible.
 
-Si el SQL de la migración usa `PRAGMA` (SQLite-specific), reescribir manualmente como `ALTER TABLE ADD COLUMN` para Turso.
+> **Historia**: el flujo original era 100% manual y los DDL de HU-03 → HU-12 nunca se aplicaron en prod, rompiendo el login con `no such column: User.countryCode`. El endpoint + workflow garantizan que esto no vuelva a pasar.
+
+Si el SQL de una migración nueva usa `PRAGMA` (SQLite-specific), reescribir como `ALTER TABLE ADD COLUMN` y registrarlo en el catálogo del endpoint.
 
 ---
 
