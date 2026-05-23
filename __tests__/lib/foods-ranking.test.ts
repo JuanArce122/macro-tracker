@@ -31,10 +31,19 @@ describe("scoreFood", () => {
     expect(score).toBeLessThan(500);
   });
 
-  it("prefers user source over usda source", () => {
-    const userFood = makeFood({ source: "user" });
-    const usdaFood = makeFood({ source: "usda" });
-    expect(scoreFood(userFood, null)).toBeGreaterThan(scoreFood(usdaFood, null));
+  it("prefers personal user food (userId set) over verified USDA", () => {
+    // HU-04: solo cuenta como "personal" si userId no es null
+    const personalFood = makeFood({ source: "user", userId: 1 });
+    const verifiedUsda = makeFood({ source: "usda", verifiedAt: new Date() });
+    expect(scoreFood(personalFood, null)).toBeGreaterThan(scoreFood(verifiedUsda, null));
+  });
+
+  it("does NOT give USER boost to curated regional foods (userId=null, source=user)", () => {
+    // HU-12 + HU-04: seed regional CO usa source=user pero userId=null;
+    // esos son globales curados, NO personales del usuario.
+    const curatedRegional = makeFood({ source: "user", userId: null });
+    const personalFood = makeFood({ source: "user", userId: 1 });
+    expect(scoreFood(personalFood, null)).toBeGreaterThan(scoreFood(curatedRegional, null));
   });
 
   it("usageCount adds to score but is capped at 30", () => {
@@ -46,10 +55,48 @@ describe("scoreFood", () => {
     expect(scoreFood(veryHighUsage, null)).toBe(30); // still cap
   });
 
-  it("regional CO beats USDA + high usage", () => {
+  it("regional CO beats verified USDA + high usage", () => {
     const regional = makeFood({ regionCode: "CO", source: "openfoodfacts", usageCount: 0 });
-    const popularUsda = makeFood({ regionCode: null, source: "usda", usageCount: 30 });
+    const popularUsda = makeFood({ regionCode: null, source: "usda", verifiedAt: new Date(), usageCount: 30 });
     expect(scoreFood(regional, "CO")).toBeGreaterThan(scoreFood(popularUsda, "CO"));
+  });
+
+  // ── HU-04: BD dos capas ──────────────────────────────────────────
+  it("gives a verified boost when verifiedAt is set", () => {
+    const verified = makeFood({ verifiedAt: new Date() });
+    const unverified = makeFood({ verifiedAt: null });
+    expect(scoreFood(verified, null)).toBeGreaterThan(scoreFood(unverified, null));
+  });
+
+  it("penalizes foods marked needsReview", () => {
+    const flagged = makeFood({ needsReview: true });
+    const normal = makeFood({ needsReview: false });
+    expect(scoreFood(flagged, null)).toBeLessThan(scoreFood(normal, null));
+  });
+
+  it("voteScore raises ranking (positive)", () => {
+    const liked = makeFood({ voteScore: 10 });
+    const neutral = makeFood({ voteScore: 0 });
+    expect(scoreFood(liked, null)).toBeGreaterThan(scoreFood(neutral, null));
+  });
+
+  it("voteScore lowers ranking (negative)", () => {
+    const disliked = makeFood({ voteScore: -10 });
+    const neutral = makeFood({ voteScore: 0 });
+    expect(scoreFood(disliked, null)).toBeLessThan(scoreFood(neutral, null));
+  });
+
+  it("voteScore is capped at ±20", () => {
+    const extremePositive = makeFood({ voteScore: 9999 });
+    const cappedPositive = makeFood({ voteScore: 20 });
+    expect(scoreFood(extremePositive, null)).toBe(scoreFood(cappedPositive, null));
+  });
+
+  it("needsReview penalty pushes a flagged food below the same food unflagged", () => {
+    // HU-04: dos alimentos idénticos excepto needsReview; el flagged debe rankear menos
+    const flagged = makeFood({ regionCode: "CO", needsReview: true });
+    const clean = makeFood({ regionCode: "CO", needsReview: false });
+    expect(scoreFood(flagged, "CO")).toBeLessThan(scoreFood(clean, "CO"));
   });
 });
 

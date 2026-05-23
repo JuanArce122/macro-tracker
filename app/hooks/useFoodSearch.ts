@@ -17,6 +17,10 @@ export type DBFood = {
   source: string;
   userId?: number | null;
   regionCode?: string | null; // HU-12
+  // HU-04: BD dos capas
+  verifiedAt?: string | null;
+  voteScore?: number;
+  voteCount?: number;
 };
 
 export function dbFoodToFood(f: DBFood): Food {
@@ -33,7 +37,14 @@ export function dbFoodToFood(f: DBFood): Food {
   };
 }
 
-export type FoodWithSource = Food & { source: string; regionCode?: string | null };
+export type FoodWithSource = Food & {
+  source: string;
+  regionCode?: string | null;
+  // HU-04
+  verifiedAt?: string | null;
+  voteScore?: number;
+  voteCount?: number;
+};
 
 const EMPTY_RESULTS: FoodWithSource[] = [];
 
@@ -63,6 +74,9 @@ export function useFoodSearch(query: string, debounceMs = 300) {
             ...dbFoodToFood(f),
             source: f.source ?? "usda",
             regionCode: f.regionCode ?? null,
+            verifiedAt: f.verifiedAt ?? null,
+            voteScore: f.voteScore ?? 0,
+            voteCount: f.voteCount ?? 0,
           })));
         } else {
           setResults(searchFoods(query).map((f) => ({ ...f, source: "usda" })));
