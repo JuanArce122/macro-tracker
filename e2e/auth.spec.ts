@@ -10,10 +10,14 @@ test.describe("Auth — smoke", () => {
     await expect(page.locator('input[type="password"]')).toBeVisible();
   });
 
-  test("rutas protegidas redirigen a /auth si no hay sesión", async ({ page }) => {
-    // Cualquier intento de entrar a /settings sin sesión debe terminar en /auth
-    await page.goto("/settings");
-    await page.waitForURL(/\/auth/);
-    expect(page.url()).toMatch(/\/auth/);
+  test("APIs protegidas devuelven 401 sin sesión", async ({ request }) => {
+    // La protección de rutas vive en las APIs (no en middleware Next),
+    // así que las páginas cargan pero los fetches retornan 401 y la UI
+    // queda sin datos. Validamos el contrato real.
+    const profile = await request.get("/api/profile");
+    expect(profile.status()).toBe(401);
+
+    const goals = await request.get("/api/goals");
+    expect(goals.status()).toBe(401);
   });
 });
