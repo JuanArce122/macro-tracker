@@ -37,6 +37,8 @@ model User {
   insights          Insight[]
   pushSubscriptions PushSubscription[]
   habits            HabitEntry[]
+  wearables         WearableConnection[]
+  activities        ActivityData[]
 }
 
 model Meal {
@@ -156,6 +158,46 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// Wearables OAuth (HU-08): conexiones a Fitbit / Oura / Garmin
+model WearableConnection {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String    // "fitbit" | "oura" | "garmin"
+  providerUserId String    // ID del usuario en el sistema externo
+  accessToken    String    // ENCRIPTADO (AES-256-GCM via lib/crypto)
+  refreshToken   String    // idem
+  expiresAt      DateTime
+  scopes         String    // CSV de scopes concedidos
+  connectedAt    DateTime  @default(now())
+  lastSyncedAt   DateTime?
+
+  @@unique([userId, provider])
+  @@index([provider, expiresAt])
+}
+
+model ActivityData {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date            String   // YYYY-MM-DD
+  provider        String   // "fitbit" | "oura" | "garmin"
+  steps           Int?
+  caloriesBurned  Int?
+  activeMinutes   Int?
+  distanceKm      Float?
+  sleepMinutes    Int?
+  sleepEfficiency Float?   // 0-1
+  hrv             Float?   // ms
+  restingHR       Int?     // bpm
+  rawJson         String?  // raw del wearable, para debug y migrar campos futuros
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, date, provider])
+  @@index([userId, date])
 }
 
 // Modo hábitos (HU-11): porciones visuales por día en lugar de macros exactos
