@@ -1,7 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest } from "next/server";
+import { getGemini } from "@/lib/gemini";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// El cliente Gemini vive en lib/gemini.ts con inicialización lazy. Si
+// `GEMINI_API_KEY` no está en el entorno, getGemini() lanza un error
+// claro en el primer call (no en module load).
 
 // HU-01: timeout duro para evitar UX colgada. Gemini Flash retorna típicamente
 // en 2–4s; le damos 8s antes de cancelar y mostrar mensaje claro al usuario.
@@ -88,7 +90,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Se requiere imageBase64" }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = getGemini().getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const weightNote = weightG
       ? `El usuario indica que el peso total del plato es ${weightG}g. Distribuye ese peso entre los ítems detectados de forma proporcional.`

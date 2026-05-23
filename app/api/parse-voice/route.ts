@@ -1,12 +1,10 @@
 import { NextRequest } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@/auth";
 import { VoiceParseRequestSchema } from "@/lib/schemas";
 import { validateBody } from "@/lib/api/validate";
 import { VOICE_PARSE_SYSTEM } from "@/lib/voice/parse-prompt";
 import { matchFoods, type ParsedVoiceItem, type VoiceUnit } from "@/lib/voice/match-foods";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { getGemini } from "@/lib/gemini";
 
 // Permitimos override por env para tests (igual que en /api/analyze)
 const PARSE_VOICE_TIMEOUT_MS = Number(process.env.PARSE_VOICE_TIMEOUT_MS) || 6_000;
@@ -89,7 +87,7 @@ export async function POST(req: NextRequest) {
   const { transcript } = parsed.data;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = getGemini().getGenerativeModel({ model: "gemini-2.5-flash" });
 
     type GeminiResult = { response: { text: () => string } };
 
@@ -133,7 +131,21 @@ export async function POST(req: NextRequest) {
         { status: 504 }
       );
     }
-    console.error("[parse-voice]", error);
+
+    // Log enriquecido para diagnosticar en Vercel: mensaje + stack + tipo.
+    const errMessage = error instanceof Error ? error.message : String(error);
+    const errName    = error instanceof Error ? error.name    : "UnknownError";
+    const errStack   = error instanceof Error ? error.stack   : undefined;
+    console.error("[parse-voice]", { name: errName, message: errMessage, stack: errStack });
+
+    // GEMINI_API_KEY ausente: getGemini() lanza con mensaje claro.
+    if (errMessage.includes("GEMINI_API_KEY")) {
+      return Response.json(
+        { error: "Servicio de voz no configurado. Contacta al administrador.", code: "missing_api_key" },
+        { status: 503 }
+      );
+    }
+
     return Response.json({ error: "Error al procesar el audio" }, { status: 500 });
   }
 }
