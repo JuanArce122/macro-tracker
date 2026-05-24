@@ -9,6 +9,7 @@ type MacroCardProps = {
 
 function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCardProps) {
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0;
+  const remaining = Math.max(goal - value, 0);
 
   return (
     <div className="bg-bg-secondary border border-border rounded-xl px-3.5 py-3 flex flex-col gap-2">
@@ -23,6 +24,9 @@ function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCard
           style={{ width: `${pct}%` }}
         />
       </div>
+      <p className="text-[10px] text-text-tertiary tabular-nums leading-none">
+        <span className="font-numbers tracking-[0.01em]">{remaining.toFixed(0)}</span>{unit} restantes
+      </p>
     </div>
   );
 }

@@ -39,6 +39,7 @@ export default function DayLoading() {
                 <Skeleton className="w-12 h-2.5" />
                 <Skeleton className="w-14 h-6" />
                 <Skeleton className="w-full h-[3px] rounded-full" />
+                <Skeleton className="w-16 h-2.5" />
               </div>
             ))}
           </div>
