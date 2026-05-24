@@ -21,25 +21,24 @@ export default function DayLoading() {
 
       <div className="flex-1 overflow-y-auto pb-32">
         {/* MacroSummary skeleton */}
-        <div className="px-4 pt-2 pb-2 flex flex-col gap-3">
+        <div className="px-4 pt-2 pb-2 flex flex-col gap-2">
           {/* Hero calorías */}
-          <div className="bg-bg-secondary border border-border rounded-xl p-6 flex flex-col gap-4">
+          <div className="bg-bg-secondary border border-border rounded-xl px-5 py-4 flex flex-col gap-3">
             <div className="flex items-baseline justify-between">
               <Skeleton className="w-16 h-3" />
               <Skeleton className="w-28 h-3" />
             </div>
-            <Skeleton className="w-40 h-[60px]" />
+            <Skeleton className="w-32 h-[48px]" />
             <Skeleton className="w-full h-1 rounded-full" />
           </div>
 
           {/* Grid macros */}
           <div className="grid grid-cols-3 gap-2">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col gap-3">
-                <Skeleton className="w-14 h-3" />
-                <Skeleton className="w-16 h-8" />
-                <Skeleton className="w-full h-1 rounded-full" />
-                <Skeleton className="w-20 h-3" />
+              <div key={i} className="bg-bg-secondary border border-border rounded-xl px-3.5 py-3 flex flex-col gap-2">
+                <Skeleton className="w-12 h-2.5" />
+                <Skeleton className="w-14 h-6" />
+                <Skeleton className="w-full h-[3px] rounded-full" />
               </div>
             ))}
           </div>
