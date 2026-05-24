@@ -207,7 +207,7 @@ export default function HistoryPage() {
 
         {/* Lista de días */}
         {!isSearching && (
-          <div className="px-4 pt-2 flex flex-col gap-3">
+          <div className="px-4 pt-2 flex flex-col gap-2">
             {/* Promedios últimos 7 días */}
             {!loading && days.length > 0 && (() => {
               const recent = days.slice(0, 7);
@@ -219,26 +219,26 @@ export default function HistoryPage() {
                 fat:      recent.reduce((s, d) => s + d.fat,      0) / n,
               };
               return (
-                <div className="bg-bg-secondary border border-border rounded-xl p-5">
-                  <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-3">
+                <div className="bg-bg-secondary border border-border rounded-xl px-4 py-3.5">
+                  <p className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2.5">
                     Promedio · últimos {n} {n === 1 ? "día" : "días"} registrados
                   </p>
-                  <div className="grid grid-cols-4 gap-3 text-center">
+                  <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{avg.calories.toFixed(0)}</p>
-                      <p className="text-xs text-text-tertiary mt-1">kcal</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{avg.calories.toFixed(0)}</p>
+                      <p className="text-[10px] text-text-tertiary mt-1">kcal</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
-                      <p className="text-xs text-text-tertiary mt-1">prot</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-protein">{avg.protein.toFixed(1)}<span className="font-body text-xs text-text-tertiary">g</span></p>
+                      <p className="text-[10px] text-text-tertiary mt-1">prot</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
-                      <p className="text-xs text-text-tertiary mt-1">carbs</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-carbs">{avg.carbs.toFixed(1)}<span className="font-body text-xs text-text-tertiary">g</span></p>
+                      <p className="text-[10px] text-text-tertiary mt-1">carbs</p>
                     </div>
                     <div>
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-body text-sm text-text-tertiary">g</span></p>
-                      <p className="text-xs text-text-tertiary mt-1">grasa</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-macro-fat">{avg.fat.toFixed(1)}<span className="font-body text-xs text-text-tertiary">g</span></p>
+                      <p className="text-[10px] text-text-tertiary mt-1">grasa</p>
                     </div>
                   </div>
                 </div>
@@ -263,23 +263,25 @@ export default function HistoryPage() {
                 <button
                   key={day.date}
                   onClick={() => router.push(`/day/${day.date}`)}
-                  className="bg-bg-secondary border border-border rounded-xl p-5 text-left active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
+                  className="bg-bg-secondary border border-border rounded-xl px-4 py-3.5 text-left active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
                 >
-                  <div className="flex items-baseline justify-between gap-3 mb-3">
+                  <div className="flex items-baseline justify-between gap-3 mb-2">
                     <div className="min-w-0">
-                      <p className="font-display text-2xl leading-none tracking-[-0.02em] font-medium text-text-primary capitalize">
+                      <p className="font-display text-xl leading-none tracking-[-0.02em] font-medium text-text-primary capitalize">
                         {format(parsed, "EEEE", { locale: es })}
                       </p>
-                      <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5 capitalize">
+                      <p className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-1 capitalize">
                         {format(parsed, "d 'de' MMMM yyyy", { locale: es })}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] text-text-primary">{day.calories.toFixed(0)}</p>
-                      <p className="text-xs text-text-tertiary mt-1">kcal</p>
+                      <p className="font-numbers text-xl leading-none tabular-nums tracking-[0.01em] text-text-primary">
+                        {day.calories.toFixed(0)}
+                        <span className="font-body text-xs text-text-tertiary ml-1 tracking-normal">kcal</span>
+                      </p>
                     </div>
                   </div>
-                  <div className="flex gap-3 text-xs tabular-nums">
+                  <div className="flex gap-2.5 text-[11px] tabular-nums">
                     <span>
                       <span className="font-numbers tracking-[0.01em] text-macro-protein">{day.protein.toFixed(1)}</span>
                       <span className="text-macro-protein">g</span>
