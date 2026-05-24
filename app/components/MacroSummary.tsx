@@ -12,20 +12,20 @@ function MacroCard({ label, value, goal, unit, textColor, fillColor }: MacroCard
   const remaining = Math.max(goal - value, 0);
 
   return (
-    <div className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col gap-3">
-      <span className="text-xs uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
-      <p className={`font-numbers text-3xl leading-none tabular-nums tracking-[0.01em] ${textColor}`}>
+    <div className="bg-bg-secondary border border-border rounded-xl px-3.5 py-3 flex flex-col gap-2">
+      <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
+      <p className={`font-numbers text-2xl leading-none tabular-nums tracking-[0.01em] ${textColor}`}>
         {value.toFixed(1)}
-        <span className="font-body text-sm tracking-normal text-text-tertiary ml-1">{unit}</span>
+        <span className="font-body text-xs tracking-normal text-text-tertiary ml-1">{unit}</span>
       </p>
-      <div className="h-1 bg-bg-tertiary rounded-full overflow-hidden">
+      <div className="h-[3px] bg-bg-tertiary rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-300 ease-[var(--ease-editorial)] ${fillColor}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-xs text-text-tertiary tabular-nums">
-        <span className="font-numbers tracking-[0.01em]">{remaining.toFixed(1)}</span>{unit} restantes
+      <p className="text-[10px] text-text-tertiary tabular-nums leading-none">
+        <span className="font-numbers tracking-[0.01em]">{remaining.toFixed(0)}</span>{unit} restantes
       </p>
     </div>
   );
@@ -41,20 +41,20 @@ export default function MacroSummary({ totals, goals }: Props) {
   const calRemaining = Math.max(goals.calories - totals.calories, 0);
 
   return (
-    <div className="px-4 pt-2 pb-2 flex flex-col gap-3">
+    <div className="px-4 pt-2 pb-2 flex flex-col gap-2">
       {/* Hero calorías */}
-      <div className="bg-bg-secondary border border-border rounded-xl p-6">
-        <div className="flex items-baseline justify-between gap-2 mb-4">
-          <span className="text-xs uppercase tracking-[0.08em] text-text-tertiary">Calorías</span>
+      <div className="bg-bg-secondary border border-border rounded-xl px-5 py-4">
+        <div className="flex items-baseline justify-between gap-2 mb-2">
+          <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">Calorías</span>
           <span className="text-xs text-text-tertiary tabular-nums">
             {calRemaining.toFixed(0)} kcal restantes
           </span>
         </div>
-        <div className="flex items-baseline gap-2 mb-5">
-          <span className="font-numbers text-[88px] leading-none tabular-nums tracking-[0.01em] text-text-primary">
+        <div className="flex items-baseline gap-2 mb-3">
+          <span className="font-numbers text-[64px] leading-none tabular-nums tracking-[0.01em] text-text-primary">
             {totals.calories.toFixed(0)}
           </span>
-          <span className="text-sm text-text-tertiary tabular-nums">
+          <span className="text-xs text-text-tertiary tabular-nums">
             / {goals.calories.toFixed(0)} kcal
           </span>
         </div>
