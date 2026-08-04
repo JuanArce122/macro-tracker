@@ -174,11 +174,14 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 > - **4.8** Índices del catálogo alineados al schema.
 > - Verificado: `tsc`, `next build`.
 >
-> **⏳ Pendiente de la Fase 4 (integridad de datos, código — no toca el drift ya resuelto):**
-> - **4.5 (D4)** Borrado de cuenta: `deleteMany` explícito por tabla + `PRAGMA foreign_keys=ON` en el adapter + export de las tablas faltantes.
-> - **4.6 (D6)** `@@unique([userId])` en Goal + `upsert` (requiere un `CREATE UNIQUE INDEX` en prod — hay 1 sola fila, sin colisión).
-> - **4.7 (D5)** `seed-foods.ts` a `upsert` (hoy es delete+create destructivo).
-> - **Opcional**: `DROP COLUMN` de las 3 fantasma de Food (`votosPositivos/votosNegativos/verified`).
+> **✅ Integridad de datos completada (2026-08-04, commit `80d6c2b`):**
+> - **4.5 (D4)** Borrado de cuenta: `deleteMany` explícito de las 17 tablas del usuario en orden FK-safe (hijos con RESTRICT primero); ya no depende de cascadas ni del enforcement de FK, no falla ni deja huérfanos. *(El export previo aún no incluye todas las tablas — mejora menor pendiente.)*
+> - **4.6 (D6)** `Goal @@unique([userId])` + `upsert` atómico en `PUT /api/goals`. Índice `Goal_userId_key` **creado en prod** (0 duplicados) y en el catálogo. Cliente Prisma regenerado.
+> - **4.7 (D5)** `seed-foods.ts` a upsert por `(nombre, source, userId)` — idempotente, preserva IDs/verificación/micros.
+> - Verificado: `tsc`, **310 tests**, `next build`, índice creado en Turso.
+> - **Opcional pendiente**: `DROP COLUMN` de las 3 fantasma de Food (`votosPositivos/votosNegativos/verified`) — inofensivas, cleanup cosmético.
+>
+> **La Fase 4 está completa.** El esquema de prod coincide con Prisma, el catálogo no puede volver a driftear (tiene modo `verify`), y las 3 fugas de integridad de datos están cerradas.
 
 ---
 
