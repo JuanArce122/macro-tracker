@@ -314,6 +314,22 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 
 **Riesgo:** bajo-medio. **Esfuerzo:** L.
 
+> **✅ Ejecutada (2026-08-04, commits `7965e4e` + `9a8daaa`):**
+> - **P1** `/_next/static/` se cachea solo si `res.ok` (un chunk 404/500 transitorio ya no queda cacheado para siempre).
+> - **P2/P8** las mutaciones a `/api/meals|history|goals` van a la red e invalidan el cache de esos GET; ya no se hace `cache.put` de no-GET (era unhandled rejection). CACHE `v5→v6`.
+> - **P3** al cerrar sesión el cliente pide `CLEAR_CACHE` al SW (dispositivo compartido).
+> - **P4** fallback offline inline cuando una navegación falla sin cache.
+> - **P6** `/api/health` expone `VERCEL_GIT_COMMIT_SHA`; el workflow de migración espera a que coincida con `github.sha` → ya no migra contra el deploy viejo.
+> - **P10** `theme_color`/`background_color` → `#FAFAF9`.
+> - Verificado: `node --check sw.js`, `tsc`, **314 tests**, `next build`.
+>
+> **⏳ Diferido (arquitectura/infra/proceso, documentado):**
+> - **P5** recordatorios: `setTimeout` en el SW no dispara con la app cerrada (limitación real de iOS PWA); el fix honesto es recordatorios vía push (cambio mayor).
+> - **P7** el auto-reload en `SW_UPDATED` es deliberado (arregla el bug de chunks); descartar formularios a medias requiere detección de estado sucio.
+> - **`npm audit`**: 16 vulnerabilidades (2 críticas en `next-auth@5.0.0-beta.31`/`@auth/core`). `npm audit fix` (no-force) arregla las transitivas (ws/undici/postcss…); las críticas necesitan **salir del beta de Auth.js** (breaking → requiere pruebas). Recomiendo correrlo en un checkout limpio (no en el worktree con `node_modules` symlinkeado).
+> - **Tests de contrato/esquema**: el **modo `verify`** de `admin/migrate` (Fase 4) es el chequeo de integridad de esquema; el test de contrato de categorías (Fase 2) cubre B1. Ampliar la suite de contrato queda como mejora.
+> - **CI gate del deploy**: `e2e` es `continue-on-error` y el gate real es un ajuste del proyecto en Vercel (fuera del repo).
+
 ---
 
 ## Mapa hallazgo → fase (cobertura completa)
