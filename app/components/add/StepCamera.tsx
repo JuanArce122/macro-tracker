@@ -84,7 +84,10 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
     : error;
 
   // Procesando: tenemos foto inicial, aún sin preview ni error. Sin state.
-  const processing = !!initialFile && !previewUrl && !displayError;
+  // F4: al quitar la foto pre-cargada (clearPhoto), `cleared` evita que
+  // `processing` quede en true para siempre (initialFile es prop, no se resetea).
+  const [cleared, setCleared] = useState(false);
+  const processing = !!initialFile && !previewUrl && !displayError && !cleared;
 
   // Procesado async de la foto pre-seleccionada. Sin setState sync en el
   // body del efecto: solo en los callbacks de .then/.catch.
@@ -185,6 +188,7 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
     setPreviewUrl(null);
     setImageBase64("");
     setError(null);
+    setCleared(true); // F4: desmarca el "procesando" de la foto inicial
     if (cameraRef.current) cameraRef.current.value = "";
     if (galleryRef.current) galleryRef.current.value = "";
   }
@@ -229,7 +233,7 @@ export default function StepCamera({ onResult, onBack, onSwitchToSearch, initial
       )}
 
       {/* Selector cámara/galería — solo si no hay foto y no hay initialFile */}
-      {!processing && !previewUrl && !initialFile && (
+      {!processing && !previewUrl && (!initialFile || cleared) && (
         <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={() => cameraRef.current?.click()}

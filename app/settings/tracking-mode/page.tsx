@@ -66,6 +66,8 @@ export default function TrackingModePage() {
       });
       if (!res.ok) throw new Error();
       setSaved(true);
+      // Refrescar el router: la vista del día debe reflejar el modo nuevo al volver (F11).
+      router.refresh();
       setTimeout(() => setSaved(false), 1500);
     } catch {
       // Revertir si falla

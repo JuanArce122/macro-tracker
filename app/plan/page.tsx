@@ -121,7 +121,9 @@ export default function PlanPage() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "No pudimos registrar la comida");
       }
-      // Marcamos localmente sin recargar
+      // Refrescar el router: la vista del día mostrará la comida registrada al
+      // volver (F11). Además marcamos localmente para feedback inmediato.
+      router.refresh();
       setPlan((prev) =>
         prev
           ? {

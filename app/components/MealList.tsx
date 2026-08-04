@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { Sunrise, Sun, Moon, Apple, UtensilsCrossed, Pencil, Trash2 } from "lucide-react";
@@ -131,6 +131,20 @@ export default function MealList({ meals, date: _date }: { meals: Meal[]; date: 
   const deletedMeals = useRef<Map<number, Meal>>(new Map());
 
   const dismissToast = useCallback(() => setToast(null), []);
+
+  // F10: si el usuario cierra la app dentro de los 5s del undo, el DELETE
+  // diferido no correría y la comida "eliminada" reaparecería al recargar. En
+  // pagehide lo forzamos con keepalive (la petición sobrevive al cierre).
+  useEffect(() => {
+    function flushPending() {
+      for (const id of deletedMeals.current.keys()) {
+        fetch(`/api/meals/${id}`, { method: "DELETE", keepalive: true }).catch(() => {});
+      }
+      deletedMeals.current.clear();
+    }
+    window.addEventListener("pagehide", flushPending);
+    return () => window.removeEventListener("pagehide", flushPending);
+  }, []);
 
   function handleDelete(id: number) {
     const meal = meals.find((m) => m.id === id);

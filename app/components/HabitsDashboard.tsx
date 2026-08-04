@@ -40,6 +40,7 @@ const PORTION_META: { key: Portion; field: keyof HabitEntry; label: string; icon
 
 export default function HabitsDashboard({ date, fitnessGoal }: Props) {
   const [entry, setEntry] = useState<HabitEntry | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [pendingPortion, setPendingPortion] = useState<Portion | null>(null);
   const goals = PORTION_GOALS[fitnessGoal ?? "default"] ?? PORTION_GOALS.default;
 
@@ -48,7 +49,8 @@ export default function HabitsDashboard({ date, fitnessGoal }: Props) {
     fetch(`/api/habits?date=${encodeURIComponent(date)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d: HabitEntry | null) => { if (!cancelled && d) setEntry(d); })
-      .catch(() => { /* silent */ });
+      .catch(() => { /* silent */ })
+      .finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
   }, [date]);
 
@@ -81,9 +83,15 @@ export default function HabitsDashboard({ date, fitnessGoal }: Props) {
   }
 
   if (!entry) {
+    // F13: si terminó de cargar y no hay entry, la carga falló → mensaje en vez
+    // de un spinner eterno.
     return (
-      <div className="bg-bg-secondary border border-border rounded-xl p-5 mx-4 my-3 flex items-center justify-center h-32">
-        <Icon icon={Loader2} size={20} className="text-text-tertiary animate-spin" />
+      <div className="bg-bg-secondary border border-border rounded-xl p-5 mx-4 my-3 flex items-center justify-center h-32 text-center">
+        {loaded ? (
+          <p className="text-xs text-text-tertiary">No pudimos cargar tus hábitos. Reintenta más tarde.</p>
+        ) : (
+          <Icon icon={Loader2} size={20} className="text-text-tertiary animate-spin" />
+        )}
       </div>
     );
   }
