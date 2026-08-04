@@ -64,12 +64,23 @@ export function useFoodSearch(query: string, debounceMs = 300) {
 
     if (timerRef.current) clearTimeout(timerRef.current);
 
+    // AbortController + flag `cancelled`: al cambiar el query se aborta el fetch
+    // en vuelo y se ignora su respuesta, así una respuesta lenta no pisa a una
+    // rápida posterior con resultados stale (F8).
+    const controller = new AbortController();
+    let cancelled = false;
+
     timerRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/foods?q=${encodeURIComponent(query)}&limit=10`);
+        const res = await fetch(
+          `/api/foods?q=${encodeURIComponent(query)}&limit=10`,
+          { signal: controller.signal }
+        );
+        if (cancelled) return;
         if (res.ok) {
           const data = await res.json();
+          if (cancelled) return;
           setResults((data.foods as DBFood[]).map((f) => ({
             ...dbFoodToFood(f),
             source: f.source ?? "usda",
@@ -81,14 +92,19 @@ export function useFoodSearch(query: string, debounceMs = 300) {
         } else {
           setResults(searchFoods(query).map((f) => ({ ...f, source: "usda" })));
         }
-      } catch {
+      } catch (e) {
+        if (cancelled || (e instanceof DOMException && e.name === "AbortError")) return;
         setResults(searchFoods(query).map((f) => ({ ...f, source: "usda" })));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }, debounceMs);
 
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    return () => {
+      cancelled = true;
+      controller.abort();
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [query, isQueryable, debounceMs]);
 
   return {

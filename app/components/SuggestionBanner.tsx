@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Lightbulb, X, Loader2, Check } from "lucide-react";
 import Button from "@/app/components/ui/Button";
 import Icon from "@/app/components/ui/Icon";
@@ -43,6 +44,7 @@ export default function SuggestionBanner({ adjustmentMode }: { adjustmentMode: s
   // effect (react-hooks/set-state-in-effect). En SSR siempre será false;
   // en cliente leemos localStorage en el primer render.
   const [dismissed, setDismissed] = useState<boolean>(() => readDismissedToday());
+  const router = useRouter();
 
   // Solo fetch si el modo es "suggested" Y no descartado hoy.
   // Los setState aquí son en callbacks de .then/.catch (no sync body
@@ -89,6 +91,9 @@ export default function SuggestionBanner({ adjustmentMode }: { adjustmentMode: s
       });
       if (!res.ok) throw new Error();
       setApplied(true);
+      // Refrescar la vista: MacroSummary (server component) debe mostrar la meta
+      // nueva, no la vieja (F11).
+      router.refresh();
       // Después de 2s, ocultamos el banner
       setTimeout(() => setDismissed(true), 2000);
     } catch {

@@ -130,17 +130,20 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
             )}
           </div>
           <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
-            <span className="font-numbers tracking-[0.01em]">{food.cal}</span> kcal ·{" "}
-            <span className="font-numbers tracking-[0.01em]">{food.p}</span>g P ·{" "}
-            <span className="font-numbers tracking-[0.01em]">{food.c}</span>g C ·{" "}
-            <span className="font-numbers tracking-[0.01em]">{food.f}</span>g G — por{" "}
             {food.gramsPerUnit ? (
               <>
-                <span className="font-numbers tracking-[0.01em]">{food.gramsPerUnit}</span>g
-                {" "}(<span className="font-numbers tracking-[0.01em]">1</span> {food.unitLabel})
+                <span className="font-numbers tracking-[0.01em]">{Math.round((food.cal * food.gramsPerUnit) / 100)}</span> kcal ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{((food.p * food.gramsPerUnit) / 100).toFixed(1)}</span>g P ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{((food.c * food.gramsPerUnit) / 100).toFixed(1)}</span>g C ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{((food.f * food.gramsPerUnit) / 100).toFixed(1)}</span>g G — <span className="font-numbers tracking-[0.01em]">1</span> {food.unitLabel} (<span className="font-numbers tracking-[0.01em]">{food.gramsPerUnit}</span>g)
               </>
             ) : (
-              <><span className="font-numbers tracking-[0.01em]">100</span>g</>
+              <>
+                <span className="font-numbers tracking-[0.01em]">{food.cal}</span> kcal ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{food.p}</span>g P ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{food.c}</span>g C ·{" "}
+                <span className="font-numbers tracking-[0.01em]">{food.f}</span>g G — por <span className="font-numbers tracking-[0.01em]">100</span>g
+              </>
             )}
           </p>
         </div>
