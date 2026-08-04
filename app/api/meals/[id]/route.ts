@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { NextRequest } from "next/server";
+import { del } from "@vercel/blob";
 
 export async function PUT(
   req: NextRequest,
@@ -63,9 +64,15 @@ export async function DELETE(
       return Response.json({ error: "Comida no encontrada" }, { status: 404 });
     }
 
-    // Si la imagen es de Vercel Blob, se puede eliminar con del() de @vercel/blob
-    // Por ahora se deja la URL huérfana si falla — no bloquea el flujo
     await prisma.meal.delete({ where: { id: Number(id) } });
+
+    // Borrar la foto de Vercel Blob (best-effort). Evita blobs huérfanos y
+    // fotos que seguían públicas tras borrar la comida (I6).
+    if (meal.imageUrl?.includes("blob.vercel-storage.com")) {
+      await del(meal.imageUrl).catch((e) =>
+        console.error("[meals DELETE] blob del failed:", e)
+      );
+    }
 
     return Response.json({ ok: true });
   } catch (error) {

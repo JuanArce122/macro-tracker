@@ -99,10 +99,13 @@ export async function POST(req: NextRequest) {
           .jpeg({ quality: 75 })
           .toBuffer();
 
-        const filename = `meal-${Date.now()}.jpg`;
+        const filename = `meal-${userId}-${Date.now()}.jpg`;
         const blob = await put(filename, resized, {
           access: "public",
           contentType: "image/jpeg",
+          // Sufijo aleatorio: la URL deja de ser adivinable por timestamp (S5)
+          // y evita colisiones entre usuarios que suben en el mismo ms.
+          addRandomSuffix: true,
         });
         imageUrl = blob.url;
       } catch (blobError) {

@@ -18,7 +18,14 @@ vi.mock("@google/generative-ai", () => {
   return { GoogleGenerativeAI };
 });
 
+// El route ahora exige sesión (S1). Mockeamos @/auth para que auth() devuelva
+// una sesión válida y no arrastre next-auth (que no resuelve en el entorno de test).
+vi.mock("@/auth", () => ({
+  auth: vi.fn(() => Promise.resolve({ user: { id: "1", email: "u@test.com" } })),
+}));
+
 import { POST } from "@/app/api/analyze/route";
+import { auth } from "@/auth";
 
 const mockedGenerate = generateContent;
 
@@ -33,6 +40,12 @@ function makeRequest(body: unknown): Request {
 describe("POST /api/analyze", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("retorna 401 cuando no hay sesión (S1)", async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null as never);
+    const res = await POST(makeRequest({ imageBase64: "abc" }) as never);
+    expect(res.status).toBe(401);
   });
 
   it("retorna 400 cuando no se envía imageBase64", async () => {

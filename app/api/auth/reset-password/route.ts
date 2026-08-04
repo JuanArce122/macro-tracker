@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
+import { sha256Hex } from "@/lib/crypto";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,14 +15,16 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "La contraseña debe tener al menos 8 caracteres." }, { status: 400 });
     }
 
-    const record = await prisma.passwordResetToken.findUnique({ where: { token } });
+    // Los tokens se guardan hasheados (S7): buscamos por el hash del que llega.
+    const tokenHash = sha256Hex(token);
+    const record = await prisma.passwordResetToken.findUnique({ where: { token: tokenHash } });
 
     if (!record) {
       return Response.json({ error: "El enlace no es válido." }, { status: 400 });
     }
 
     if (record.expiresAt < new Date()) {
-      await prisma.passwordResetToken.delete({ where: { token } });
+      await prisma.passwordResetToken.delete({ where: { token: tokenHash } });
       return Response.json({ error: "El enlace ha expirado. Solicita uno nuevo." }, { status: 400 });
     }
 
@@ -33,7 +36,7 @@ export async function POST(req: NextRequest) {
         where: { id: record.userId },
         data: { passwordHash },
       }),
-      prisma.passwordResetToken.delete({ where: { token } }),
+      prisma.passwordResetToken.delete({ where: { token: tokenHash } }),
     ]);
 
     return Response.json({ message: "Contraseña actualizada correctamente." });

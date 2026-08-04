@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getGemini } from "@/lib/gemini";
+import { auth } from "@/auth";
 
 // El cliente Gemini vive en lib/gemini.ts con inicialización lazy. Si
 // `GEMINI_API_KEY` no está en el entorno, getGemini() lanza un error
@@ -17,6 +18,9 @@ const TIMEOUT_MS = Number(process.env.ANALYZE_TIMEOUT_MS) || ANALYZE_TIMEOUT_MS;
 // del Edge runtime.
 export const runtime = "nodejs";
 export const maxDuration = 30;
+
+const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const MAX_IMAGE_B64 = 8_000_000; // ~6 MB de imagen decodificada
 
 const PROMPT_BASE = `Eres un nutricionista experto. Analiza la imagen de comida proporcionada e identifica TODOS los alimentos o ingredientes visibles por separado. Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown, sin explicaciones.
 
@@ -84,15 +88,26 @@ async function generateWithTimeout(
 
 export async function POST(req: NextRequest) {
   try {
+    // Requiere sesión: sin esto es un proxy abierto a Gemini facturable (S1).
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { imageBase64, mimeType, weightG } = await req.json();
 
-    if (!imageBase64) {
+    if (!imageBase64 || typeof imageBase64 !== "string") {
       return Response.json({ error: "Se requiere imageBase64" }, { status: 400 });
     }
+    if (imageBase64.length > MAX_IMAGE_B64) {
+      return Response.json({ error: "La imagen es demasiado grande." }, { status: 413 });
+    }
+    const mime = typeof mimeType === "string" && ALLOWED_MIME.includes(mimeType) ? mimeType : "image/jpeg";
+    const weightValid = typeof weightG === "number" && Number.isFinite(weightG) && weightG > 0 && weightG < 5000;
 
     const model = getGemini().getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const weightNote = weightG
+    const weightNote = weightValid
       ? `El usuario indica que el peso total del plato es ${weightG}g. Distribuye ese peso entre los ítems detectados de forma proporcional.`
       : "El usuario no proporcionó el peso total, estima visualmente el peso de cada ítem.";
 
@@ -102,7 +117,7 @@ export async function POST(req: NextRequest) {
       model.generateContent([
         {
           inlineData: {
-            mimeType: mimeType ?? "image/jpeg",
+            mimeType: mime,
             data: imageBase64,
           },
         },

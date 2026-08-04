@@ -79,7 +79,10 @@ type Tab = "login" | "register";
 export default function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  // Solo rutas relativas (evita open redirect a dominios externos, S13).
+  const rawCallback = searchParams.get("callbackUrl") ?? "/";
+  const callbackUrl =
+    rawCallback.startsWith("/") && !rawCallback.startsWith("//") ? rawCallback : "/";
   const [tab, setTab] = useState<Tab>("login");
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);

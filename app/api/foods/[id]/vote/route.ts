@@ -78,10 +78,15 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!parsed.ok) return parsed.response;
   const { vote } = parsed.data;
 
-  // Verificar que el alimento exista
+  // Verificar que el alimento exista y sea votable. Los votos son para la BD
+  // comunitaria (alimentos globales); un alimento privado no se vota — así se
+  // evita marcar needsReview el alimento privado de otro usuario (S11).
   const food = await prisma.food.findUnique({ where: { id: foodId } });
   if (!food) {
     return NextResponse.json({ error: "Alimento no encontrado" }, { status: 404 });
+  }
+  if (food.userId !== null) {
+    return NextResponse.json({ error: "No se puede votar un alimento privado" }, { status: 403 });
   }
 
   // Upsert: un usuario solo tiene 1 voto activo por alimento

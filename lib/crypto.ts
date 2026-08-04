@@ -83,3 +83,11 @@ export function decrypt(encrypted: string): string {
   const decrypted = Buffer.concat([decipher.update(body), decipher.final()]);
   return decrypted.toString("utf8");
 }
+
+/**
+ * SHA-256 en hex. Para guardar tokens de un solo uso (reset de contraseña) sin
+ * plaintext: el token se envía en claro por email y se persiste su hash (S7).
+ */
+export function sha256Hex(input: string): string {
+  return crypto.createHash("sha256").update(input).digest("hex");
+}
