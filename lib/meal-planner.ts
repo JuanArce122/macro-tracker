@@ -45,7 +45,9 @@ export type PlannerRecipe = {
 
 export type PlannedMealEntry = {
   date: string;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  // snack1/snack2 son los dos snacks del plan de 5 comidas; deben diferir
+  // para no violar @@unique([planId, date, mealType]) al persistir.
+  mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack1" | "snack2";
   recipeId: number;
   servings: number;
 };
@@ -91,9 +93,9 @@ function getSlotsForMealsPerDay(n: 3 | 4 | 5): Array<{ name: string; ratio: numb
   }
   return [
     { name: "breakfast", ratio: SLOT_RATIO_5.breakfast, mealType: "breakfast" },
-    { name: "snack1",    ratio: SLOT_RATIO_5.snack1,    mealType: "snack" },
+    { name: "snack1",    ratio: SLOT_RATIO_5.snack1,    mealType: "snack1" },
     { name: "lunch",     ratio: SLOT_RATIO_5.lunch,     mealType: "lunch" },
-    { name: "snack2",    ratio: SLOT_RATIO_5.snack2,    mealType: "snack" },
+    { name: "snack2",    ratio: SLOT_RATIO_5.snack2,    mealType: "snack2" },
     { name: "dinner",    ratio: SLOT_RATIO_5.dinner,    mealType: "dinner" },
   ];
 }

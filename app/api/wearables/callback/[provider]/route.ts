@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
@@ -13,17 +13,14 @@ const STATE_COOKIE_PREFIX = "wearable_oauth_state_";
 
 type Params = { params: Promise<{ provider: string }> };
 
-function clearStateCookie(provider: string): string {
-  return [
-    `${STATE_COOKIE_PREFIX}${provider}=`,
-    "Path=/",
-    "Max-Age=0",
-    "HttpOnly",
-    "SameSite=Lax",
-    process.env.NODE_ENV === "production" ? "Secure" : "",
-  ]
-    .filter(Boolean)
-    .join("; ");
+function clearStateCookie(response: NextResponse, provider: string): void {
+  response.cookies.set(`${STATE_COOKIE_PREFIX}${provider}`, "", {
+    path: "/",
+    maxAge: 0,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 /**
@@ -58,11 +55,11 @@ export async function GET(req: NextRequest, { params }: Params) {
   // Helper para redirigir con error
   const base = process.env.NEXTAUTH_URL ?? `${url.protocol}//${url.host}`;
   function redirectError(reason: string) {
-    const response = Response.redirect(
+    const response = NextResponse.redirect(
       `${base}/settings/wearables?error=${encodeURIComponent(reason)}`,
       302
     );
-    response.headers.append("Set-Cookie", clearStateCookie(provider));
+    clearStateCookie(response, provider);
     return response;
   }
 
@@ -117,10 +114,10 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 
   // Éxito — redirigir limpio
-  const response = Response.redirect(
+  const response = NextResponse.redirect(
     `${base}/settings/wearables?connected=${provider}`,
     302
   );
-  response.headers.append("Set-Cookie", clearStateCookie(provider));
+  clearStateCookie(response, provider);
   return response;
 }

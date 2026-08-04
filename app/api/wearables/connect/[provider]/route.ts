@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { auth } from "@/auth";
 import { getAuthUrl, isSupportedProvider } from "@/lib/wearables/providers";
@@ -35,19 +35,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const authUrl = getAuthUrl(provider, state);
 
   // Redirigir y setear la cookie de state. Lax permite el redirect post-OAuth.
-  const response = Response.redirect(authUrl, 302);
-  response.headers.append(
-    "Set-Cookie",
-    [
-      `${STATE_COOKIE_PREFIX}${provider}=${state}`,
-      "Path=/",
-      `Max-Age=${STATE_TTL_SECONDS}`,
-      "HttpOnly",
-      "SameSite=Lax",
-      process.env.NODE_ENV === "production" ? "Secure" : "",
-    ]
-      .filter(Boolean)
-      .join("; ")
-  );
+  // Usamos NextResponse (no Response.redirect) porque sus headers/cookies son
+  // mutables; Response.redirect los deja inmutables y .append lanza TypeError.
+  const response = NextResponse.redirect(authUrl, 302);
+  response.cookies.set(`${STATE_COOKIE_PREFIX}${provider}`, state, {
+    path: "/",
+    maxAge: STATE_TTL_SECONDS,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
   return response;
 }

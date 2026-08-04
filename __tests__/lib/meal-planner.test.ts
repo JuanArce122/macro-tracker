@@ -174,6 +174,24 @@ describe("generatePlan", () => {
     expect(Math.max(...Object.values(counts))).toBeLessThanOrEqual(2);
   });
 
+  it("plan de 5 comidas no duplica (date, mealType) — respeta @@unique(planId,date,mealType)", () => {
+    const plan = generatePlan({
+      candidates,
+      goal: baseGoal,
+      preferences: mkPrefs({ mealsPerDay: 5 }),
+      startDate: "2026-05-25",
+    });
+    const seen = new Set<string>();
+    for (const p of plan) {
+      const key = `${p.date}|${p.mealType}`;
+      expect(seen.has(key)).toBe(false); // un duplicado violaría el unique en DB
+      seen.add(key);
+    }
+    const day0 = plan.filter((p) => p.date === "2026-05-25");
+    expect(day0).toHaveLength(5);
+    expect(new Set(day0.map((p) => p.mealType)).size).toBe(5);
+  });
+
   it("mealType corresponde al slot (breakfast/lunch/dinner)", () => {
     const plan = generatePlan({
       candidates,

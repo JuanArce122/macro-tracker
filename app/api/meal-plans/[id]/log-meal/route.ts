@@ -77,8 +77,13 @@ export async function POST(
     const carbs = Math.round(carbPerServing * servings * 10) / 10;
     const fat = Math.round(fatPerServing * servings * 10) / 10;
 
-    // Mapeo PlannedMeal.mealType → Meal.category (mismos valores; snack→snack)
-    const category = planned.mealType;
+    // Mapeo PlannedMeal.mealType → Meal.category. snack1/snack2 (plan de 5
+    // comidas) colapsan a "snack". La unificación es↔en de categorías se
+    // resuelve en la Fase 2.
+    const category =
+      planned.mealType === "snack1" || planned.mealType === "snack2"
+        ? "snack"
+        : planned.mealType;
 
     const result = await prisma.$transaction(async (tx) => {
       const meal = await tx.meal.create({

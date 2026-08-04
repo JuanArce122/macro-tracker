@@ -35,7 +35,7 @@ type PlannedMeal = {
   id: number;
   planId: number;
   date: string;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack1" | "snack2";
   recipeId: number;
   servings: number;
   consumed: boolean;
@@ -56,10 +56,12 @@ const MEAL_LABELS: Record<PlannedMeal["mealType"], string> = {
   breakfast: "Desayuno",
   lunch: "Almuerzo",
   snack: "Snack",
+  snack1: "Snack",
+  snack2: "Snack",
   dinner: "Cena",
 };
 
-const MEAL_ORDER: PlannedMeal["mealType"][] = ["breakfast", "lunch", "snack", "dinner"];
+const MEAL_ORDER: PlannedMeal["mealType"][] = ["breakfast", "snack1", "lunch", "snack2", "snack", "dinner"];
 
 function dayLabel(dateISO: string): string {
   const d = new Date(`${dateISO}T00:00:00.000Z`);
