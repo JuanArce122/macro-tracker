@@ -1,19 +1,30 @@
 /**
- * Endpoint de migración ad-hoc para aplicar los .sql de docs/migrations/
- * en Turso producción de forma idempotente.
+ * Endpoint de migración idempotente para aplicar el esquema HU-03…HU-12 en
+ * Turso producción.
  *
- * Motivación: el flujo manual `turso db shell ... < migration.sql` se
- * saltó en algún punto y producción quedó con un schema desfasado
- * (faltaba User.countryCode entre otros). Cualquier query del User
- * fallaba con "no such column".
+ * Motivación: el flujo manual `turso db shell < migration.sql` se saltó en
+ * algún punto y producción quedó con un schema desfasado. Este catálogo
+ * declara el DDL de forma chequeable e idempotente.
+ *
+ * IMPORTANTE (Fase 4, 2026-08-04): este catálogo fue reescrito para coincidir
+ * EXACTO con `prisma/schema.prisma` y con `docs/migrations/*.sql`. La versión
+ * anterior había divergido (nombres de columna, tipos y constraints) y
+ * materializó 5 tablas rotas en prod (GoalAdjustmentLog, Insight,
+ * WearableConnection, ActivityData, Food). Se repararon con
+ * `docs/migrations/FASE-4-repair-prod.sql`. NO reintroducir columnas fantasma
+ * (votosPositivos/votosNegativos/verified) ni nombres antiguos.
  *
  * Seguridad:
- *   - Requiere `Authorization: Bearer <AUTH_SECRET>` (reutilizamos el
- *     secret que ya está en Vercel).
- *   - Idempotente: lee `pragma_table_info` antes de cada ALTER y
- *     `sqlite_master` antes de cada CREATE TABLE, de modo que correr
- *     el endpoint múltiples veces no falla.
- *   - Solo aplica DDL (ALTER/CREATE/CREATE INDEX). No toca datos.
+ *   - Requiere `Authorization: Bearer <AUTH_SECRET>`.
+ *   - Idempotente: chequea `pragma_table_info` / `sqlite_master` antes de cada
+ *     ALTER / CREATE.
+ *   - Solo DDL (ALTER/CREATE/CREATE INDEX). No toca datos.
+ *
+ * Modos:
+ *   - POST                → aplica el catálogo.
+ *   - POST ?mode=verify   → NO aplica: compara el esquema real contra las
+ *                           columnas esperadas y reporta discrepancias (red de
+ *                           seguridad contra futuros drifts).
  *
  * Uso:
  *   curl -X POST https://.../api/admin/migrate \
@@ -30,63 +41,54 @@ type ColumnSpec = { name: string; sql: string };
 type TableSpec = { name: string; sql: string };
 type IndexSpec = { name: string; sql: string };
 
-// ─── Catálogo de migraciones declaradas en docs/migrations/*.sql ─────
-//
-// Cada entrada es la *intención* de la migración expresada como
-// secuencia de pasos chequeables. No leemos los .sql en runtime — los
-// transcribimos aquí para tener control sobre la idempotencia.
+const MICROS = [
+  "fiber", "sugar", "sodium", "potassium", "calcium", "iron", "vitaminC",
+  "vitaminD", "vitaminB12", "vitaminA", "folate", "magnesium", "zinc",
+  "omega3", "omega6",
+] as const;
 
+// ─── Catálogo de columnas (ALTER TABLE ADD COLUMN) ───────────────────
 const COLUMN_ADDS: Array<{ table: string; column: ColumnSpec }> = [
   // HU-03: barcode en Food
   { table: "Food", column: { name: "barcode", sql: "ALTER TABLE Food ADD COLUMN barcode TEXT" } },
-  // HU-04: votos y verificación en Food
-  { table: "Food", column: { name: "votosPositivos", sql: "ALTER TABLE Food ADD COLUMN votosPositivos INTEGER NOT NULL DEFAULT 0" } },
-  { table: "Food", column: { name: "votosNegativos", sql: "ALTER TABLE Food ADD COLUMN votosNegativos INTEGER NOT NULL DEFAULT 0" } },
-  { table: "Food", column: { name: "needsReview", sql: "ALTER TABLE Food ADD COLUMN needsReview INTEGER NOT NULL DEFAULT 0" } },
-  { table: "Food", column: { name: "verified", sql: "ALTER TABLE Food ADD COLUMN verified INTEGER NOT NULL DEFAULT 0" } },
+
+  // HU-04: verificación + votos denormalizados en Food
   { table: "Food", column: { name: "verifiedAt", sql: "ALTER TABLE Food ADD COLUMN verifiedAt DATETIME" } },
+  { table: "Food", column: { name: "verifiedBy", sql: "ALTER TABLE Food ADD COLUMN verifiedBy TEXT" } },
+  { table: "Food", column: { name: "needsReview", sql: "ALTER TABLE Food ADD COLUMN needsReview INTEGER NOT NULL DEFAULT 0" } },
+  { table: "Food", column: { name: "voteScore", sql: "ALTER TABLE Food ADD COLUMN voteScore INTEGER NOT NULL DEFAULT 0" } },
+  { table: "Food", column: { name: "voteCount", sql: "ALTER TABLE Food ADD COLUMN voteCount INTEGER NOT NULL DEFAULT 0" } },
+
   // HU-05: adjustmentMode en Goal
   { table: "Goal", column: { name: "adjustmentMode", sql: "ALTER TABLE Goal ADD COLUMN adjustmentMode TEXT NOT NULL DEFAULT 'manual'" } },
-  // HU-07: 15 micros en Food (por 100 g)
+
+  // HU-07: fdcId + 15 micros en Food
   { table: "Food", column: { name: "fdcId", sql: "ALTER TABLE Food ADD COLUMN fdcId INTEGER" } },
-  { table: "Food", column: { name: "fiber", sql: "ALTER TABLE Food ADD COLUMN fiber REAL" } },
-  { table: "Food", column: { name: "sugar", sql: "ALTER TABLE Food ADD COLUMN sugar REAL" } },
-  { table: "Food", column: { name: "sodium", sql: "ALTER TABLE Food ADD COLUMN sodium REAL" } },
-  { table: "Food", column: { name: "potassium", sql: "ALTER TABLE Food ADD COLUMN potassium REAL" } },
-  { table: "Food", column: { name: "calcium", sql: "ALTER TABLE Food ADD COLUMN calcium REAL" } },
-  { table: "Food", column: { name: "iron", sql: "ALTER TABLE Food ADD COLUMN iron REAL" } },
-  { table: "Food", column: { name: "vitaminC", sql: "ALTER TABLE Food ADD COLUMN vitaminC REAL" } },
-  { table: "Food", column: { name: "vitaminD", sql: "ALTER TABLE Food ADD COLUMN vitaminD REAL" } },
-  { table: "Food", column: { name: "vitaminB12", sql: "ALTER TABLE Food ADD COLUMN vitaminB12 REAL" } },
-  { table: "Food", column: { name: "vitaminA", sql: "ALTER TABLE Food ADD COLUMN vitaminA REAL" } },
-  { table: "Food", column: { name: "folate", sql: "ALTER TABLE Food ADD COLUMN folate REAL" } },
-  { table: "Food", column: { name: "magnesium", sql: "ALTER TABLE Food ADD COLUMN magnesium REAL" } },
-  { table: "Food", column: { name: "zinc", sql: "ALTER TABLE Food ADD COLUMN zinc REAL" } },
-  { table: "Food", column: { name: "omega3", sql: "ALTER TABLE Food ADD COLUMN omega3 REAL" } },
-  { table: "Food", column: { name: "omega6", sql: "ALTER TABLE Food ADD COLUMN omega6 REAL" } },
-  // HU-07: snapshot de micros en Meal
-  { table: "Meal", column: { name: "fiber", sql: "ALTER TABLE Meal ADD COLUMN fiber REAL" } },
-  { table: "Meal", column: { name: "sugar", sql: "ALTER TABLE Meal ADD COLUMN sugar REAL" } },
-  { table: "Meal", column: { name: "sodium", sql: "ALTER TABLE Meal ADD COLUMN sodium REAL" } },
-  { table: "Meal", column: { name: "potassium", sql: "ALTER TABLE Meal ADD COLUMN potassium REAL" } },
-  { table: "Meal", column: { name: "calcium", sql: "ALTER TABLE Meal ADD COLUMN calcium REAL" } },
-  { table: "Meal", column: { name: "iron", sql: "ALTER TABLE Meal ADD COLUMN iron REAL" } },
-  { table: "Meal", column: { name: "vitaminC", sql: "ALTER TABLE Meal ADD COLUMN vitaminC REAL" } },
-  { table: "Meal", column: { name: "vitaminD", sql: "ALTER TABLE Meal ADD COLUMN vitaminD REAL" } },
-  { table: "Meal", column: { name: "vitaminB12", sql: "ALTER TABLE Meal ADD COLUMN vitaminB12 REAL" } },
-  { table: "Meal", column: { name: "vitaminA", sql: "ALTER TABLE Meal ADD COLUMN vitaminA REAL" } },
-  { table: "Meal", column: { name: "folate", sql: "ALTER TABLE Meal ADD COLUMN folate REAL" } },
-  { table: "Meal", column: { name: "magnesium", sql: "ALTER TABLE Meal ADD COLUMN magnesium REAL" } },
-  { table: "Meal", column: { name: "zinc", sql: "ALTER TABLE Meal ADD COLUMN zinc REAL" } },
-  { table: "Meal", column: { name: "omega3", sql: "ALTER TABLE Meal ADD COLUMN omega3 REAL" } },
-  { table: "Meal", column: { name: "omega6", sql: "ALTER TABLE Meal ADD COLUMN omega6 REAL" } },
+  ...MICROS.map((m) => ({ table: "Food", column: { name: m, sql: `ALTER TABLE Food ADD COLUMN ${m} REAL` } })),
+
+  // HU-07: snapshot de 15 micros en Meal
+  ...MICROS.map((m) => ({ table: "Meal", column: { name: m, sql: `ALTER TABLE Meal ADD COLUMN ${m} REAL` } })),
+
+  // Perfil de User (columnas nullable). Registradas aquí para que el catálogo
+  // pueda reconstruir prod desde cero (disaster-recovery).
+  { table: "User", column: { name: "name", sql: "ALTER TABLE User ADD COLUMN name TEXT" } },
+  { table: "User", column: { name: "avatarEmoji", sql: "ALTER TABLE User ADD COLUMN avatarEmoji TEXT" } },
+  { table: "User", column: { name: "age", sql: "ALTER TABLE User ADD COLUMN age INTEGER" } },
+  { table: "User", column: { name: "sex", sql: "ALTER TABLE User ADD COLUMN sex TEXT" } },
+  { table: "User", column: { name: "weightKg", sql: "ALTER TABLE User ADD COLUMN weightKg REAL" } },
+  { table: "User", column: { name: "heightCm", sql: "ALTER TABLE User ADD COLUMN heightCm REAL" } },
+  { table: "User", column: { name: "activityLevel", sql: "ALTER TABLE User ADD COLUMN activityLevel TEXT" } },
+  { table: "User", column: { name: "fitnessGoal", sql: "ALTER TABLE User ADD COLUMN fitnessGoal TEXT" } },
+
   // HU-11: trackingMode en User
   { table: "User", column: { name: "trackingMode", sql: "ALTER TABLE User ADD COLUMN trackingMode TEXT NOT NULL DEFAULT 'macros'" } },
-  // HU-12: countryCode en User + regionCode en Food (este es el que rompe el login)
+
+  // HU-12: countryCode en User + regionCode en Food
   { table: "User", column: { name: "countryCode", sql: "ALTER TABLE User ADD COLUMN countryCode TEXT" } },
   { table: "Food", column: { name: "regionCode", sql: "ALTER TABLE Food ADD COLUMN regionCode TEXT" } },
 ];
 
+// ─── Catálogo de tablas (CREATE TABLE IF NOT EXISTS) ─────────────────
 const TABLE_CREATES: TableSpec[] = [
   {
     name: "FoodVote",
@@ -117,27 +119,37 @@ const TABLE_CREATES: TableSpec[] = [
   {
     name: "GoalAdjustmentLog",
     sql: `CREATE TABLE IF NOT EXISTS GoalAdjustmentLog (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId        INTEGER NOT NULL,
-      previousCalories INTEGER NOT NULL,
-      newCalories      INTEGER NOT NULL,
-      reason        TEXT,
-      mode          TEXT NOT NULL,
-      createdAt     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId      INTEGER NOT NULL,
+      goalId      INTEGER NOT NULL,
+      oldCalories REAL NOT NULL,
+      oldProtein  REAL NOT NULL,
+      oldCarbs    REAL NOT NULL,
+      oldFat      REAL NOT NULL,
+      newCalories REAL NOT NULL,
+      newProtein  REAL NOT NULL,
+      newCarbs    REAL NOT NULL,
+      newFat      REAL NOT NULL,
+      reason      TEXT NOT NULL,
+      mode        TEXT NOT NULL,
+      createdAt   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE,
+      FOREIGN KEY (goalId) REFERENCES Goal(id) ON DELETE CASCADE
     )`,
   },
   {
     name: "Insight",
     sql: `CREATE TABLE IF NOT EXISTS Insight (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId      INTEGER NOT NULL,
-      type        TEXT NOT NULL,
-      title       TEXT NOT NULL,
-      body        TEXT NOT NULL,
-      severity    TEXT NOT NULL DEFAULT 'info',
-      dismissedAt DATETIME,
-      createdAt   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId        INTEGER NOT NULL,
+      type          TEXT NOT NULL,
+      title         TEXT NOT NULL,
+      body          TEXT NOT NULL,
+      dataJson      TEXT NOT NULL,
+      createdAt     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      dismissedAt   DATETIME,
+      dismissReason TEXT,
+      pushedAt      DATETIME,
       FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
     )`,
   },
@@ -173,16 +185,16 @@ const TABLE_CREATES: TableSpec[] = [
   {
     name: "WearableConnection",
     sql: `CREATE TABLE IF NOT EXISTS WearableConnection (
-      id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId              INTEGER NOT NULL,
-      provider            TEXT NOT NULL,
-      providerUserId      TEXT,
-      accessTokenEncrypted TEXT NOT NULL,
-      refreshTokenEncrypted TEXT,
-      expiresAt           DATETIME,
-      scope               TEXT,
-      createdAt           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updatedAt           DATETIME NOT NULL,
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId         INTEGER NOT NULL,
+      provider       TEXT NOT NULL,
+      providerUserId TEXT NOT NULL,
+      accessToken    TEXT NOT NULL,
+      refreshToken   TEXT NOT NULL,
+      expiresAt      DATETIME NOT NULL,
+      scopes         TEXT NOT NULL,
+      connectedAt    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      lastSyncedAt   DATETIME,
       FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE,
       UNIQUE(userId, provider)
     )`,
@@ -190,19 +202,23 @@ const TABLE_CREATES: TableSpec[] = [
   {
     name: "ActivityData",
     sql: `CREATE TABLE IF NOT EXISTS ActivityData (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId        INTEGER NOT NULL,
-      date          TEXT NOT NULL,
-      source        TEXT NOT NULL,
-      steps         INTEGER,
-      caloriesOut   INTEGER,
-      activeMinutes INTEGER,
-      restingHr     INTEGER,
-      hrv           REAL,
-      sleepMinutes  INTEGER,
-      createdAt     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId          INTEGER NOT NULL,
+      date            TEXT NOT NULL,
+      provider        TEXT NOT NULL,
+      steps           INTEGER,
+      caloriesBurned  INTEGER,
+      activeMinutes   INTEGER,
+      distanceKm      REAL,
+      sleepMinutes    INTEGER,
+      sleepEfficiency REAL,
+      hrv             REAL,
+      restingHR       INTEGER,
+      rawJson         TEXT,
+      createdAt       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updatedAt       DATETIME NOT NULL,
       FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE,
-      UNIQUE(userId, date, source)
+      UNIQUE(userId, date, provider)
     )`,
   },
   {
@@ -284,17 +300,42 @@ const TABLE_CREATES: TableSpec[] = [
   },
 ];
 
+// ─── Catálogo de índices ─────────────────────────────────────────────
+// barcode/fdcId: índices ÚNICOS parciales (NULLs libres), como en el schema.
 const INDEX_CREATES: IndexSpec[] = [
+  { name: "Food_barcode_unique", sql: "CREATE UNIQUE INDEX IF NOT EXISTS Food_barcode_unique ON Food(barcode) WHERE barcode IS NOT NULL" },
+  { name: "Food_fdcId_unique", sql: "CREATE UNIQUE INDEX IF NOT EXISTS Food_fdcId_unique ON Food(fdcId) WHERE fdcId IS NOT NULL" },
   { name: "Food_regionCode_idx", sql: "CREATE INDEX IF NOT EXISTS Food_regionCode_idx ON Food(regionCode)" },
-  { name: "Food_barcode_idx", sql: "CREATE INDEX IF NOT EXISTS Food_barcode_idx ON Food(barcode)" },
+  { name: "Food_needsReview_idx", sql: "CREATE INDEX IF NOT EXISTS Food_needsReview_idx ON Food(needsReview)" },
+  { name: "FoodVote_foodId_idx", sql: "CREATE INDEX IF NOT EXISTS FoodVote_foodId_idx ON FoodVote(foodId)" },
+  { name: "WeightEntry_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS WeightEntry_userId_date_idx ON WeightEntry(userId, date)" },
+  { name: "GoalAdjustmentLog_userId_idx", sql: "CREATE INDEX IF NOT EXISTS GoalAdjustmentLog_userId_idx ON GoalAdjustmentLog(userId, createdAt)" },
+  { name: "Insight_userId_createdAt_idx", sql: "CREATE INDEX IF NOT EXISTS Insight_userId_createdAt_idx ON Insight(userId, createdAt)" },
+  { name: "Insight_userId_dismissedAt_idx", sql: "CREATE INDEX IF NOT EXISTS Insight_userId_dismissedAt_idx ON Insight(userId, dismissedAt)" },
+  { name: "PushSubscription_userId_idx", sql: "CREATE INDEX IF NOT EXISTS PushSubscription_userId_idx ON PushSubscription(userId)" },
+  { name: "HabitEntry_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS HabitEntry_userId_date_idx ON HabitEntry(userId, date)" },
+  { name: "WearableConnection_provider_expires_idx", sql: "CREATE INDEX IF NOT EXISTS WearableConnection_provider_expires_idx ON WearableConnection(provider, expiresAt)" },
+  { name: "ActivityData_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS ActivityData_userId_date_idx ON ActivityData(userId, date)" },
   { name: "Recipe_cuisineCode_idx", sql: "CREATE INDEX IF NOT EXISTS Recipe_cuisineCode_idx ON Recipe(cuisineCode)" },
+  { name: "Recipe_userId_idx", sql: "CREATE INDEX IF NOT EXISTS Recipe_userId_idx ON Recipe(userId)" },
+  { name: "RecipeIngredient_recipeId_idx", sql: "CREATE INDEX IF NOT EXISTS RecipeIngredient_recipeId_idx ON RecipeIngredient(recipeId)" },
+  { name: "RecipeIngredient_foodId_idx", sql: "CREATE INDEX IF NOT EXISTS RecipeIngredient_foodId_idx ON RecipeIngredient(foodId)" },
+  { name: "MealPlan_userId_startDate_idx", sql: "CREATE INDEX IF NOT EXISTS MealPlan_userId_startDate_idx ON MealPlan(userId, startDate)" },
   { name: "MealPlan_userId_isActive_idx", sql: "CREATE INDEX IF NOT EXISTS MealPlan_userId_isActive_idx ON MealPlan(userId, isActive)" },
   { name: "PlannedMeal_planId_date_idx", sql: "CREATE INDEX IF NOT EXISTS PlannedMeal_planId_date_idx ON PlannedMeal(planId, date)" },
-  { name: "HabitEntry_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS HabitEntry_userId_date_idx ON HabitEntry(userId, date)" },
-  { name: "Insight_userId_createdAt_idx", sql: "CREATE INDEX IF NOT EXISTS Insight_userId_createdAt_idx ON Insight(userId, createdAt)" },
-  { name: "WearableConnection_userId_idx", sql: "CREATE INDEX IF NOT EXISTS WearableConnection_userId_idx ON WearableConnection(userId)" },
-  { name: "ActivityData_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS ActivityData_userId_date_idx ON ActivityData(userId, date)" },
+  { name: "PlannedMeal_recipeId_idx", sql: "CREATE INDEX IF NOT EXISTS PlannedMeal_recipeId_idx ON PlannedMeal(recipeId)" },
 ];
+
+// ─── Modo verify: columnas esperadas por tabla (según schema.prisma) ─
+// Red de seguridad: si prod pierde alguna, `?mode=verify` lo reporta.
+const EXPECTED_COLUMNS: Record<string, string[]> = {
+  User: ["id", "email", "passwordHash", "createdAt", "name", "avatarEmoji", "age", "sex", "weightKg", "heightCm", "activityLevel", "fitnessGoal", "countryCode", "trackingMode"],
+  Food: ["id", "nombre", "categoria", "cal", "p", "c", "f", "gramsPerUnit", "unitLabel", "source", "userId", "usageCount", "lastUsedAt", "regionCode", "verifiedAt", "verifiedBy", "needsReview", "voteScore", "voteCount", "barcode", "fdcId", ...MICROS],
+  GoalAdjustmentLog: ["id", "userId", "goalId", "oldCalories", "oldProtein", "oldCarbs", "oldFat", "newCalories", "newProtein", "newCarbs", "newFat", "reason", "mode", "createdAt"],
+  Insight: ["id", "userId", "type", "title", "body", "dataJson", "createdAt", "dismissedAt", "dismissReason", "pushedAt"],
+  WearableConnection: ["id", "userId", "provider", "providerUserId", "accessToken", "refreshToken", "expiresAt", "scopes", "connectedAt", "lastSyncedAt"],
+  ActivityData: ["id", "userId", "date", "provider", "steps", "caloriesBurned", "activeMinutes", "distanceKm", "sleepMinutes", "sleepEfficiency", "hrv", "restingHR", "rawJson", "createdAt", "updatedAt"],
+};
 
 type Result =
   | { action: "skip-column"; table: string; column: string }
@@ -303,6 +344,15 @@ type Result =
   | { action: "created-table"; name: string }
   | { action: "ensured-index"; name: string }
   | { action: "error"; step: string; message: string };
+
+async function getColumns(table: string): Promise<string[] | null> {
+  const exists = await tableExists(table);
+  if (!exists) return null;
+  const rows = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
+    `SELECT name FROM pragma_table_info('${table}')`
+  );
+  return rows.map((r) => r.name);
+}
 
 async function tableHasColumn(table: string, column: string): Promise<boolean> {
   const rows = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
@@ -320,11 +370,34 @@ async function tableExists(name: string): Promise<boolean> {
   return rows.length > 0;
 }
 
+/** Compara el esquema real contra EXPECTED_COLUMNS. No aplica cambios. */
+async function runVerify() {
+  const discrepancies: Array<{ table: string; issue: string; missing?: string[] }> = [];
+  for (const [table, expected] of Object.entries(EXPECTED_COLUMNS)) {
+    const existing = await getColumns(table);
+    if (existing === null) {
+      discrepancies.push({ table, issue: "tabla-no-existe" });
+      continue;
+    }
+    const missing = expected.filter((c) => !existing.includes(c));
+    if (missing.length > 0) {
+      discrepancies.push({ table, issue: "columnas-faltantes", missing });
+    }
+  }
+  return discrepancies;
+}
+
 export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization");
   const expected = process.env.AUTH_SECRET;
   if (!expected) return Response.json({ error: "AUTH_SECRET no configurado" }, { status: 500 });
   if (auth !== `Bearer ${expected}`) return Response.json({ error: "no autorizado" }, { status: 401 });
+
+  // Modo verify: solo reporta, no aplica.
+  if (new URL(req.url).searchParams.get("mode") === "verify") {
+    const discrepancies = await runVerify();
+    return Response.json({ mode: "verify", ok: discrepancies.length === 0, discrepancies });
+  }
 
   const results: Result[] = [];
 
