@@ -71,30 +71,26 @@ jobs:
           PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
-      - name: Wait for Vercel production deploy
-        # Polling simple: la migración necesita que el endpoint
-        # /api/admin/migrate esté presente en el deploy actual. Un sleep
-        # corto + retry es suficiente para la mayoría de los deploys.
+      - name: Wait for Vercel production deploy of this commit
+        # P6: esperamos a que el deploy del COMMIT ACTUAL esté vivo antes de
+        # migrar. Antes chequeábamos un 401 de /api/admin/migrate, pero el deploy
+        # VIEJO también responde 401 → se migraba contra código viejo. Ahora
+        # /api/health expone VERCEL_GIT_COMMIT_SHA y esperamos que coincida.
+        # PROD_APP_URL viene normalizado del step anterior vía GITHUB_ENV.
         run: |
-          ENDPOINT="$PROD_APP_URL/api/admin/migrate"
           for i in $(seq 1 30); do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ENDPOINT" || echo "000")
-            # 401 = endpoint disponible (rechaza por falta de auth).
-            # 404 = aún sin desplegar (Vercel todavía sirve la versión vieja).
-            # 000 = error de red / DNS / URL.
-            if [ "$CODE" = "401" ]; then
-              echo "Endpoint listo (HTTP $CODE)"
+            SHA=$(curl -s "$PROD_APP_URL/api/health" | grep -oE '"sha":"[^"]*"' | cut -d'"' -f4)
+            if [ "$SHA" = "$EXPECTED_SHA" ]; then
+              echo "Deploy del commit actual vivo ($SHA)"
               exit 0
             fi
-            if [ "$CODE" = "000" ]; then
-              echo "[$i/30] Curl no logró conectar (posible DNS / host inválido). Retry en 10s…"
-            else
-              echo "[$i/30] Endpoint todavía no disponible (HTTP $CODE). Retry en 10s…"
-            fi
+            echo "[$i/30] Deploy actual aún no vivo (deployed=$SHA, esperado=$EXPECTED_SHA), retry en 10s…"
             sleep 10
           done
-          echo "::error::Timeout esperando el deploy ($ENDPOINT no respondió 401 en 5 min)"
+          echo "::error::Timeout esperando el deploy del commit actual ($EXPECTED_SHA)"
           exit 1
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
 
       - name: Apply migrations
         run: |
