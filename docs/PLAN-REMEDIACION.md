@@ -279,7 +279,11 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 > - **F13** `handleLogin` con try/catch/finally (el botón ya no se cuelga).
 > - Verificado: `tsc`, **313 tests** (+3 regresión).
 >
-> **⏳ Remanente de Fase 7** (menor valor — edge cases y pulido): **L7/L9** (insights: hitos de racha con cron semanal, dedupe 24h), **L8** (contigüidad de días en TCA/déficit), **L10** (`matchesRegion` completar mapa), **L11/L12** (tags de recetas, cap de repetición); barrido de `res.ok` en clientes (`history` F9, `settings/goals` F12, `HabitsDashboard`/`InsightCard`/`settings/foods` F13/F16); frontend **F4** (spinner cámara), **F8** (race de búsqueda), **F10** (delete diferido), **F11** (`router.refresh`), **F15** (etiqueta kcal/unidad); integraciones **I9** (USDA full vs search), **I10** (User-Agent OFF, unificar UPC/EAN), **I11** (throttle/API key).
+> **✅ Remanente — parte hecha (2026-08-04, commits `32e89e9` + `e2dd08e`):**
+> - Barrido de `res.ok` en clientes: **F9** (`history` — no más crash `.map`/"Buscando…" pegado), **F12** (`goals` — no muestra "Guardado" si falla), **F16** (`foods` delete + `InsightCard` dismiss solo si el server confirma).
+> - **F8** race de búsqueda (`AbortController`). **F15** etiqueta kcal/unidad correcta. **F11** `SuggestionBanner` refresca las metas al aplicar.
+>
+> **⏳ Remanente — cola de bajo valor (pendiente):** **L7/L9** (insights: hitos de racha vs cron semanal, dedupe 24h), **L8** (contigüidad de días en TCA/déficit), **L10** (matching de región por substring — no localicé la función exacta del reporte; requiere revisión), **L11/L12** (tags de recetas veganas con lácteos, cap de repetición); frontend **F4** (spinner de cámara al quitar foto pre-cargada), **F10** (`sendBeacon` para el delete diferido de 5s), **F11** restantes (`tracking-mode`, `plan`), estado de error en `HabitsDashboard`; integraciones **I9** (USDA full vs search), **I10** (User-Agent OFF + unificar UPC/EAN), **I11** (throttle/API key en header).
 
 ---
 
