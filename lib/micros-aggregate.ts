@@ -74,6 +74,21 @@ export function computeMicroProgress(
     const rda = rdas[k];
     const consumed = totals[k] ?? 0;
     const target = rda.min;
+
+    // Micros de SOLO LÍMITE (min=0, p.ej. azúcar): "menos es mejor". No hay un
+    // mínimo que alcanzar; el estado solo depende de si se supera el UL. Antes
+    // caían siempre en "low" (rojo) aunque 0 g de azúcar sea lo deseable (L5).
+    if (target === 0 && rda.max !== undefined) {
+      return {
+        key: k,
+        consumed,
+        target,
+        pctOfTarget: rda.max > 0 ? Math.round((consumed / rda.max) * 100) : 0,
+        unit: rda.unit,
+        status: (consumed > rda.max ? "over" : "good") as "low" | "ok" | "good" | "over",
+      };
+    }
+
     const pctOfTarget = target > 0 ? (consumed / target) * 100 : 0;
 
     let status: "low" | "ok" | "good" | "over" = "low";

@@ -12,9 +12,22 @@ function getResend(): Resend {
   return cached;
 }
 
+/**
+ * Remitente verificado. Falla ruidosamente si no está configurado — así una
+ * mala config se ve en los logs en vez de "entregar" silenciosamente al sandbox
+ * onboarding@resend.dev (que solo llega al dueño de la cuenta de Resend) (I5).
+ */
+function getFromEmail(): string {
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!from) {
+    throw new Error("RESEND_FROM_EMAIL no configurada. Usa un dominio verificado en Resend.");
+  }
+  return from;
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const { error } = await getResend().emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+    from: getFromEmail(),
     to,
     subject: "Recupera tu contraseña — Macro Tracker",
     html: buildResetEmail(resetUrl),
@@ -31,7 +44,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
  */
 export async function sendAccountDeletionExport(to: string, exportUrl: string) {
   const { error } = await getResend().emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+    from: getFromEmail(),
     to,
     subject: "Tus datos exportados — Macro Tracker",
     html: buildDeletionExportEmail(exportUrl),

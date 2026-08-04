@@ -1,6 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { calcTrendSlope, decideAdjustment, type FitnessGoal } from "@/lib/weight-trend";
+import { calcAdherence } from "@/lib/weight-adherence";
+
+// Mismas guardas que /api/goals/suggest — aplicarlas aquí evita que POSTs
+// repetidos compongan ajustes de -200 kcal cada vez (L1).
+const MIN_WEIGHT_ENTRIES = 14;
+const MIN_ADHERENCE = 0.5;
+const COOLDOWN_DAYS = 14;
 
 /**
  * POST /api/goals/apply-suggestion
@@ -50,6 +57,30 @@ export async function POST(req: Request) {
     select: { date: true, weightKg: true },
   });
   const entries = [...recent].reverse();
+
+  if (entries.length < MIN_WEIGHT_ENTRIES) {
+    return Response.json(
+      { error: `Necesitas al menos ${MIN_WEIGHT_ENTRIES} pesos registrados.` },
+      { status: 400 }
+    );
+  }
+  if ((await calcAdherence(userId)) < MIN_ADHERENCE) {
+    return Response.json(
+      { error: "Tu adherencia al tracking es insuficiente para ajustar la meta." },
+      { status: 400 }
+    );
+  }
+  const cooldownStart = new Date();
+  cooldownStart.setDate(cooldownStart.getDate() - COOLDOWN_DAYS);
+  const lastAdjust = await prisma.goalAdjustmentLog.findFirst({
+    where: { userId, createdAt: { gte: cooldownStart } },
+  });
+  if (lastAdjust) {
+    return Response.json(
+      { error: `Ya ajustamos tu meta hace poco. Espera ${COOLDOWN_DAYS} días entre ajustes.` },
+      { status: 429 }
+    );
+  }
 
   const trendKgPerWeek = calcTrendSlope(entries);
   const adjustment = decideAdjustment(

@@ -130,16 +130,21 @@ export default function AuthForm() {
     setLoading(true);
     setGlobalError(null);
 
-    const result = await signIn("credentials", { email, password, redirect: false });
-
-    if (result?.error) {
-      setGlobalError("Email o contraseña incorrectos.");
+    try {
+      const result = await signIn("credentials", { email, password, redirect: false });
+      if (result?.error) {
+        setGlobalError("Email o contraseña incorrectos.");
+        return;
+      }
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
+      // signIn puede lanzar (red caída): sin esto, loading quedaba en true para
+      // siempre y el botón "Entrando…" se colgaba (F13).
+      setGlobalError("No se pudo conectar. Intenta de nuevo.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   async function handleRegister(e: React.FormEvent) {
