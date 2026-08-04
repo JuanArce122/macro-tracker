@@ -54,3 +54,7 @@ next-env.d.ts
 /playwright-report
 /test-results
 /coverage
+
+# DB backups — contienen datos de producción (emails, hashes). NUNCA commitear.
+/backups/
+*.turso-dump.sql
