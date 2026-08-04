@@ -50,6 +50,15 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Verificación de la fase:** tenemos backup, diff real de esquema dev↔prod, y rama lista.
 **Depende de:** nada. **Bloquea:** Fases 2, 3, 4.
 
+> **✅ Resultados Fase 0 (2026-08-04) — ejecutada:**
+> - **0.1 Backup:** `backups/turso-2026-08-04.turso-dump.sql` (77 KB, 303 filas, gitignored). ⚠️ Nota: `turso db dump` **no existe** en el CLI v1.0.22 (era una suposición del plan); el backup válido se hace con `turso db shell macro-tracker ".dump"`.
+> - **0.2 Diff esquema real vs Prisma:** producción **SÍ tiene el drift** — se materializó desde el catálogo roto. Confirmado con `.schema` real. Pero **prod está casi vacía** → riesgo de Fase 4 mucho menor de lo temido:
+>   - `GoalAdjustmentLog`, `Insight`, `WearableConnection`, `ActivityData`: **rotas y con 0 filas** → DROP+CREATE correcto, riesgo nulo. Hoy HU-05/HU-08/HU-09 fallan en prod.
+>   - `Food`: **rota pero con 287 filas** → ALTER no destructivo (agregar `voteScore`, `voteCount`, `verifiedBy`; índices UNIQUE en `barcode`/`fdcId`; opcional drop de `votosPositivos`/`votosNegativos`/`verified` fantasma).
+>   - `User`: **sana**, tiene las 8 columnas de perfil → login/perfil funcionan. **D3 se rebaja** de "posible bug de prod" a solo "hueco de catálogo/disaster-recovery".
+>   - Volumen: Food 287, Meal 7, User 2, Goal 1, HabitEntry 1; resto en 0.
+> - **0.3 ✓** rama con commit base. **0.4 ✓** decisiones confirmadas.
+
 ---
 
 ## Fase 1 — Desbloquear el flujo principal (P0 contenidos y mecánicos)
@@ -112,6 +121,12 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 ## Fase 4 — Raíz #2: drift de esquema e integridad de datos (⚠️ riesgo producción)
 
 **Objetivo:** que el esquema real de Turso coincida con `schema.prisma`, y que el endpoint de migración deje de ser una fuente de verdad divergente. **Es la fase de mayor riesgo** → backup (0.1) obligatorio y ejecución supervisada.
+
+> **✅ Alcance confirmado en Fase 0 (2026-08-04):** el diff real contra Turso confirmó las 5 tablas con drift, pero 4 tienen **0 filas**, así que la reparación es de bajo riesgo:
+> - **DROP + CREATE** (desde los `.sql` correctos): `GoalAdjustmentLog`, `Insight`, `WearableConnection`, `ActivityData` — 0 filas, sin pérdida de datos.
+> - **ALTER aditivo** en `Food` (287 filas): `ADD COLUMN voteScore/voteCount/verifiedBy` + `CREATE UNIQUE INDEX` en `barcode` y `fdcId`; opcional `DROP COLUMN` de las 3 fantasma. No destructivo.
+> - **4.4 (`User`) se reduce**: prod ya tiene las 8 columnas de perfil → solo hay que registrarlas en el catálogo, sin tocar prod.
+> - Backup 0.1 ya tomado (`backups/turso-2026-08-04.turso-dump.sql`).
 
 | # | Hallazgo | Cambio concreto |
 |---|---|---|
