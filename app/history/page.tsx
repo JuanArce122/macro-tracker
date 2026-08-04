@@ -105,18 +105,25 @@ export default function HistoryPage() {
 
   useEffect(() => {
     fetch("/api/history")
-      .then((r) => r.json())
-      .then(setDays)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setDays(Array.isArray(d) ? d : []))
+      .catch(() => setDays([]))
       .finally(() => setLoading(false));
   }, []);
 
   const runSearch = useCallback(async (q: string) => {
     if (!q.trim()) { setSearchResults([]); return; }
     setSearching(true);
-    const res = await fetch(`/api/history?q=${encodeURIComponent(q)}`);
-    const data = await res.json();
-    setSearchResults(data);
-    setSearching(false);
+    try {
+      const res = await fetch(`/api/history?q=${encodeURIComponent(q)}`);
+      // Guard Array.isArray: si el server devuelve {error}, no crashear en .map.
+      const data = res.ok ? await res.json() : [];
+      setSearchResults(Array.isArray(data) ? data : []);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false); // finally: "Buscando…" ya no se queda pegado offline.
+    }
   }, []);
 
   useEffect(() => {

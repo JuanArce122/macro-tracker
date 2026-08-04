@@ -45,16 +45,18 @@ export default function GoalsPage() {
 
   useEffect(() => {
     fetch("/api/goals")
-      .then((r) => r.json())
-      .then((d) =>
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return; // mantener defaults si la carga falló
         setGoals({
           calories: d.calories,
           protein: d.protein,
           carbs: d.carbs,
           fat: d.fat,
           adjustmentMode: (d.adjustmentMode as AdjustmentMode) ?? "manual",
-        })
-      )
+        });
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -70,12 +72,13 @@ export default function GoalsPage() {
     const debounceTimer = setTimeout(async () => {
       setStatus("saving");
       try {
-        await fetch("/api/goals", {
+        const res = await fetch("/api/goals", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(goals),
         });
         if (cancelled) return;
+        if (!res.ok) { setStatus("idle"); return; } // no mostrar "Guardado" si falló
         setStatus("saved");
         clearTimer = setTimeout(() => {
           if (!cancelled) setStatus("idle");

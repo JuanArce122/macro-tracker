@@ -61,12 +61,17 @@ export default function InsightCard() {
   async function dismiss(id: number, reason: "seen" | "not_useful" = "seen") {
     setDismissingId(id);
     try {
-      await fetch(`/api/insights/${id}/dismiss`, {
+      const res = await fetch(`/api/insights/${id}/dismiss`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
       });
-      setItems((prev) => (prev ? prev.filter((i) => i.id !== id) : prev));
+      // Solo ocultar si el server confirmó; si no, reaparecería en la próxima visita.
+      if (res.ok) {
+        setItems((prev) => (prev ? prev.filter((i) => i.id !== id) : prev));
+      }
+    } catch {
+      // offline / error: dejamos el insight visible para reintentar.
     } finally {
       setDismissingId(null);
     }

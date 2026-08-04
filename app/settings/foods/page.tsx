@@ -34,8 +34,8 @@ export default function FoodsPage() {
 
   useEffect(() => {
     fetch("/api/foods/user")
-      .then((r) => r.json())
-      .then((d) => setFoods(d.myFoods ?? []))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setFoods(d?.myFoods ?? []))
       .catch(() => null)
       .finally(() => setLoading(false));
   }, []);
@@ -74,10 +74,11 @@ export default function FoodsPage() {
   async function handleDelete(id: number) {
     setDeletingId(id);
     try {
-      await fetch(`/api/foods/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/foods/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(); // no quitar de la UI si el server rechazó
       setFoods((prev) => prev.filter((f) => f.id !== id));
     } catch {
-      // silencioso
+      setError("No se pudo eliminar. Intenta de nuevo.");
     } finally {
       setDeletingId(null);
     }
