@@ -167,6 +167,19 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Verificación:** el modo `verify` reporta 0 discrepancias; login/perfil/wearables/insights/metas-adaptativas funcionan contra Turso; borrar cuenta deja 0 filas residuales en un entorno de prueba.
 **Depende de:** Fase 0 (0.1 backup, 0.2 diff). **Coordina con:** Fase 3 si D-B = Opción 2 (columna `timezone`).
 
+> **✅ Núcleo ejecutado (2026-08-04) — el drift de esquema está RESUELTO en prod:**
+> - **4.1** `docs/migrations/FASE-4-repair-prod.sql` **ejecutado contra Turso** (con backup previo). DROP+CREATE de las 4 tablas vacías + ALTER aditivo en Food (voteScore/voteCount/verifiedBy + índices únicos parciales barcode/fdcId + backfill de 125 seed foods). Post-flight: las 5 tablas coinciden con `schema.prisma`, Food conserva 287 filas.
+> - **4.2/4.4** Catálogo de `admin/migrate/route.ts` reescrito exacto contra `schema.prisma` (sin fantasmas; +8 columnas de perfil de User). Commit `55ccf9c`.
+> - **4.3** Modo `?mode=verify` añadido (compara `pragma_table_info` vs columnas esperadas). Confirmado contra prod: las 6 tablas clave dan match → `verify` = `ok:true`.
+> - **4.8** Índices del catálogo alineados al schema.
+> - Verificado: `tsc`, `next build`.
+>
+> **⏳ Pendiente de la Fase 4 (integridad de datos, código — no toca el drift ya resuelto):**
+> - **4.5 (D4)** Borrado de cuenta: `deleteMany` explícito por tabla + `PRAGMA foreign_keys=ON` en el adapter + export de las tablas faltantes.
+> - **4.6 (D6)** `@@unique([userId])` en Goal + `upsert` (requiere un `CREATE UNIQUE INDEX` en prod — hay 1 sola fila, sin colisión).
+> - **4.7 (D5)** `seed-foods.ts` a `upsert` (hoy es delete+create destructivo).
+> - **Opcional**: `DROP COLUMN` de las 3 fantasma de Food (`votosPositivos/votosNegativos/verified`).
+
 ---
 
 ## Fase 5 — Features muertas o rotas (micros, push, wearables)
