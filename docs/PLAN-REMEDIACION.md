@@ -230,6 +230,17 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Riesgo:** medio (6.2 y 6.4 tocan datos/prod). **Esfuerzo:** L.
 **Depende de:** Fase 4 (6.2 índice, 6.4 relación con esquema). D-C (6.5).
 
+> **✅ Ejecutada (2026-08-04, commit `b4b6b32`):**
+> - **S1** `/api/analyze` exige sesión + valida tamaño/tipo de imagen (ya no es proxy abierto a Gemini). +test de 401.
+> - **S2** email a minúsculas en register/login/forgot → cierra la escalada a admin. (Los 2 emails de prod ya estaban en minúsculas.)
+> - **S7** tokens de reset hasheados (sha256, nuevo `sha256Hex` en `lib/crypto`).
+> - **S12** register maneja P2002 (409) + login con hash dummy (timing constante).
+> - **S13** `callbackUrl` validado como ruta relativa. **S14** headers `Referrer-Policy`/`HSTS`/`Permissions-Policy`.
+> - **S11** `foods/[id]/use` y `/vote` scopeados. **S10** allowlist de hosts de push (anti-SSRF).
+> - **S5** fotos con `addRandomSuffix`. **I6** se borra el blob al eliminar una comida.
+> - Verificado: `tsc`, **311 tests**, `next build`.
+> - **⏳ Diferido** (requiere env/dep/schema): **S3** `MIGRATE_SECRET` (coordinar env + GitHub secret), **S6** rate-limiting (dep Upstash/KV + env — D-C), **S8** invalidar sesiones al cambiar contraseña (columna `tokenVersion`), **S4** export de cuenta privado con URL firmada + cleanup de blobs en borrado de cuenta. S1 ya corta el abuso principal.
+
 ---
 
 ## Fase 7 — Raíz #4: manejo de errores honesto + correctitud de lógica
