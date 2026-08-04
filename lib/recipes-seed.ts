@@ -773,7 +773,8 @@ export const RECIPES_SEED: RecipeSeed[] = [
     prepTimeMin: 5,
     cookTimeMin: 3,
     servings: 1,
-    dietTags: ["vegetariano", "vegano"],
+    // "Café con leche" lleva lácteos → NO es vegano (L11).
+    dietTags: ["vegetariano"],
     allergyTags: ["gluten", "lacteos"],
     costLevel: 1,
     cuisineCode: null,

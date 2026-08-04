@@ -154,15 +154,20 @@ export async function consecutiveDeficitDays(
     byDay.set(day, (byDay.get(day) ?? 0) + v);
   }
 
-  // Contar racha de días con déficit
-  const sorted = Array.from(byDay.entries()).sort((a, b) =>
-    b[0].localeCompare(a[0])
-  );
+  // Racha de días de calendario CONSECUTIVOS en déficit, empezando por AYER
+  // (hoy está en curso: a media mañana casi siempre es "déficit" e inflaría la
+  // racha). Un día sin registro rompe la racha — no se confirma déficit (L8).
+  const todayStr = new Date().toISOString().split("T")[0];
+  const cursor = new Date(`${todayStr}T00:00:00.000Z`);
+  cursor.setUTCDate(cursor.getUTCDate() - 1);
 
   let streak = 0;
-  for (const [, total] of sorted) {
-    if (total < rdaMin * 0.6) streak++;
-    else break;
+  for (let i = 0; i < maxLookback; i++) {
+    const dayStr = cursor.toISOString().split("T")[0];
+    const total = byDay.get(dayStr);
+    if (total === undefined || total >= rdaMin * 0.6) break;
+    streak++;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
   }
   return streak;
 }
