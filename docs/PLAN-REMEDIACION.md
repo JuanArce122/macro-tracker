@@ -130,6 +130,16 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Verificación:** a las 20:00 simuladas en UTC−5, registrar comida/peso los archiva en el día correcto y se ven en la pantalla donde se registraron; `/` abre el día correcto; banners y header coinciden.
 **Depende de:** Fase 0 (D-B). **Nota:** 3.3 desbloquea parcialmente P4 (offline start_url), que se cierra en Fase 8.
 
+> **✅ Ejecutada (2026-08-04, commit `053177e`):**
+> - `lib/user-date.ts` (tz por `countryCode`, sin dependencias — usa `Intl`) + `lib/user-date-server.ts` (`getUserTodayById`).
+> - Redirect raíz dinámico + tz → **`/` ya no queda congelada con la fecha del build** (verificado: fuera del prerender-manifest).
+> - Defaults de "hoy" en API (`micros/today`, `micros/details`, `habits`, `weight`) y en day page (`isToday`); `DayHeader` recibe `isToday` del servidor (anti-hydration).
+> - `BottomNav` "Hoy" → `/`; `micros/page` y `weight/page` dejan que el server resuelva "hoy".
+> - `StepConfirm`: default = día de la URL (F6), `date` a mediodía UTC estable (F7/F12), `max`=hoy (evita fecha futura, L6).
+> - `history` navega/muestra por `dateLocal`. Cron wearables 04:00→17:00 UTC (mediodía Bogotá, P9 práctico).
+> - Test `user-date` con la regresión del bug nocturno UTC-5. Verificado: `tsc`, **310 tests**, `next build`.
+> - Pendiente relacionado: la ventana UTC de `sync.ts` (wearables) se pule en Fase 5; el fallback offline del start_url (P4) en Fase 8.
+
 ---
 
 ## Fase 4 — Raíz #2: drift de esquema e integridad de datos (⚠️ riesgo producción)
