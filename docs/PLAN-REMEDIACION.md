@@ -283,7 +283,14 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 > - Barrido de `res.ok` en clientes: **F9** (`history` — no más crash `.map`/"Buscando…" pegado), **F12** (`goals` — no muestra "Guardado" si falla), **F16** (`foods` delete + `InsightCard` dismiss solo si el server confirma).
 > - **F8** race de búsqueda (`AbortController`). **F15** etiqueta kcal/unidad correcta. **F11** `SuggestionBanner` refresca las metas al aplicar.
 >
-> **⏳ Remanente — cola de bajo valor (pendiente):** **L7/L9** (insights: hitos de racha vs cron semanal, dedupe 24h), **L8** (contigüidad de días en TCA/déficit), **L10** (matching de región por substring — no localicé la función exacta del reporte; requiere revisión), **L11/L12** (tags de recetas veganas con lácteos, cap de repetición); frontend **F4** (spinner de cámara al quitar foto pre-cargada), **F10** (`sendBeacon` para el delete diferido de 5s), **F11** restantes (`tracking-mode`, `plan`), estado de error en `HabitsDashboard`; integraciones **I9** (USDA full vs search), **I10** (User-Agent OFF + unificar UPC/EAN), **I11** (throttle/API key en header).
+> **✅ Cola cerrada (2026-08-04, commits `b6acbf7`→`491ca70`):**
+> - Integraciones: **I9** (extractMicros full/search), **I10** (User-Agent OFF), **I11** (X-Api-Key header). **L10** (matchesRegion: 21 países, sin fallback a 2 letras).
+> - Insights **L7** (hito de racha cruzado en 7 días, no match exacto — compatible con cron semanal). **L8** (déficit: días de calendario consecutivos desde ayer, no días salteados con hoy en curso).
+> - Frontend **F4** (spinner de cámara), **F10** (`keepalive` en pagehide para el delete diferido), **F11** (`tracking-mode` + `plan` refrescan), **HabitsDashboard** (estado de error vs spinner eterno).
+> - **L11** ("Café con leche" ya no es vegano).
+> - Verificado: `tsc`, **314 tests** (+2), `next build`.
+>
+> **⏳ Micro-remanente consciente (muy bajo valor):** **L9** (dedupe 24h de insights — la cuota semanal ya limita), **L12** (cap de repetición del meal-planner — el penalizador −1000 ya funciona; su test pasa), 2 recetas borderline (`avena`/`chía` con "agua o leche" — dato de receta debatible), y la contigüidad en `tca-detection` (feature sensible a TCA — se dejó cauta; la de déficit de micros sí se corrigió).
 
 ---
 
