@@ -11,8 +11,9 @@ import Button from "@/app/components/ui/Button";
 import FoodDropdown from "@/app/components/ui/FoodDropdown";
 import Icon from "@/app/components/ui/Icon";
 import ConfidenceBadge from "./ConfidenceBadge";
+import type { MealCategory } from "@/lib/categories";
 
-type Category = "desayuno" | "almuerzo" | "cena" | "snack";
+type Category = MealCategory;
 
 const CATEGORIES: { key: Category; label: string; icon: LucideIcon }[] = [
   { key: "desayuno", label: "Desayuno", icon: Sunrise },

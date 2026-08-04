@@ -8,6 +8,7 @@ import { Sunrise, Sun, Moon, Apple, UtensilsCrossed, Pencil, Trash2 } from "luci
 import EditMealSheet from "./EditMealSheet";
 import Toast from "./Toast";
 import Icon from "@/app/components/ui/Icon";
+import type { MealCategory } from "@/lib/categories";
 
 type Meal = {
   id: number;
@@ -29,7 +30,7 @@ type ToastState = {
   action?: { label: string; onClick: () => void };
 } | null;
 
-const CATEGORIES: { key: string; label: string; icon: LucideIcon }[] = [
+const CATEGORIES: { key: MealCategory; label: string; icon: LucideIcon }[] = [
   { key: "desayuno", label: "Desayuno", icon: Sunrise },
   { key: "almuerzo", label: "Almuerzo", icon: Sun },
   { key: "cena",     label: "Cena",     icon: Moon },

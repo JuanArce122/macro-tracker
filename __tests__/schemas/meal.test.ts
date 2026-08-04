@@ -2,9 +2,15 @@ import { describe, it, expect } from "vitest";
 import { MealCreateSchema, MealItemSchema, MealCategorySchema } from "@/lib/schemas";
 
 describe("MealCategorySchema", () => {
-  it("accepts valid categories (Spanish, per CLAUDE.md convention)", () => {
+  it("accepts valid categories (español — lo que envía el frontend)", () => {
     for (const cat of ["desayuno", "almuerzo", "cena", "snack"]) {
       expect(MealCategorySchema.safeParse(cat).success).toBe(true);
+    }
+  });
+
+  it("rejects English categories (regresión B1: el contrato es español)", () => {
+    for (const cat of ["breakfast", "lunch", "dinner"]) {
+      expect(MealCategorySchema.safeParse(cat).success).toBe(false);
     }
   });
 

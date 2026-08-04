@@ -1,23 +1,17 @@
 import { z } from "zod";
 import { DateLocalSchema, PositiveNumberSchema } from "./common";
+import { MEAL_CATEGORIES } from "@/lib/categories";
 
 /**
- * Categorías de comida del día.
- * Coincide con `Meal.category` en la DB y con la convención del proyecto
- * (texto de UI y dominio en español; ver CLAUDE.md → Convenciones).
+ * Categorías de comida del día — en español (fuente única en `@/lib/categories`).
+ * Coincide con `Meal.category` en la DB y con lo que envía el frontend.
  *
- * NOTA: `MealPlan.mealType` (HU-06) usa el set en inglés ("breakfast"…)
- * porque es su propio dominio interno de planificación, distinto de
- * `Meal.category`.
+ * NOTA: `MealPlan.mealType` (HU-06) usa el set en inglés ("breakfast"…) porque
+ * es su propio dominio interno de planificación, distinto de `Meal.category`.
  */
-export const MealCategorySchema = z.enum([
-  "desayuno",
-  "almuerzo",
-  "cena",
-  "snack",
-]);
+export const MealCategorySchema = z.enum(MEAL_CATEGORIES);
 
-export type MealCategory = z.infer<typeof MealCategorySchema>;
+export type { MealCategory } from "@/lib/categories";
 
 /**
  * Cada ítem identificado dentro de un meal (por ej., del análisis de Gemini).
