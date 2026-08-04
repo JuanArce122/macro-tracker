@@ -94,6 +94,9 @@ model Goal {
   adjustmentMode String @default("manual")
 
   adjustments GoalAdjustmentLog[]
+
+  // Un Goal por usuario (D6): permite upsert atómico y evita duplicados.
+  @@unique([userId])
 }
 
 model WeightEntry {

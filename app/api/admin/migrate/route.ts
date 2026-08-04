@@ -309,6 +309,7 @@ const INDEX_CREATES: IndexSpec[] = [
   { name: "Food_needsReview_idx", sql: "CREATE INDEX IF NOT EXISTS Food_needsReview_idx ON Food(needsReview)" },
   { name: "FoodVote_foodId_idx", sql: "CREATE INDEX IF NOT EXISTS FoodVote_foodId_idx ON FoodVote(foodId)" },
   { name: "WeightEntry_userId_date_idx", sql: "CREATE INDEX IF NOT EXISTS WeightEntry_userId_date_idx ON WeightEntry(userId, date)" },
+  { name: "Goal_userId_key", sql: "CREATE UNIQUE INDEX IF NOT EXISTS Goal_userId_key ON Goal(userId)" },
   { name: "GoalAdjustmentLog_userId_idx", sql: "CREATE INDEX IF NOT EXISTS GoalAdjustmentLog_userId_idx ON GoalAdjustmentLog(userId, createdAt)" },
   { name: "Insight_userId_createdAt_idx", sql: "CREATE INDEX IF NOT EXISTS Insight_userId_createdAt_idx ON Insight(userId, createdAt)" },
   { name: "Insight_userId_dismissedAt_idx", sql: "CREATE INDEX IF NOT EXISTS Insight_userId_dismissedAt_idx ON Insight(userId, dismissedAt)" },

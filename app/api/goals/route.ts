@@ -20,10 +20,7 @@ export async function GET() {
     }
     const userId = Number(session.user.id);
 
-    const goal = await prisma.goal.findFirst({
-      where: { userId },
-      orderBy: { id: "desc" },
-    });
+    const goal = await prisma.goal.findUnique({ where: { userId } });
 
     if (!goal) {
       return Response.json(DEFAULT_GOAL);
@@ -48,28 +45,21 @@ export async function PUT(req: NextRequest) {
     if (!parsed.ok) return parsed.response;
     const { calories, protein, carbs, fat, adjustmentMode } = parsed.data;
 
-    const existing = await prisma.goal.findFirst({
-      where: { userId },
-      orderBy: { id: "desc" },
-    });
-
     // Solo actualizamos adjustmentMode si fue provisto; preservamos el
     // valor anterior si no.
     const baseData = { calories, protein, carbs, fat };
-    const data =
+    const update =
       adjustmentMode !== undefined
         ? { ...baseData, adjustmentMode }
         : baseData;
 
-    const goal = existing
-      ? await prisma.goal.update({ where: { id: existing.id }, data })
-      : await prisma.goal.create({
-          data: {
-            userId,
-            ...baseData,
-            adjustmentMode: adjustmentMode ?? "manual",
-          },
-        });
+    // upsert atómico por userId (Goal.@@unique([userId])): dos PUT concurrentes
+    // ya no crean metas duplicadas (D6).
+    const goal = await prisma.goal.upsert({
+      where: { userId },
+      update,
+      create: { userId, ...baseData, adjustmentMode: adjustmentMode ?? "manual" },
+    });
 
     return Response.json(goal);
   } catch (error) {

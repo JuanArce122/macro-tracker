@@ -62,8 +62,27 @@ export async function DELETE() {
       }
     }
 
-    // ── 4. Borrar todo en transacción ────────────────────────────
+    // ── 4. Borrar TODO en transacción, sin depender de cascadas ──
+    // Orden FK-safe: primero los hijos con FK RESTRICT (PlannedMeal→Recipe,
+    // RecipeIngredient→Food), luego el resto de tablas con userId, y User al
+    // final. Explícito para no dejar huérfanos aunque el enforcement de FK de
+    // libSQL esté desactivado (D4).
     await prisma.$transaction([
+      prisma.plannedMeal.deleteMany({ where: { plan: { userId } } }),
+      prisma.recipeIngredient.deleteMany({
+        where: { OR: [{ recipe: { userId } }, { food: { userId } }] },
+      }),
+      prisma.foodVote.deleteMany({ where: { userId } }),
+      prisma.goalAdjustmentLog.deleteMany({ where: { userId } }),
+      prisma.insight.deleteMany({ where: { userId } }),
+      prisma.pushSubscription.deleteMany({ where: { userId } }),
+      prisma.weightEntry.deleteMany({ where: { userId } }),
+      prisma.habitEntry.deleteMany({ where: { userId } }),
+      prisma.wearableConnection.deleteMany({ where: { userId } }),
+      prisma.activityData.deleteMany({ where: { userId } }),
+      prisma.mealPlan.deleteMany({ where: { userId } }),
+      prisma.recipe.deleteMany({ where: { userId } }),
+      prisma.passwordResetToken.deleteMany({ where: { userId } }),
       prisma.meal.deleteMany({ where: { userId } }),
       prisma.goal.deleteMany({ where: { userId } }),
       prisma.food.deleteMany({ where: { userId } }),

@@ -8,29 +8,36 @@ import { prisma } from "../lib/prisma";
 async function main() {
   console.log(`Seeding ${FOODS.length} foods…`);
 
-  // Limpiar alimentos globales anteriores para evitar duplicados
-  await prisma.food.deleteMany({ where: { userId: null, source: "usda" } });
-
-  // Insertar en lotes de 50
-  const BATCH = 50;
-  for (let i = 0; i < FOODS.length; i += BATCH) {
-    const batch = FOODS.slice(i, i + BATCH);
-    await prisma.food.createMany({
-      data: batch.map((f) => ({
-        nombre: f.nombre,
-        categoria: f.categoria,
-        cal: f.cal,
-        p: f.p,
-        c: f.c,
-        f: f.f,
-        gramsPerUnit: f.gramsPerUnit ?? null,
-        unitLabel: f.unitLabel ?? null,
-        source: "usda",
-        userId: null,
-      })),
+  // Upsert manual por (nombre, source=usda, userId=null): idempotente y NO
+  // destructivo — preserva IDs, verificación (HU-04), micros (HU-07) y votos de
+  // las filas existentes, y no rompe la FK RESTRICT de RecipeIngredient (D5).
+  let created = 0;
+  let updated = 0;
+  for (const food of FOODS) {
+    const base = {
+      categoria: food.categoria,
+      cal: food.cal,
+      p: food.p,
+      c: food.c,
+      f: food.f,
+      gramsPerUnit: food.gramsPerUnit ?? null,
+      unitLabel: food.unitLabel ?? null,
+    };
+    const existing = await prisma.food.findFirst({
+      where: { nombre: food.nombre, source: "usda", userId: null },
+      select: { id: true },
     });
-    console.log(`  Inserted ${Math.min(i + BATCH, FOODS.length)} / ${FOODS.length}`);
+    if (existing) {
+      await prisma.food.update({ where: { id: existing.id }, data: base });
+      updated++;
+    } else {
+      await prisma.food.create({
+        data: { nombre: food.nombre, source: "usda", userId: null, ...base },
+      });
+      created++;
+    }
   }
+  console.log(`  ${created} creados, ${updated} actualizados`);
 
   const count = await prisma.food.count({ where: { userId: null } });
   console.log(`✅ Done. Total global foods in DB: ${count}`);
