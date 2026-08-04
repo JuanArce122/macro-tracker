@@ -200,6 +200,14 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Riesgo:** medio. **Verificación:** `MicrosCard` se renderiza con datos reales; llega un push de prueba; conectar/refrescar wearable refleja estado real.
 **Depende de:** Fase 1 (1.2 para que el OAuth arranque), Fase 4 (5.4 si añade columna).
 
+> **✅ Ejecutada (2026-08-04, commit `813130d`):**
+> - **5.1 (B6/I7)** `foodId` propagado desde búsqueda/barcode/voz y desde la edición de ingredientes hasta `POST /api/meals`; se envía cuando el meal es de un solo alimento → el snapshot de micros por fin se calcula.
+> - **5.2 (B7)** La página de notificaciones crea la `PushSubscription` del navegador (`pushManager.subscribe` con la VAPID key) y la registra en el server. *(Requiere `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + VAPID del server configuradas para entregar; sin ellas es no-op elegante.)*
+> - **5.3 (I2)** `redirect_uri` de wearables usa `NEXT_PUBLIC_APP_URL`.
+> - **5.5 (I4)** `lastSyncedAt` solo se actualiza si `days>0`.
+> - Verificado: `tsc`, **310 tests**, `next build`.
+> - **⏳ Diferido**: **5.4 (I3)** campo de estado "conexión rota" en `WearableConnection` — requiere columna nueva y hay 0 conexiones; el health-signal lo aporta `lastSyncedAt` (5.5). El refresh ya persiste el token antes de usarlo.
+
 ---
 
 ## Fase 6 — Seguridad
