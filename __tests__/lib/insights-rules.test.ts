@@ -116,8 +116,15 @@ describe("ruleStreak", () => {
     }
   });
 
-  it("no dispara en 8 (no hito)", () => {
-    expect(ruleStreak(8)).toBeNull();
+  it("dispara un hito cruzado en los últimos 7 días (cron semanal, L7)", () => {
+    // 32 días: el hito de 30 se cruzó hace 2 días → dispara aunque no sea exacto.
+    const insight = ruleStreak(32);
+    expect(insight).not.toBeNull();
+    expect(insight!.data).toMatchObject({ milestone: 30 });
+  });
+
+  it("no dispara lejos de cualquier hito (>7 días del último)", () => {
+    expect(ruleStreak(25)).toBeNull(); // 14 fue hace 11 días; 30 aún no
   });
 
   it("no dispara en 0 o 1", () => {

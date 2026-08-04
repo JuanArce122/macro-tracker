@@ -101,7 +101,13 @@ export function ruleAdherenceLow(adherence: number): GeneratedInsight | null {
  * spam diario (7, 14, 30, 60, 90 días consecutivos).
  */
 export function ruleStreak(streak: number): GeneratedInsight | null {
-  if (!STREAK_MILESTONES.includes(streak)) return null;
+  // El cron de insights es SEMANAL, así que la racha se observa a saltos de ~7 y
+  // el match exacto perdía 30/60/90 (residuos distintos mod 7). Disparamos el
+  // hito más alto CRUZADO en los últimos 7 días (L7).
+  const milestone = [...STREAK_MILESTONES]
+    .reverse()
+    .find((m) => streak >= m && streak - m < 7);
+  if (milestone === undefined) return null;
 
   const titles: Record<number, string> = {
     7:  "¡7 días seguidos registrando!",
@@ -113,12 +119,12 @@ export function ruleStreak(streak: number): GeneratedInsight | null {
 
   return {
     type: "streak",
-    title: titles[streak],
+    title: titles[milestone],
     body:
-      streak === 7
+      milestone === 7
         ? "La consistencia es la base de cualquier objetivo. Sigue así."
         : "Tu disciplina está pagando. Mantén el momentum.",
-    data: { streak },
+    data: { streak, milestone },
   };
 }
 
