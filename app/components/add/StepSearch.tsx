@@ -89,6 +89,7 @@ export default function StepSearch({ onResult, onBack, onPhotoSelected, onScanBa
         carbs: macros.carbs,
         grasa: macros.grasa,
         confianza: 1.0,
+        foodId: selected.id,
       }],
       imageBase64: "",
       mimeType: "",

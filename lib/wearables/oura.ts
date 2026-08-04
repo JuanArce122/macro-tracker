@@ -20,7 +20,7 @@ const OURA_API = "https://api.ouraring.com/v2";
 export const OURA_SCOPES = ["daily", "heartrate", "personal"];
 
 function getRedirectUri(): string {
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return `${base}/api/wearables/callback/oura`;
 }
 

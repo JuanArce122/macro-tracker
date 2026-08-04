@@ -50,6 +50,7 @@ const ENABLED_FORMATS: BarcodeFormat[] = [
  * El usuario podrá editar el peso en StepConfirm como con cualquier otro alimento.
  */
 function foodToAnalysisResult(food: {
+  id: number;
   nombre: string;
   cal: number;
   p: number;
@@ -68,6 +69,7 @@ function foodToAnalysisResult(food: {
         carbs: food.c,
         grasa: food.f,
         confianza: 1.0,
+        foodId: food.id,
       },
     ],
     imageBase64: "",

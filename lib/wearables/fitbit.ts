@@ -20,7 +20,7 @@ const FITBIT_API = "https://api.fitbit.com";
 export const FITBIT_SCOPES = ["activity", "heartrate", "sleep", "weight"];
 
 function getRedirectUri(): string {
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return `${base}/api/wearables/callback/fitbit`;
 }
 

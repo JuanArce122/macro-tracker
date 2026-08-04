@@ -190,10 +190,15 @@ export async function syncConnection(conn: Connection): Promise<{ days: number }
     throw new Error(`Provider sin sync implementado: ${conn.provider}`);
   }
 
-  await prisma.wearableConnection.update({
-    where: { id: conn.id },
-    data: { lastSyncedAt: new Date() },
-  });
+  // Solo marcar como sincronizado si de verdad importamos algún día. Si los
+  // fetches fallaron (token revocado, red), `days === 0` y NO tocamos
+  // lastSyncedAt → la UI muestra la última sync REAL, no una mentira (I4).
+  if (result.days > 0) {
+    await prisma.wearableConnection.update({
+      where: { id: conn.id },
+      data: { lastSyncedAt: new Date() },
+    });
+  }
 
   return result;
 }

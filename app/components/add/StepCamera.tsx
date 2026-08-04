@@ -15,6 +15,10 @@ export type MealItem = {
   carbs: number;
   grasa: number;
   confianza: number;
+  // HU-07: id del Food de la DB cuando el ítem viene de búsqueda/barcode/voz.
+  // Permite que el server tome snapshot de micros (se envía si el meal es de
+  // un solo alimento). Ausente en items del análisis por foto.
+  foodId?: number;
 };
 
 export type AnalysisResult = {

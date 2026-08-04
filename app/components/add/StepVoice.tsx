@@ -49,6 +49,7 @@ function matchedToAnalysisResult(items: MatchedVoiceItem[], transcript: string):
     carbs: it.carbs,
     grasa: it.grasa,
     confianza: it.confianza,
+    foodId: it.foodId ?? undefined,
   }));
 
   return {

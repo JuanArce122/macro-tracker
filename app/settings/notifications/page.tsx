@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { EggFried, Salad, UtensilsCrossed, BarChart3, Bell, AlertTriangle, Info, ChevronLeft, Loader2 } from "lucide-react";
@@ -33,11 +33,48 @@ async function sendScheduleToSW(schedule: Schedule) {
   reg.active.postMessage({ type: "SCHEDULE_NOTIFICATIONS", schedule });
 }
 
+/**
+ * B7: crea (o reutiliza) la PushSubscription del navegador y la registra en el
+ * server. Idempotente. No-op silencioso si no hay VAPID key configurada o el
+ * navegador no soporta push. Sin esto, `pushSubscription` queda vacía y ningún
+ * push de coaching (HU-09) llega jamás.
+ */
+async function subscribeToPush(): Promise<void> {
+  try {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidKey) return;
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    const sub =
+      existing ??
+      (await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        // La Push API acepta la VAPID public key como string base64url.
+        applicationServerKey: vapidKey,
+      }));
+    const json = sub.toJSON();
+    await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+    });
+  } catch (err) {
+    console.error("[push] subscribe failed:", err);
+  }
+}
+
 export default function NotificationsPage() {
   const router = useRouter();
   const permission = useNotificationPermission();
   const [schedule, setSchedule] = useNotificationSchedule();
   const [requesting, setRequesting] = useState(false);
+
+  // B7: si el permiso ya está concedido (incluido usuarios que lo dieron antes
+  // de que existiera esta feature), asegura la suscripción push en el server.
+  useEffect(() => {
+    if (permission === "granted") subscribeToPush();
+  }, [permission]);
 
   // Detectar soporte iOS
   const isIOS = typeof navigator !== "undefined" &&
@@ -63,6 +100,7 @@ export default function NotificationsPage() {
       notifyPermissionChange();
       if (result === "granted") {
         await sendScheduleToSW(schedule);
+        await subscribeToPush();
       }
     } finally {
       setRequesting(false);

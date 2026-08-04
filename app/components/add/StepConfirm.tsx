@@ -112,6 +112,7 @@ export default function StepConfirm({ result, date, onBack, onSaved }: Props) {
       prev.map((item) =>
         item.id !== itemId ? item : {
           ...item,
+          foodId: food.id,
           nombre: food.nombre,
           pesoG: weight,
           calorias: macros.calorias,
@@ -244,6 +245,12 @@ export default function StepConfirm({ result, date, onBack, onSaved }: Props) {
       if (result.imageBase64) {
         body.imageBase64 = result.imageBase64;
         body.mimeType = result.mimeType;
+      }
+
+      // HU-07: si el meal es de UN solo alimento de la DB, mandamos su foodId
+      // para que el server haga snapshot de micros (escala per-100g al weightG).
+      if (!useFlatMode && items.length === 1 && items[0].foodId) {
+        body.foodId = items[0].foodId;
       }
 
       const res = await fetch("/api/meals", {
