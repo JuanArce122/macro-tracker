@@ -12,8 +12,13 @@
 
 import { prisma } from "@/lib/prisma";
 
-/** Tamaño mínimo de la muestra para que la estadística sea significativa. */
-export const MIN_SAMPLES = 10;
+/**
+ * Tamaño mínimo de la muestra. Debe ser ≥ 12: por la cota de Samuelson, con σ
+ * poblacional el z-score máximo posible es √(n-1). Con n=10 ese máximo es
+ * exactamente 3.0, así que el umbral estricto `z > 3` NUNCA dispara (L3). Con
+ * n ≥ 12, √(n-1) ≥ 3.32 > 3 y los outliers reales sí se detectan.
+ */
+export const MIN_SAMPLES = 12;
 
 /** Z-score umbral: más de 3σ de la media → outlier. */
 export const Z_THRESHOLD = 3;

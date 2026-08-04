@@ -87,14 +87,22 @@ export function calcTrendSlope(points: WeightPoint[]): number {
 
   const smoothed = smoothExponential(points);
   const n = smoothed.length;
-  const meanX = (n - 1) / 2; // promedio de 0..n-1
+
+  // Eje X = días reales desde el primer punto (no el índice). Antes se asumían
+  // puntos diarios consecutivos, así que un usuario que se pesa 2x/semana
+  // obtenía una pendiente inflada ~3.5x (L4). Para datos diarios consecutivos
+  // xs = 0,1,2,… → resultado idéntico al anterior (backward-compatible).
+  const t0 = Date.parse(`${points[0].date}T00:00:00Z`);
+  const xs = points.map((p) => (Date.parse(`${p.date}T00:00:00Z`) - t0) / 86400000);
+
+  const meanX = xs.reduce((s, x) => s + x, 0) / n;
   const meanY = smoothed.reduce((s, y) => s + y, 0) / n;
 
   let num = 0;
   let den = 0;
   for (let i = 0; i < n; i++) {
-    num += (i - meanX) * (smoothed[i] - meanY);
-    den += (i - meanX) ** 2;
+    num += (xs[i] - meanX) * (smoothed[i] - meanY);
+    den += (xs[i] - meanX) ** 2;
   }
   if (den === 0) return 0;
 

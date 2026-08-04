@@ -47,6 +47,18 @@ describe("calcTrendSlope", () => {
     expect(calcTrendSlope(pts([70, 71, 72, 73, 74, 75]))).toBe(0);
   });
 
+  it("no infla la pendiente con muestreo NO diario (L4)", () => {
+    // 0.2 kg cada 2 días = 0.1 kg/día ≈ 0.7 kg/sem. Con el bug (eje X = índice)
+    // daría ~-1.4 kg/sem (el doble); con fechas reales ronda -0.7.
+    const points: WeightPoint[] = Array.from({ length: 14 }, (_, i) => ({
+      date: `2026-05-${String(1 + i * 2).padStart(2, "0")}`, // cada 2 días
+      weightKg: 75 - i * 0.2,
+    }));
+    const slope = calcTrendSlope(points);
+    expect(slope).toBeGreaterThan(-0.9); // NO el ~-1.4 inflado del bug
+    expect(slope).toBeLessThan(-0.3); // sí refleja el descenso real
+  });
+
   it("detecta tendencia negativa (perdiendo peso)", () => {
     // 14 días bajando 0.05 kg/día = ~0.35 kg/sem
     const weights = Array.from({ length: 14 }, (_, i) => 75 - i * 0.05);

@@ -61,6 +61,16 @@ describe("detectOutliersFromFoods", () => {
     expect(ids).not.toContain(1000);
   });
 
+  it("detecta un outlier en una categoría de exactamente 12 (Samuelson n>=12, L3)", () => {
+    // 11 valores ~100-110 + 1 en 300. Con n=12, √(n-1)=3.32 > 3 → el outlier
+    // supera el umbral 3σ (con n=10 esto era imposible por la cota de Samuelson).
+    const foods: FoodForOutlierCheck[] = [
+      ...Array.from({ length: 11 }, (_, i) => makeFood(i + 1, 100 + i)),
+      makeFood(100, 300),
+    ];
+    expect(detectOutliersFromFoods(foods).map((o) => o.id)).toContain(100);
+  });
+
   it("returns a stable list (no duplicates)", () => {
     const foods: FoodForOutlierCheck[] = [
       ...Array.from({ length: 20 }, (_, i) => makeFood(i + 1, 110 + i)),
