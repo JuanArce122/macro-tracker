@@ -19,6 +19,7 @@ type DaySummary = {
 type MealResult = {
   id: number;
   date: string;
+  dateLocal: string | null;
   category: string;
   name: string;
   imageUrl: string | null;
@@ -32,7 +33,7 @@ type MealResult = {
 
 function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => void }) {
   const router = useRouter();
-  const day = meal.date.split("T")[0];
+  const day = meal.dateLocal ?? meal.date.split("T")[0];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
@@ -55,7 +56,7 @@ function MealDetailSheet({ meal, onClose }: { meal: MealResult; onClose: () => v
             <p className="font-display text-xl tracking-[-0.02em] font-medium text-text-primary leading-tight">{meal.name}</p>
             <p className="text-xs text-text-tertiary capitalize mt-1 tabular-nums">{meal.category} · {meal.weightG}g</p>
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mt-1.5">
-              {format(parseISO(meal.date), "d 'de' MMMM yyyy", { locale: es })}
+              {format(parseISO(meal.dateLocal ?? meal.date), "d 'de' MMMM yyyy", { locale: es })}
             </p>
           </div>
         </div>
@@ -193,7 +194,7 @@ export default function HistoryPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{meal.name}</p>
                       <p className="text-xs text-text-tertiary tabular-nums mt-0.5">
-                        {format(parseISO(meal.date), "d MMM yyyy", { locale: es })} ·{" "}
+                        {format(parseISO(meal.dateLocal ?? meal.date), "d MMM yyyy", { locale: es })} ·{" "}
                         <span className="font-numbers tracking-[0.01em]">{meal.calories.toFixed(0)}</span> kcal
                       </p>
                     </div>

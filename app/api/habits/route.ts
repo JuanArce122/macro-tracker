@@ -3,10 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { HabitEntryUpsertSchema } from "@/lib/schemas";
 import { validateBody } from "@/lib/api/validate";
-
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
-}
+import { getUserTodayById } from "@/lib/user-date-server";
 
 const SELECT_FIELDS = {
   id: true,
@@ -32,7 +29,7 @@ export async function GET(req: NextRequest) {
   }
   const userId = Number(session.user.id);
 
-  const date = req.nextUrl.searchParams.get("date") ?? todayLocal();
+  const date = req.nextUrl.searchParams.get("date") ?? (await getUserTodayById(userId));
 
   const entry = await prisma.habitEntry.findUnique({
     where: { userId_date: { userId, date } },
@@ -70,7 +67,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.ok) return parsed.response;
 
   const { date: dateInput, ...portions } = parsed.data;
-  const date = dateInput ?? todayLocal();
+  const date = dateInput ?? (await getUserTodayById(userId));
 
   // Si no se envía ninguna porción, no hay nada que actualizar
   if (Object.keys(portions).length === 0) {

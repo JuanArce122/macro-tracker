@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation";
-import { format } from "date-fns";
+import { auth } from "@/auth";
+import { getUserTodayById } from "@/lib/user-date-server";
 
-export default function Home() {
-  const today = format(new Date(), "yyyy-MM-dd");
+// Dinámica (usa auth()): el redirect se resuelve por request, no en el build.
+// El "hoy" se calcula en la zona del usuario (no en UTC del servidor).
+export default async function Home() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth");
+  const today = await getUserTodayById(Number(session.user.id));
   redirect(`/day/${today}`);
 }

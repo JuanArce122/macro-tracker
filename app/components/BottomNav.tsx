@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { format } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 import { Home, ClipboardList, Settings } from "lucide-react";
 import Icon from "@/app/components/ui/Icon";
-
-const today = () => format(new Date(), "yyyy-MM-dd");
 
 type Tab = {
   label: string;
@@ -50,7 +47,7 @@ export default function BottomNav() {
     >
       {TABS.map(({ label, href, icon, match }) => {
         const active = match(pathname);
-        const targetHref = href || `/day/${today()}`;
+        const targetHref = href || "/";
         return (
           <Link
             key={label}

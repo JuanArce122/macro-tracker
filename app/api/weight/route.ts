@@ -3,14 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { WeightCreateSchema } from "@/lib/schemas";
 import { validateBody } from "@/lib/api/validate";
-
-/**
- * Devuelve la fecha local del día en formato YYYY-MM-DD.
- * (Server-side; el usuario puede pasar `date` si quiere registrar otro día.)
- */
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
-}
+import { getUserTodayById } from "@/lib/user-date-server";
 
 /**
  * POST /api/weight
@@ -32,7 +25,7 @@ export async function POST(req: NextRequest) {
   const parsed = await validateBody(req, WeightCreateSchema);
   if (!parsed.ok) return parsed.response;
   const { weightKg, date } = parsed.data;
-  const dateStr = date ?? todayLocal();
+  const dateStr = date ?? (await getUserTodayById(userId));
 
   const entry = await prisma.weightEntry.upsert({
     where: { userId_date: { userId, date: dateStr } },

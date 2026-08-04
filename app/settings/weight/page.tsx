@@ -17,10 +17,6 @@ type TrendResponse = {
   points: number;
 };
 
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
-}
-
 function formatTrend(kgWeek: number): { label: string; color: string } {
   if (Math.abs(kgWeek) < 0.05) return { label: "Estable", color: "text-text-secondary" };
   const sign = kgWeek > 0 ? "+" : "";
@@ -32,7 +28,6 @@ function formatTrend(kgWeek: number): { label: string; color: string } {
 export default function WeightPage() {
   const router = useRouter();
   const [weightInput, setWeightInput] = useState("");
-  const [today] = useState(todayLocal());
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [trend, setTrend] = useState<TrendResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +59,7 @@ export default function WeightPage() {
       const res = await fetch("/api/weight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weightKg: parsed, date: today }),
+        body: JSON.stringify({ weightKg: parsed }),
       });
       if (!res.ok) throw new Error();
       setSaved(true);
@@ -107,7 +102,6 @@ export default function WeightPage() {
         <div className="bg-bg-secondary border border-border rounded-xl p-5 flex flex-col gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.08em] text-text-tertiary mb-1">Peso de hoy</p>
-            <p className="text-xs text-text-tertiary tabular-nums">{today}</p>
           </div>
 
           <div className="relative">

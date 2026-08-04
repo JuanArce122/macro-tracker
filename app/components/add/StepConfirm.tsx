@@ -79,13 +79,14 @@ function todayString() {
 const inputClass = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-4 py-3 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)]";
 const inputClassSmall = "w-full bg-bg-secondary border border-border rounded-xl text-text-primary placeholder:text-text-tertiary px-3 py-2 text-sm focus:outline-none focus:border-text-primary transition-colors duration-200 ease-[var(--ease-editorial)] tabular-nums font-numbers tracking-[0.01em]";
 
-export default function StepConfirm({ result, date: _date, onBack, onSaved }: Props) {
+export default function StepConfirm({ result, date, onBack, onSaved }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>(defaultCategory());
-  const [selectedDate, setSelectedDate] = useState(todayString());
+  // Default = el día que el usuario está viendo (URL), no siempre "hoy".
+  const [selectedDate, setSelectedDate] = useState(date);
   const [nombrePlato, setNombrePlato] = useState(result.nombrePlato);
   const [items, setItems] = useState<EditableItem[]>(makeEditable(result.items));
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -225,7 +226,9 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
     try {
       const useFlatMode = items.length === 0;
       const body: Record<string, unknown> = {
-        date: `${selectedDate}T${new Date().toISOString().split("T")[1]}`,
+        // Mediodía UTC del día elegido: el día se mantiene estable en cualquier
+        // zona de América (dateLocal es la fuente de verdad del día).
+        date: `${selectedDate}T12:00:00.000Z`,
         dateLocal: selectedDate,
         category,
         name: nombrePlato,
@@ -314,6 +317,7 @@ export default function StepConfirm({ result, date: _date, onBack, onSaved }: Pr
           <input
             type="date"
             value={selectedDate}
+            max={todayString()}
             onChange={(e) => setSelectedDate(e.target.value)}
             className={inputClass}
           />

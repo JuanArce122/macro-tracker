@@ -3,10 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { getRDA, MICRO_KEYS, MICRO_LABELS, type UserProfile, type MicroKey } from "@/lib/micros";
 import { sumMicrosForDay, computeMicroProgress } from "@/lib/micros-aggregate";
-
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
-}
+import { getUserToday } from "@/lib/user-date";
 
 /**
  * GET /api/micros/details?date=YYYY-MM-DD
@@ -21,12 +18,12 @@ export async function GET(req: NextRequest) {
   }
   const userId = Number(session.user.id);
 
-  const date = req.nextUrl.searchParams.get("date") ?? todayLocal();
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { sex: true, age: true, fitnessGoal: true },
+    select: { sex: true, age: true, fitnessGoal: true, countryCode: true },
   });
+
+  const date = req.nextUrl.searchParams.get("date") ?? getUserToday(user);
 
   const profile: UserProfile = {
     sex: (user?.sex as "male" | "female" | null) ?? null,

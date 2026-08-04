@@ -36,22 +36,18 @@ const STATUS_COLOR: Record<MicroDetail["status"], string> = {
   over: "bg-accent-warm",
 };
 
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
-}
-
 export default function MicrosPage() {
   const router = useRouter();
-  const [date] = useState(todayLocal());
   const [data, setData] = useState<DetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/micros/details?date=${encodeURIComponent(date)}`)
+    // Sin ?date: el servidor usa el "hoy" del usuario (según su zona horaria).
+    fetch("/api/micros/details")
       .then((r) => (r.ok ? r.json() : null))
       .then((d: DetailsResponse | null) => setData(d))
       .finally(() => setLoading(false));
-  }, [date]);
+  }, []);
 
   return (
     <div className="flex flex-col flex-1 bg-bg-primary">

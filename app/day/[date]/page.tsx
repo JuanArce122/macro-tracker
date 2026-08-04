@@ -11,6 +11,7 @@ import InsightCard from "@/app/components/InsightCard";
 import HabitsDashboard from "@/app/components/HabitsDashboard";
 import SafeUseBanner from "@/app/components/SafeUseBanner";
 import MicrosCard from "@/app/components/MicrosCard";
+import { getUserToday } from "@/lib/user-date";
 
 async function getMeals(userId: number, date: string) {
   return prisma.meal.findMany({
@@ -41,12 +42,8 @@ async function getGoals(userId: number) {
 async function getProfileForDashboard(userId: number) {
   return prisma.user.findUnique({
     where: { id: userId },
-    select: { trackingMode: true, fitnessGoal: true },
+    select: { trackingMode: true, fitnessGoal: true, countryCode: true },
   });
-}
-
-function todayLocal(): string {
-  return new Date().toISOString().split("T")[0];
 }
 
 export default async function DayPage({
@@ -79,7 +76,7 @@ export default async function DayPage({
   // HU-05: solo mostramos el banner de sugerencia cuando el usuario
   // está viendo el día de hoy. En días pasados es menos relevante y
   // evitamos un fetch extra por cada navegación al historial.
-  const isToday = date === todayLocal();
+  const isToday = date === getUserToday(userInfo);
   const adjustmentMode = "adjustmentMode" in goals ? goals.adjustmentMode : "manual";
   // HU-11: si el usuario está en modo hábitos, reemplazamos MacroSummary
   // por HabitsDashboard. MealList se mantiene en ambos modos porque
@@ -89,7 +86,7 @@ export default async function DayPage({
 
   return (
     <div className="flex flex-col flex-1 bg-bg-primary">
-      <DayHeader date={date} />
+      <DayHeader date={date} isToday={isToday} />
       <div className="flex-1 overflow-y-auto pb-32">
         {isHabitsMode ? (
           <HabitsDashboard date={date} fitnessGoal={fitnessGoal ?? null} />

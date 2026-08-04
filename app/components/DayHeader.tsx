@@ -1,18 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { format, addDays, subDays, isToday, parseISO } from "date-fns";
+import { format, addDays, subDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Icon from "@/app/components/ui/Icon";
 
-export default function DayHeader({ date }: { date: string }) {
+export default function DayHeader({ date, isToday }: { date: string; isToday: boolean }) {
   const router = useRouter();
   const parsed = parseISO(date);
 
   const prev = format(subDays(parsed, 1), "yyyy-MM-dd");
   const next = format(addDays(parsed, 1), "yyyy-MM-dd");
-  const isTodayDate = isToday(parsed);
+  const isTodayDate = isToday;
 
   const dayLabel = isTodayDate
     ? "Hoy"
