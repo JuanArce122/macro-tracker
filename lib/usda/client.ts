@@ -13,10 +13,14 @@ const FDC_TIMEOUT_MS = Number(process.env.USDA_FDC_TIMEOUT_MS) || 8_000;
 // ─── Tipos ────────────────────────────────────────────────────────────
 
 export type FDCNutrient = {
-  nutrientId: number;
-  nutrientName: string;
-  unitName: string;
+  // Formato del endpoint de BÚSQUEDA (/foods/search):
+  nutrientId?: number;
+  nutrientName?: string;
+  unitName?: string;
   value?: number;
+  // Formato "full" del endpoint de DETALLE (/food/{fdcId}):
+  nutrient?: { id: number; name?: string; unitName?: string };
+  amount?: number;
 };
 
 export type FDCFood = {
@@ -112,13 +116,14 @@ export async function searchUSDA(
     throw new Error("USDA_FDC_API_KEY no configurada");
   }
 
+  // API key por header (X-Api-Key), no en la query string → no se filtra a
+  // logs ni proxies (I11).
   const url =
-    `${FDC_BASE}/foods/search?api_key=${apiKey}` +
-    `&query=${encodeURIComponent(query)}` +
+    `${FDC_BASE}/foods/search?query=${encodeURIComponent(query)}` +
     `&pageSize=${Math.min(pageSize, 50)}` +
     `&dataType=Foundation,SR%20Legacy`;
 
-  const res = await fetchWithTimeout(url);
+  const res = await fetchWithTimeout(url, { headers: { "X-Api-Key": apiKey } });
   if (!res || !res.ok) return [];
 
   const data = (await res.json()) as { foods?: FDCFood[] };
@@ -134,8 +139,8 @@ export async function fetchFDC(fdcId: number): Promise<FDCFood | null> {
     throw new Error("USDA_FDC_API_KEY no configurada");
   }
 
-  const url = `${FDC_BASE}/food/${fdcId}?api_key=${apiKey}`;
-  const res = await fetchWithTimeout(url);
+  const url = `${FDC_BASE}/food/${fdcId}`;
+  const res = await fetchWithTimeout(url, { headers: { "X-Api-Key": apiKey } });
   if (!res || !res.ok) return null;
   return (await res.json()) as FDCFood;
 }
@@ -147,10 +152,15 @@ export async function fetchFDC(fdcId: number): Promise<FDCFood | null> {
 export function extractMicros(food: FDCFood): ExtractedNutrition {
   const out: ExtractedNutrition = {};
   for (const n of food.foodNutrients) {
-    const key = NUTRIENT_ID_MAP[n.nutrientId];
+    // El endpoint de búsqueda usa {nutrientId, value}; el de detalle (full) usa
+    // {nutrient:{id}, amount}. Soportamos ambos para que el modo `fdcIds` no
+    // importe 0 alimentos en silencio (I9).
+    const id = n.nutrientId ?? n.nutrient?.id;
+    const value = typeof n.value === "number" ? n.value : n.amount;
+    if (id == null || typeof value !== "number") continue;
+    const key = NUTRIENT_ID_MAP[id];
     if (!key) continue;
-    if (typeof n.value !== "number") continue;
-    out[key] = n.value;
+    out[key] = value;
   }
   return out;
 }

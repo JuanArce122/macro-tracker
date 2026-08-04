@@ -62,19 +62,18 @@ export function matchesRegion(
 ): boolean {
   if (!countryCode || !countriesTags) return false;
   const needle = countryCode.toLowerCase();
-  // Mapeo mínimo ISO → palabra que OFF usa en sus tags
+  // ISO alpha-2 → palabra que OFF usa en sus tags (los 21 países de regions.ts).
   const countryWord: Record<string, string> = {
-    co: "colombia",
-    mx: "mexico",
-    ar: "argentina",
-    pe: "peru",
-    cl: "chile",
-    ve: "venezuela",
-    ec: "ecuador",
-    es: "spain",
-    us: "united-states",
+    co: "colombia", mx: "mexico", ar: "argentina", pe: "peru", cl: "chile",
+    ve: "venezuela", ec: "ecuador", uy: "uruguay", py: "paraguay", bo: "bolivia",
+    cr: "costa-rica", pa: "panama", do: "dominican-republic", gt: "guatemala",
+    hn: "honduras", sv: "el-salvador", ni: "nicaragua", cu: "cuba",
+    pr: "puerto-rico", es: "spain", us: "united-states",
   };
-  const word = countryWord[needle] ?? needle;
+  const word = countryWord[needle];
+  // Sin fallback al código de 2 letras: evitaba matches por substring — falsos
+  // positivos (DO en "indonesia") y falsos negativos (GT no matchea "guatemala") (L10).
+  if (!word) return false;
   return countriesTags.some((t) => t.toLowerCase().includes(word));
 }
 
@@ -112,6 +111,8 @@ export async function fetchFromOFF(barcode: string): Promise<OFFResponse | null>
   try {
     const res = await fetch(`${OFF_PRODUCT_BASE}/${barcode}.json`, {
       signal: controller.signal,
+      // OFF exige un User-Agent descriptivo; bloquean UAs genéricos (I10).
+      headers: { "User-Agent": "MacroTracker/1.0 (+https://fit-app-nu-weld.vercel.app)" },
       // OFF cachea bien — 1h de revalidation es razonable.
       next: { revalidate: 3600 },
     });
