@@ -99,6 +99,14 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Verificación:** registrar desayuno/almuerzo/cena por foto/búsqueda/voz/barcode → 201; comida logueada desde el plan aparece en `MealList`.
 **Depende de:** Fase 0 (D-A).
 
+> **✅ Ejecutada (2026-08-04, commit `4d18b4d`):**
+> - Fuente única `lib/categories.ts` (`MEAL_CATEGORIES` español + labels + `plannedTypeToCategory`).
+> - `MealCategorySchema` deriva de `MEAL_CATEGORIES` → **B1 cerrado** (el schema ya acepta `desayuno/almuerzo/cena`).
+> - `log-meal` traduce el `mealType` del plan (inglés) → categoría español (las comidas del plan ya no se guardan invisibles).
+> - `StepConfirm` y `MealList` tipan sus categorías contra `MealCategory` (anti-drift). `EditMealSheet` ya usaba español (sin cambios).
+> - Test de contrato: acepta español, rechaza inglés. Verificado: `tsc`, **305 tests**, `next build`.
+> - Nota: los `breakfast/lunch/dinner` de `notifications`/`useNotificationSchedule` son claves de *recordatorio* (`ReminderKey`), concepto separado de `Meal.category` — no se tocan.
+
 ---
 
 ## Fase 3 — Raíz #1: fuente única del "día del usuario"
