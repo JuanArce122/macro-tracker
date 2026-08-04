@@ -269,6 +269,18 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Riesgo:** medio; la parte de lógica es sensible → cada cambio con su test. **Esfuerzo:** L.
 **Depende de:** nada estructural, pero conviene tras Fases 2-4.
 
+> **✅ Núcleo ejecutado (2026-08-04, commits `507628e` + `9083d01`):**
+> - **I5** Resend falla ruidosamente si falta `RESEND_FROM_EMAIL` (`getFromEmail`), ya no "entrega" al sandbox.
+> - **L1** `apply-suggestion` re-verifica las guardas de `/suggest` (≥14 pesos, adherencia ≥50%, cooldown 14d).
+> - **L3** `MIN_SAMPLES` 10→12 en outliers (la cota de Samuelson hacía imposible `z>3` con n=10). +test.
+> - **L4** `calcTrendSlope` usa la fecha real como eje X (no infla la pendiente con muestreo no diario). +test, backward-compatible.
+> - **L5** micros de solo-límite (azúcar) usan "menos es mejor" (no más "low"/rojo permanente).
+> - **L6** ventana de adherencia de exactamente 14 días + clamp a 1 (ya no da >100%).
+> - **F13** `handleLogin` con try/catch/finally (el botón ya no se cuelga).
+> - Verificado: `tsc`, **313 tests** (+3 regresión).
+>
+> **⏳ Remanente de Fase 7** (menor valor — edge cases y pulido): **L7/L9** (insights: hitos de racha con cron semanal, dedupe 24h), **L8** (contigüidad de días en TCA/déficit), **L10** (`matchesRegion` completar mapa), **L11/L12** (tags de recetas, cap de repetición); barrido de `res.ok` en clientes (`history` F9, `settings/goals` F12, `HabitsDashboard`/`InsightCard`/`settings/foods` F13/F16); frontend **F4** (spinner cámara), **F8** (race de búsqueda), **F10** (delete diferido), **F11** (`router.refresh`), **F15** (etiqueta kcal/unidad); integraciones **I9** (USDA full vs search), **I10** (User-Agent OFF, unificar UPC/EAN), **I11** (throttle/API key).
+
 ---
 
 ## Fase 8 — PWA/SW, robustez y proceso
