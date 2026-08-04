@@ -74,6 +74,12 @@ Tres decisiones cambian el trabajo de las fases 2, 3 y 6. Las detallo aquí y la
 **Verificación:** `next build` OK; crear comida con foto (tras Fase 2), conectar Fitbit no da 500, generar plan de 5 comidas no da 500. Tests existentes verdes.
 **Depende de:** Fase 0. **Nota:** 1.1 y 1.2 son independientes entre sí; se pueden hacer en cualquier orden.
 
+> **✅ Ejecutada (2026-08-04, commit `cf5f8a7`):**
+> - **1.1 B2:** `images.remotePatterns` en `next.config.ts` (`*.public.blob.vercel-storage.com`). Validado por `next build`.
+> - **1.2 B4:** `NextResponse.redirect` + `cookies.set` en `connect` y `callback` de wearables. Verificado en runtime: 302 con `Location` + `Set-Cookie`, sin `TypeError`.
+> - **1.3 B5:** slots `snack1/snack2` con `mealType` distinto; `log-meal` los colapsa a `snack`; página del plan los etiqueta "Snack". + test de regresión de unicidad `(date, mealType)`.
+> - Verificación: `tsc --noEmit` limpio, **304 tests** verdes (+1 nuevo), `next build` (webpack, por el symlink de node_modules en el worktree; los cambios son agnósticos al bundler).
+
 ---
 
 ## Fase 2 — Raíz #3: contrato de dominio (idioma de categorías)
