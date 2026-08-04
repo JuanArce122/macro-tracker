@@ -223,7 +223,12 @@ export default function SettingsPage() {
         {/* CERRAR SESIÓN */}
         <div className="mx-4 mt-4 mb-6">
           <button
-            onClick={() => signOut({ callbackUrl: "/auth" })}
+            onClick={() => {
+              // P3: limpiar el cache del SW antes de salir, para que el próximo
+              // usuario en este dispositivo no vea datos cacheados del anterior.
+              navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_CACHE" });
+              signOut({ callbackUrl: "/auth" });
+            }}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-bg-secondary border border-border text-red-600 font-medium text-sm active:bg-bg-tertiary transition-colors duration-200 ease-[var(--ease-editorial)]"
           >
             <Icon icon={LogOut} size={16} />

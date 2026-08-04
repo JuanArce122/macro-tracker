@@ -9,7 +9,36 @@
 //   - fetch: cache-first SOLO para /_next/static/* (hashes inmutables);
 //            stale-while-revalidate para APIs idempotentes;
 //            network-first para navegación (HTML).
-const CACHE_NAME = "macro-tracker-v5";
+const CACHE_NAME = "macro-tracker-v6";
+
+// APIs con datos del usuario (stale-while-revalidate en GET; invalidación en
+// mutaciones). El bump a v6 fuerza el borrado de los caches v5 en activate.
+const CACHEABLE_API = ["/api/meals", "/api/history", "/api/goals"];
+
+async function invalidateApiCache() {
+  const cache = await caches.open(CACHE_NAME);
+  const keys = await cache.keys();
+  await Promise.all(
+    keys
+      .filter((req) => CACHEABLE_API.some((p) => new URL(req.url).pathname.startsWith(p)))
+      .map((req) => cache.delete(req))
+  );
+}
+
+// P4: página de fallback offline (mínima, inline) para cuando una navegación
+// falla y no hay nada cacheado — antes el usuario veía el error del navegador.
+function offlineFallback() {
+  return new Response(
+    '<!doctype html><html lang="es"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      "<title>Sin conexión</title><style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;" +
+      "background:#FAFAF9;color:#1A1A1A;display:flex;align-items:center;justify-content:center;" +
+      "min-height:100vh;margin:0;text-align:center;padding:24px}h1{font-size:20px;margin:0 0 8px}" +
+      "p{color:#6B6B6B;font-size:14px}</style></head><body><div><h1>Sin conexión</h1>" +
+      "<p>Revisa tu internet e intenta de nuevo.</p></div></body></html>",
+    { headers: { "Content-Type": "text/html; charset=utf-8" }, status: 503 }
+  );
+}
 
 // ─── Instalación ──────────────────────────────────────────────────────────────
 
@@ -46,11 +75,21 @@ self.addEventListener("fetch", (event) => {
 
   if (url.pathname.startsWith("/uploads/") || url.pathname.startsWith("/api/export")) return;
 
-  if (
-    url.pathname.startsWith("/api/meals") ||
-    url.pathname.startsWith("/api/history") ||
-    url.pathname.startsWith("/api/goals")
-  ) {
+  if (CACHEABLE_API.some((p) => url.pathname.startsWith(p))) {
+    if (request.method !== "GET") {
+      // Mutación (POST/PUT/DELETE): a la red e invalida el cache de estos GET
+      // para no servir datos viejos tras crear/editar/borrar (P2). No hacemos
+      // cache.put de no-GET — la Cache API lo rechaza (antes: unhandled
+      // rejection en cada mutación, P8).
+      event.respondWith(
+        fetch(request).then((res) => {
+          if (res.ok) invalidateApiCache();
+          return res;
+        })
+      );
+      return;
+    }
+    // GET: stale-while-revalidate
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
         const cached = await cache.match(request);
@@ -70,7 +109,11 @@ self.addEventListener("fetch", (event) => {
       caches.match(request).then((cached) => {
         if (cached) return cached;
         return fetch(request).then((res) => {
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, res.clone()));
+          // Solo cachear respuestas OK: un 404/500 transitorio de un chunk NO
+          // debe quedar cacheado para siempre (ChunkLoadError permanente) (P1).
+          if (res.ok) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, res.clone()));
+          }
           return res;
         });
       })
@@ -90,7 +133,7 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => caches.match(request))
+        .catch(async () => (await caches.match(request)) ?? offlineFallback())
     );
   }
 });
@@ -163,6 +206,12 @@ function cancelNotification(key) {
  * Formato del mensaje: { type: "SCHEDULE_NOTIFICATIONS", schedule: { breakfast: { enabled, time }, ... } }
  */
 self.addEventListener("message", (event) => {
+  // P3: al cerrar sesión el cliente pide limpiar el cache para que el próximo
+  // usuario en el mismo dispositivo no vea datos cacheados del anterior.
+  if (event.data?.type === "CLEAR_CACHE") {
+    event.waitUntil(caches.delete(CACHE_NAME));
+    return;
+  }
   if (!event.data || event.data.type !== "SCHEDULE_NOTIFICATIONS") return;
 
   const { schedule } = event.data;
